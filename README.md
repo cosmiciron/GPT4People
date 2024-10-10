@@ -69,4 +69,4 @@ Our roadmap includes:
 We’re at the beginning of an exciting journey, and there’s much more to come. Stay tuned and join us as we grow!
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for more information.
+This project is licensed under the Apache License 2.0. See the `LICENSE` file for more information.
