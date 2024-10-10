@@ -17,7 +17,7 @@ A key concept in GPT4People is the use of "Channels"—communication methods tha
 ### Decentralized Value Creation and Collaboration
 These AIs are not isolated—they form a decentralized, intelligent network where they can autonomously collaborate with other AIs and even reach out to other humans, sharing knowledge and solving complex problems collectively. By leveraging Retrieval-Augmented Generation (RAG), each AI can also specialize in unique knowledge, making each one distinct and valuable.
 
-For a more comprehensive overview of the project's vision, concepts, and implications, please refer to our detailed essay [here](https://github.com/cosmiciron/GPT4People/blob/main/gpt4people_concepts_and_vision.md).
+For a more comprehensive overview of the project's vision, concepts, and implications, please refer to our detailed essay [here](OVERVIEW.md).
 
 ## Design
 The design of GPT4People revolves around creating a modular, flexible, and autonomous AI agent that can operate locally while connecting with the world.
