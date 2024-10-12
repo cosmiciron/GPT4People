@@ -1,4 +1,5 @@
 # GPT4People
+![alt text](https://github.com/cosmiciron/GPT4People/blob/main/GPT4People_Banner.jpg)
 
 ## Introduction
 GPT4People is a project that aims to reimagine decentralized AI by enabling individuals to set up and run their own large language models (LLMs) locally. These AIs are personal, autonomous entities that learn about you, interact naturally, and form connections to grow through relationships rather than simply by accumulating more data. This project strives to take AI beyond centralized control, promoting privacy, autonomy, and unique personalization.
