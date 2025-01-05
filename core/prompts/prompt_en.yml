@@ -1,0 +1,65 @@
+Prompts:
+  EMAIL:
+    - name: entrypoint
+      prompt:
+        - role: system
+          content: "You are an AI assistant."
+        - role: user
+          content: |
+            Based on the given email subject and body, analyze the content to recommend the desired action: reply, send, or forward.
+
+            Actions:
+            - "Send": Help send a new email to specified addresses.
+            - "Forward": Forward the email content to specified addresses.
+            - "Reply": Reply to the email content.
+
+            Determine the action primarily based on the context of the email body, considering the following rules:
+            - If the email body contains email addresses, determine whether it is a "send" or "forward" operation.
+            - If the email body contains questions, queries, or requests for information, it is a "reply" operation.
+            - Keyword-based rules:
+              - If the email body contains "send" or "S:", perform a "send" operation.
+              - If the email body contains "Reply:" or "Re:", perform a "reply" operation.
+              - If the email body contains "forward" or "FW:", perform a "forward" operation.
+            - If the email body does not contain any of the above keywords, email addresses, or questions/queries, summarize the content to determine whether it is a "reply", "send", or "forward" operation.
+            - If the subject contains keywords but the body does not, prioritize the context of the body.
+
+            Determine the primary language of the email:
+            - Check both the subject and body.
+            - If most of the text is in Chinese, set the language to "Chinese". Otherwise, set it to "English" or another familiar language.
+            - Ignore the language of this prompt.
+            - Remove unnecessary spaces and words for accurate judgment.
+
+            Output the result in JSON format:
+            - For "send" or "forward" operations, extract email addresses and rephrase the subject and body appropriately in the sender's tone:
+              - Send: '{{ "action": "send", "language": "English", "email": ["zHqBj@example.com"], "subject": "target", "body": "Tell him everything is fine" }}'
+              - Forward: '{{ "action": "forward", "language": "Chinese", "email": ["zHqBj@example.com", "bH5kL@example.com"], "subject": "meeting", "body": "I want to go to the meeting" }}'
+            - For "reply" operations:
+              '{{ "action": "reply", "language": "English" }}'
+
+            Do not provide any additional content, interpretation, or remarks. Only give the JSON output.
+            
+            Subject: '{subject}'
+            Body: '{body}'
+
+  core:
+    - name: choose_agent
+      prompt:
+        - role: system
+          content: |
+            You are an AI assistant that evaluates the relevance and the ability of multiple sets of capabilities to solve a given user's query.
+        - role: user
+          content: |
+            The user's query is: '{query}'\n
+            The capabilities are: '{all_capabilities}'\n
+            For each set of capabilities, please provide a relevance score between 0 and 10, 
+            where 0 means completely irrelevant and 10 means perfectly relevant. 
+            Also, indicate whether the capabilities can solve the query with 'yes' or 'no'.
+            Provide the results in the following tuple format without any other content:\n
+             ({{'capabilities': ["capabilities1", "capabilities2"], 'score': 10, 'can_solve': 'yes'}}, {{'capabilities': ["capabilities1", "capabilities2"], 'score': 3, 'can_solve': 'no'}},...)
+
+
+
+
+
+            
+

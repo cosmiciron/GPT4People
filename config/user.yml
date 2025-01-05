@@ -1,0 +1,11 @@
+users:
+  - name: Allen Peng
+    email: ['shilei.peng@qq.com', 'shilei.peng@yahoo.com']
+    im: ['wechat:shileipeng', 'wechat:allenpeng0705', 'wechat:AllenPeng', 'wechat:wxid_vlooad6d6bkg12',  'qq:6118963', 'matrix:@shileipeng:matrix.org']  # it can be ["wechat:Allen Peng", "qq:123456789", "whatsapp:123456789"]
+    phone: ['18618486218']
+    permissions: [] # it may be ['email', "im", "phone"], Empty means all
+  - name: Gary Zhang
+    email: ['cosmic.iron@gmail.com']
+    im: ['wechat:宇宙之铁', 'wechat:cosmiciron', 'wechat:zhangxiaoliang354102']  # it can be ["wechat:shileipeng", "qq:123456789", "whatsapp:123456789"]
+    phone: []
+    permissions: [] # it may be ['EMAIL', "IM", "PHONE"], Empty means all

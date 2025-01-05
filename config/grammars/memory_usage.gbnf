@@ -1,0 +1,9 @@
+root ::= MemoryUsage
+MemoryUsage ::= "{"   ws   "\"action\":"   ws   string   "}"
+MemoryUsagelist ::= "[]" | "["   ws   MemoryUsage   (","   ws   MemoryUsage)*   "]"
+string ::= "\""   ([^"]*)   "\""
+boolean ::= "true" | "false"
+ws ::= [ \t\n]*
+number ::= [0-9]+   "."?   [0-9]*
+stringlist ::= "["   ws   "]" | "["   ws   string   (","   ws   string)*   ws   "]"
+numberlist ::= "["   ws   "]" | "["   ws   string   (","   ws   number)*   ws   "]"
