@@ -4,16 +4,9 @@
 /build
 /dist
 *.pyc
-/models
-/app/build
-/app/dist
-/app/document
-/app/models
 /.idea
-/models
 *.log
-app/gpt4people_debug.log
-app/messages.db
+/models
 /llama.cpp-master/build
 *.db
 *.sqlite3
