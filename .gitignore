@@ -2,6 +2,7 @@
 *.bin
 *.o
 /build
+/logs
 /dist
 *.pyc
 /.idea
@@ -19,5 +20,6 @@ channels/matrix/session.txt
 ui/session.txt
 channels/wechat/logs/wcf.txt
 ui/session.txt
+ui/logs
 core/latestPromptRequest.json
 ui/latestPromptRequest.json
