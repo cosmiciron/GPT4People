@@ -14,6 +14,7 @@
 *.db
 *.db
 *.db
+config/gpt4people_account.yml
 channels/matrix/session.txt
 channels/matrix/session.txt
 channels/matrix/session.txt
@@ -24,4 +25,4 @@ ui/session.txt
 ui/logs
 core/latestPromptRequest.json
 ui/latestPromptRequest.json
-config/gpt4people_account.yml
+
