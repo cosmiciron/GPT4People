@@ -17,10 +17,11 @@
 channels/matrix/session.txt
 channels/matrix/session.txt
 channels/matrix/session.txt
+channels/whatsapp
 ui/session.txt
 channels/wechat/logs/wcf.txt
 ui/session.txt
 ui/logs
 core/latestPromptRequest.json
 ui/latestPromptRequest.json
-/config/gpt4people_account.yml
+config/gpt4people_account.yml
