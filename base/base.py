@@ -104,14 +104,14 @@ class User:
 
     @staticmethod
     def from_yaml(yaml_file: str) -> List['User']:
-        with open(yaml_file, 'r') as file:
+        with open(yaml_file, 'r', encoding='utf-8') as file:
             data = yaml.safe_load(file)
 
         return [User(**user) for user in data['users']]
 
     @staticmethod
     def to_yaml(users: List['User'], yaml_file: str):
-        with open(yaml_file, 'w') as file:
+        with open(yaml_file, 'w', encoding='utf-8') as file:
             yaml.safe_dump({'users': [user.__dict__ for user in users]}, file)
 
 
