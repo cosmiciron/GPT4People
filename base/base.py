@@ -126,7 +126,7 @@ class GPT4PeopleAccount:
 
     @classmethod
     def from_yaml(cls, filepath: str):
-        with open(filepath, 'r') as file:
+        with open(filepath, 'r', encoding='utf-8') as file:
             data = yaml.safe_load(file)
             account_data = data['gpt4people_account']
             return cls(**account_data)
@@ -143,7 +143,7 @@ class GPT4PeopleAccount:
                 'email_pass': self.email_pass,
             }
         }
-        with open(filepath, 'w') as file:
+        with open(filepath, 'w', encoding='utf-8') as file:
             yaml.dump(account_data, file, default_flow_style=False)
 
             
