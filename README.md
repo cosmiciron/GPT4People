@@ -53,11 +53,17 @@ Although the project is still in its early stages, you can begin exploring and e
       阿里云：http://mirrors.aliyun.com/pypi/simple/
       中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/
    3. Download the required models **http://www.gpt4people.ai:8001/models.zip**
-      Unzip the models.zip to GPT4People root folder. The path is like **"GPT4People/models/llama-3-8B-Instruct"**
+      The models can be downloaded from Baidu too.
+      Link(链接)：https://pan.baidu.com/s/1tUOct-YZXuNaQQSNpMSQzQ 
+      Code(提取码)：8888
+      Unzip the models.zip to GPT4People root folder. The path is like **"GPT4People/models/llama-3-8B-Instruct"** 
       The models can be replaced to whatever you want and we also support ollama and litellm. The detail instruction is coming.
-   4. GPT4People is using different channels to communicate with the user and the default channel is **Email**. You can send email to your own GPT4People and get response.
+   5. GPT4People is using different channels to communicate with the user and the default channel is **Email**. You can send email to your own GPT4People and get response.
       Matrix and WeChat(微信）are supported too.
       For the users in China, you can download the specified WeChat from **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**
+      The wechat package can be downloaded from Baidu too.
+      链接：https://pan.baidu.com/s/1ct_sYAeHYslJ1uihxFlRVw 
+      提取码：8888 
       You can use one wechat account to login on windows and add it as friend on your mobile phone.
       For the users who can use Matrix, you can download Element mobile app，PC App or Mac App. Connect to the same matrix home server. Now GPT4People is using matrix.org.
     
