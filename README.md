@@ -45,8 +45,24 @@ Although the project is still in its early stages, you can begin exploring and e
 
 1. **Clone the Repository**: Once available, clone this repository to your local machine.
 2. **Install Requirements**: Follow the instructions in the `requirements.txt` to install dependencies.
-3. **Run a Local LLM**: Use the provided scripts to set up and run a local instance of a language model.
-4. **Interact via Channels**: Test out interactions through different channels, such as email or text messages.
+3. **For Developers:**
+   1. Python Environment **Version < 3.12**, recommend **version 3.10**
+   2. Install required python packages based on the requirements.txt. Run command pip install -r requirements.txt
+      Note: If you are in China, you may need to use the **mirrors** from China
+      清华大学：https://pypi.tuna.tsinghua.edu.cn/simple/
+      阿里云：http://mirrors.aliyun.com/pypi/simple/
+      中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/
+   3. Download the required models **http://www.gpt4people.ai:8001/models.zip**
+      Unzip the models.zip to GPT4People root folder. The path is like **"GPT4People/models/llama-3-8B-Instruct"**
+      The models can be replaced to whatever you want and we also support ollama and litellm. The detail instruction is coming.
+   4. GPT4People is using different channels to communicate with the user and the default channel is **Email**. You can send email to your own GPT4People and get response.
+      Matrix and WeChat(微信）are supported too.
+      For the users in China, you can download the specified WeChat from **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**
+      You can use one wechat account to login on windows and add it as friend on your mobile phone.
+      For the users who can use Matrix, you can download Element mobile app，PC App or Mac App. Connect to the same matrix home server. Now GPT4People is using matrix.org.
+    
+4. **Run a Local LLM**: Use the provided scripts to set up and run a local instance of a language model.
+5. **Interact via Channels**: Test out interactions through different channels, such as email or text messages.
 
 Note: The current version is experimental, and we welcome contributions to make the setup easier and more versatile.
 
