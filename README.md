@@ -52,21 +52,23 @@ Although the project is still in its early stages, you can begin exploring and e
       清华大学：https://pypi.tuna.tsinghua.edu.cn/simple/
       阿里云：http://mirrors.aliyun.com/pypi/simple/
       中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/
-   3. Download the required models **http://www.gpt4people.ai:8001/models.zip**
-      The models can be downloaded from Baidu too.
-      Link(链接)：https://pan.baidu.com/s/1tUOct-YZXuNaQQSNpMSQzQ 
-      Code(提取码)：8888
+   3. Download the required models
+   4. **http://www.gpt4people.ai:8001/models.zip** \n
+      The models can be downloaded from Baidu too.\n
+      Link(链接)：https://pan.baidu.com/s/1tUOct-YZXuNaQQSNpMSQzQ \n
+      Code(提取码)：8888 \n
       Unzip the models.zip to GPT4People root folder. The path is like **"GPT4People/models/llama-3-8B-Instruct"** 
       The models can be replaced to whatever you want and we also support ollama and litellm. The detail instruction is coming.
    5. GPT4People is using different channels to communicate with the user and the default channel is **Email**. You can send email to your own GPT4People and get response.
       Matrix and WeChat(微信）are supported too.
-      For the users in China, you can download the specified WeChat from **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**
-      The wechat package can be downloaded from Baidu too.
-      链接：https://pan.baidu.com/s/1ct_sYAeHYslJ1uihxFlRVw 
-      提取码：8888 
+      For the users in China, you can download the specified WeChat from\n
+      **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**\n
+      The wechat package can be downloaded from Baidu too.\n
+      链接：https://pan.baidu.com/s/1ct_sYAeHYslJ1uihxFlRVw \n
+      提取码：8888 \n
       You can use one wechat account to login on windows and add it as friend on your mobile phone.
       For the users who can use Matrix, you can download Element mobile app，PC App or Mac App. Connect to the same matrix home server. Now GPT4People is using matrix.org.
-   6. Run the following command **"python GPT4People/ui/gpt4people.py"**. Note: You can change the path based on your root path.
+   7. Run the following command **"python GPT4People/ui/gpt4people.py"**. Note: You can change the path based on your root path.
       Open one brower and access **"http://127.0.0.1:8000"**
       If it's the first time you are trying GPT4People. You can use one email address to retrieve verfication code. After inputting the verification code, you can create one GPT4People account.
       One email address with **xxx@gpt4people.ai** will be created for you.
