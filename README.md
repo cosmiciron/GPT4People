@@ -66,6 +66,11 @@ Although the project is still in its early stages, you can begin exploring and e
       提取码：8888 
       You can use one wechat account to login on windows and add it as friend on your mobile phone.
       For the users who can use Matrix, you can download Element mobile app，PC App or Mac App. Connect to the same matrix home server. Now GPT4People is using matrix.org.
+   6. Run the following command **"python GPT4People/ui/gpt4people.py"**. Note: You can change the path based on your root path.
+      Open one brower and access **"http://127.0.0.1:8000"**
+      If it's the first time you are trying GPT4People. You can use one email address to retrieve verfication code. After inputting the verification code, you can create one GPT4People account.
+      One email address with **xxx@gpt4people.ai** will be created for you.
+      After that, you can jump to portal page by clicking the link or type **"http://127.0.0.1:8000/portal/"**. The portal will work well only after the account created. 
     
 4. **Run a Local LLM**: Use the provided scripts to set up and run a local instance of a language model.
 5. **Interact via Channels**: Test out interactions through different channels, such as email or text messages.
