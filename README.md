@@ -48,31 +48,33 @@ Although the project is still in its early stages, you can begin exploring and e
 3. **For Developers:**
    1. Python Environment **Version < 3.12**, recommend **version 3.10**
    2. Install required python packages based on the requirements.txt. Run command pip install -r requirements.txt
-      Note: If you are in China, you may need to use the **mirrors** from China
-      清华大学：https://pypi.tuna.tsinghua.edu.cn/simple/
-      阿里云：http://mirrors.aliyun.com/pypi/simple/
-      中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/
+      Note: If you are in China, you may need to use the **mirrors** from China <br>
+      清华大学：https://pypi.tuna.tsinghua.edu.cn/simple/ <br>
+      阿里云：http://mirrors.aliyun.com/pypi/simple/ <br>
+      中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/ <br>
    3. Download the required models
-   4. **http://www.gpt4people.ai:8001/models.zip** \n
-      The models can be downloaded from Baidu too.\n
-      Link(链接)：https://pan.baidu.com/s/1tUOct-YZXuNaQQSNpMSQzQ \n
-      Code(提取码)：8888 \n
-      Unzip the models.zip to GPT4People root folder. The path is like **"GPT4People/models/llama-3-8B-Instruct"** 
+   4. **http://www.gpt4people.ai:8001/models.zip** <br>
+      The models can be downloaded from Baidu too.<br>
+      Link(链接)：https://pan.baidu.com/s/1tUOct-YZXuNaQQSNpMSQzQ <br>
+      Code(提取码)：8888 <br>
+      Unzip the models.zip to GPT4People root folder. The path is like **"GPT4People/models/llama-3-8B-Instruct"** <br>
       The models can be replaced to whatever you want and we also support ollama and litellm. The detail instruction is coming.
-   5. GPT4People is using different channels to communicate with the user and the default channel is **Email**. You can send email to your own GPT4People and get response.
-      Matrix and WeChat(微信）are supported too.
-      For the users in China, you can download the specified WeChat from\n
-      **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**\n
-      The wechat package can be downloaded from Baidu too.\n
-      链接：https://pan.baidu.com/s/1ct_sYAeHYslJ1uihxFlRVw \n
-      提取码：8888 \n
-      You can use one wechat account to login on windows and add it as friend on your mobile phone.
-      For the users who can use Matrix, you can download Element mobile app，PC App or Mac App. Connect to the same matrix home server. Now GPT4People is using matrix.org.
-   7. Run the following command **"python GPT4People/ui/gpt4people.py"**. Note: You can change the path based on your root path.
-      Open one brower and access **"http://127.0.0.1:8000"**
+   5. GPT4People is using different channels to communicate with the user and the default channel is **Email**. <br>
+      You can send email to your own GPT4People and get response.<br>
+      Matrix and WeChat(微信）are supported too.<br>
+      For the users in China, you can download the specified WeChat from<br>
+      **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**<br>
+      The wechat package can be downloaded from Baidu too.<br>
+      链接：https://pan.baidu.com/s/1ct_sYAeHYslJ1uihxFlRVw <br>
+      提取码：8888 <br>
+      You can use one wechat account to login on windows and add it as friend on your mobile phone.<br>
+      For the users who can use Matrix, you can download Element mobile app，PC App or Mac App. Connect to the same matrix home server. Now GPT4People is using matrix.org.<br>
+   7. Run the following command **"python GPT4People/ui/gpt4people.py"**. Note: You can change the path based on your root path.<br>
+      Open one brower and access **"http://127.0.0.1:8000"**<br>
       If it's the first time you are trying GPT4People. You can use one email address to retrieve verfication code. After inputting the verification code, you can create one GPT4People account.
       One email address with **xxx@gpt4people.ai** will be created for you.
-      After that, you can jump to portal page by clicking the link or type **"http://127.0.0.1:8000/portal/"**. The portal will work well only after the account created. 
+      After that, you can jump to portal page by clicking the link or type **"http://127.0.0.1:8000/portal/"**. <br>
+      The portal will work well only after the account created. 
     
 4. **Run a Local LLM**: Use the provided scripts to set up and run a local instance of a language model.
 5. **Interact via Channels**: Test out interactions through different channels, such as email or text messages.
