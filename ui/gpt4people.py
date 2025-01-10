@@ -369,4 +369,5 @@ def public(existed: bool = Depends(account_exists)):
 
 if __name__ == '__main__':
     # Call the function to launch the app
-    uvicorn.run(app, host="0.0.0.0", port=10000)
+    uvicorn.run(app)
+    #uvicorn.run(app, host="0.0.0.0", port=10000)

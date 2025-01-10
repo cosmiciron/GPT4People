@@ -103,7 +103,10 @@ class LLMServiceManager:
                                      ctx_size:str = '2048', predict:str = '1024', temp:str = '0.7', 
                                      threads:str = '8', n_gpu_layers:str = '99', 
                                      chat_format:str = None, verbose:str = 'false'):
-        model_path = os.path.join(Util.models_path(), model_path)
+        logger.debug(f"model path {model_path}")
+        model_sub_path = os.path.normpath(model_path)
+        model_path = os.path.join(Util.models_path(), model_sub_path)
+        logger.debug(f"Full model path: {model_path}")
         llama_cpp_args = "-m " + model_path
         if verbose != 'false' and verbose != 'False':
             llama_cpp_args += " --verbose "
