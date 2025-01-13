@@ -223,14 +223,14 @@ def render_main_ui(visible=False):
             with gr.Tab("Portal"):
                 selected_channel = gr.Dropdown(label="Select Channel", choices=channels)
                 start_core_button = gr.Button("Start core")
-                start_channels_button = gr.Button("Start Channels")
+                #start_channels_button = gr.Button("Start Channels")
                 start_channel_button = gr.Button("Start Selected Channel")
-                start_all_button = gr.Button("Start All")
+                #start_all_button = gr.Button("Start All")
 
                 start_core_button.click(fn=start_core, inputs=[], outputs=[])
-                start_channels_button.click(fn=start_channels, inputs=[], outputs=[])
+                #start_channels_button.click(fn=start_channels, inputs=[], outputs=[])
                 start_channel_button.click(fn=start_channel, inputs=[selected_channel], outputs=[])
-                start_all_button.click(fn=start_all, inputs=[], outputs=[])
+                #start_all_button.click(fn=start_all, inputs=[], outputs=[])
 
             with gr.Tab("Core Configuration"):
                 with gr.Row():
