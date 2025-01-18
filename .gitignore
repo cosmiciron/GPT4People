@@ -11,9 +11,6 @@
 /llama.cpp-master/build
 *.db
 *.sqlite3
-*.db
-*.db
-*.db
 config/gpt4people_account.yml
 channels/matrix/session.txt
 channels/wechat/logs/wcf.txt
