@@ -1,6 +1,6 @@
 gpt4people_account:
-  email_pass: f1efa008
-  email_user: 244706625@gpt4people.ai
+  email_pass:
+  email_user:
   imap_host: mail.gpt4people.ai
   imap_port: 993
   smtp_host: mail.gpt4people.ai
