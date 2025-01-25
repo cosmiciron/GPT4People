@@ -1,5 +1,6 @@
 import asyncio
-from datetime import datetime, time
+from datetime import datetime
+import time
 import os
 
 import re

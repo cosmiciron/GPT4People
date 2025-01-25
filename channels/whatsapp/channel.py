@@ -8,7 +8,29 @@ from pathlib import Path
 import threading
 import httpx
 from abc import ABC, abstractmethod
+import signal
+from datetime import timedelta
+from neonize.client import NewClient
+from neonize.events import (
+    ConnectedEv,
+    MessageEv,
+    PairStatusEv,
+    event,
+    ReceiptEv,
+    CallOfferEv,
+)
+from neonize.proto.waE2E.WAWebProtobufsE2E_pb2 import (
+    Message,
+    FutureProofMessage,
+    InteractiveMessage,
+    MessageContextInfo,
+    DeviceListMetadata,
+)
+from neonize.types import MessageServerID
+from neonize.utils import log
+from neonize.utils.enum import ReceiptType
 
+sys.path.insert(0, os.getcwd())
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from contextlib import asynccontextmanager
@@ -20,42 +42,43 @@ from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
 from dotenv import dotenv_values
 import yaml
 from os import getenv
-from yowsup.layers.interface                           import YowInterfaceLayer, ProtocolEntityCallback
-from yowsup.layers.protocol_messages.protocolentities  import TextMessageProtocolEntity
-from yowsup.layers.protocol_receipts.protocolentities  import OutgoingReceiptProtocolEntity
-from yowsup.layers.protocol_acks.protocolentities      import OutgoingAckProtocolEntity
-from yowsup.stacks import YowStack, YowStackBuilder
-from yowsup.layers.network import YowNetworkLayer
 
 
-class whatsappinterface(ABC):
-    @abstractmethod
-    def sendMessage(self, to, message):
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    #await register_with_core()
+    logger.debug("whatsapp Channel lifespan started!")
+    yield
+    logger.debug("whatsapp Channel lifespan end!")
+    try:
+        # Do some deinitialization
+        pass
+    except:
         pass
 
+channel_app: FastAPI = FastAPI(lifespan=lifespan)  
 
-class WhatsappLayer(YowInterfaceLayer, whatsappinterface):
+client: NewClient = NewClient("db.sqlite3")
 
-    def __init__(self):
-        super(WhatsappLayer, self).__init__()
-        YowInterfaceLayer.__init__(self)
-        self.channel = None
-        logger.debug("WhatsappLayer initialized!")
 
-    
-    def __init__(self, channel: BaseChannel):
-        super(WhatsappLayer, self).__init__()
-        YowInterfaceLayer.__init__(self)
-        self.channel: BaseChannel = channel 
-        logger.debug("WhatsappLayer initialized with channel!") 
+class Channel(BaseChannel):
+    def __init__(self, metadata: ChannelMetadata):
+        super().__init__(metadata=metadata, app=channel_app)
 
-    @ProtocolEntityCallback("message")
-    def onMessage(self, messageProtocolEntity: TextMessageProtocolEntity):
+        self.message_queue = asyncio.Queue()
+        self.whatsapp_task = None
+        self.message_queue_task = None
+        self.chats = {}
+
+
+    def handle_message(self, client: NewClient, message: MessageEv):
         try:
             #send receipt otherwise we keep receiving the same message over and over
-            sender = messageProtocolEntity.getFrom()
-            content = messageProtocolEntity.getBody()
-            msg_id = messageProtocolEntity.getId()
+            content = message.Message.conversation or message.Message.extendedTextMessage.text
+            sender = message.Info.MessageSource.Sender.User
+            msg_id = message.Info.ID
+            chat = message.Info.MessageSource.Chat
+            self.chats[msg_id] =  chat
 
             # Extract data from request
             im_name = 'whatsapp'
@@ -94,100 +117,31 @@ class WhatsappLayer(YowInterfaceLayer, whatsappinterface):
             )
 
             # Call handle_message with the extracted data
-            if self.channel is not None:
-                self.channel.syncTransferTocore(request=request)
+            self.syncTransferTocore(request=request)
 
         except Exception as e:
             logger.exception(e)
             return {"message": "System Internal Error", "response": "Sorry, something went wrong. Please try again later."}         
-
-        logger.debug("Start to send receipt back to sender!")
-        receipt = OutgoingReceiptProtocolEntity(messageProtocolEntity.getId(), 
-                                                messageProtocolEntity.getFrom(), 'read', messageProtocolEntity.getParticipant())
-        self.toLower(receipt)
-
     
-    @ProtocolEntityCallback("receipt")
-    def onReceipt(self, entity):
-        ack = OutgoingAckProtocolEntity(entity.getId(), "receipt", entity.getType(), entity.getFrom())
-        self.toLower(ack)
 
-
-    def sendMessage(self, to, message):
-        outgoingMessageProtocolEntity = TextMessageProtocolEntity(
-            message,
-            to = to)
-        self.toLower(outgoingMessageProtocolEntity)
-
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    #await register_with_core()
-    logger.debug("whatsapp Channel lifespan started!")
-    yield
-    logger.debug("whatsapp Channel lifespan end!")
-    try:
-        # Do some deinitialization
-        pass
-    except:
-        pass
-
-channel_app: FastAPI = FastAPI(lifespan=lifespan)  
-
-
-class whatsappRequest(BaseModel):
-    im_name: str
-    sender: str
-    message: str
-    msg_id: str
-
-credentials = ("18618486218", "Eficode232410@") # replace with your phone and password
-class Channel(BaseChannel):
-    def __init__(self, metadata: ChannelMetadata):
-        super().__init__(metadata=metadata, app=channel_app)
-
-        self.message_queue = asyncio.Queue()
-        self.whatsapp_task = None
-        self.message_queue_task = None
-        self.whatsapp_layer: WhatsappLayer = None
-        self.stackBuilder = YowStackBuilder() 
-        self.stack: YowStack = self.stackBuilder\
-            .pushDefaultLayers()\
-            .push(WhatsappLayer(self))\
-            .build()
-        self.stack.setCredentials(credentials)
-
-    async def run_bot_async(self):
-        logger.debug("Starting whatsapp bot...")
-        loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor() as pool:
-            await loop.run_in_executor(pool, self.run_bot)    
-
-    def run_bot(self):
-        logger.debug("Run whatsapp bot...")
-        self.stack.broadcastEvent(YowNetworkLayer.EVENT_STATE_CONNECT)
-
-        try:
-            self.stack.loop()
-        except Exception as e:
-            logger.exception(e)
-        
 
     async def process_message_queue(self):
         while True:
             try: 
+                global client
                 response: AsyncResponse = await self.message_queue.get()
                 logger.debug(f"Got response: {response} from message queue")
                 """Handle the response from the core"""
                 request_id = response.request_id
                 response_data = response.response_data
                 to = response.request_metadata['sender']
+                msg_id = response.request_metadata['msg_id']
                 if 'text' in response_data:
                     text = response_data['text']
-                    logger.debug(f"sending text: {text} to {to}")   
+                    logger.debug(f"sending text: {text} to {to}") 
+                    chat = self.chats.pop(msg_id)  
                     try:
-                        self.whatsapp_layer.sendMessage(to, text)
+                        client.send_message(chat, text)
                     except asyncio.TimeoutError:
                         logger.error(f"Timeout sending message to whatsapp user {to}")
                     except Exception as e:
@@ -221,7 +175,6 @@ class Channel(BaseChannel):
 
     def initialize(self):
         logger.debug("whatsapp Channel initializing...")
-        self.bot_task = asyncio.create_task(self.run_bot_async())
         self.message_queue_task = asyncio.create_task(self.process_message_queue())
         super().initialize()
         
@@ -230,15 +183,48 @@ class Channel(BaseChannel):
     def stop(self):
         # do some deinitialization here
         super().stop()
-        self.bot_task.cancel()
         self.message_queue_task.cancel()
         logger.debug("Whatsapp Channel is stopping!")
         
         
     async def handle_async_response(self, response: AsyncResponse):
         logger.debug(f"Put response: {response} into message queue")
-        await self.message_queue.put(response)        
-        
+        await self.message_queue.put(response) 
+
+
+channel: Channel = None
+
+@client.event(ConnectedEv)
+def on_connected(_: NewClient, __: ConnectedEv):
+    logger.debug("whatsapp Connected\n")
+
+
+@client.event(ReceiptEv)
+def on_receipt(_: NewClient, receipt: ReceiptEv):
+    logger.debug(receipt)
+
+
+@client.event(CallOfferEv)
+def on_call(_: NewClient, call: CallOfferEv):
+    logger.debug(call)
+
+
+@client.event(PairStatusEv)
+def PairStatusMessage(_: NewClient, message: PairStatusEv):
+    logger.debug(f"logged as {message.ID.User}")
+
+@client.event(MessageEv)
+def on_message(client: NewClient, message: MessageEv):
+    channel.handle_message(client, message)  
+
+
+def run_client_connect_forever():
+    # This function will run in a separate thread
+    # Assuming client.connect() is a blocking function with an endless loop
+    logger.debug("client connecting...")
+    global client
+    client.connect()     
+
           
 async def main():
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
@@ -246,17 +232,22 @@ async def main():
         config = yaml.safe_load(file)
         metadata = ChannelMetadata(**config)
     
-    with Channel(metadata=metadata) as channel:
-        try:
-            await channel.run()
-        except KeyboardInterrupt:
-            logger.info("Shutting down...")
-        except Exception as e:
-            logger.exception(f"An error occurred: {e}")
-        finally:
-            channel.stop()
+    try:
+        global channel
+        channel = Channel(metadata=metadata)
+        
+        # Start client.connect() in a background thread
+        thread = threading.Thread(target=run_client_connect_forever, daemon=True)
+        thread.start()        
+        logger.debug("client connected...")
+        await channel.run()
+    except KeyboardInterrupt:
+        logger.info("Shutting down...")
+    except Exception as e:
+        logger.exception(f"An error occurred: {e}")
+    finally:
+        channel.stop()
             
-
 
 if __name__ == "__main__":
     asyncio.run(main())
