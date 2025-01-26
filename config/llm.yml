@@ -193,5 +193,17 @@ llms:
     port: 5013
     parameters: {'API_KEY': 'your_api_key'} 
 
+  deepseek_r1_q4_k_m:
+    type: local
+    alias: DeepSeek-R1
+    path: deepseek-r1/deepseek-qwen-32B_q4_k_m/DeepSeek-R1-Distill-Qwen-32B-Q4_K_M.gguf
+    description: DeepSeek-R1 distill model using qwen 32B
+    languages: ['cn', 'en']
+    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+    capabilities: ['Chat']
+    host: 127.0.0.1
+    port: 5014
+    parameters: {'API_KEY': 'your_api_key'}
+
 
 
