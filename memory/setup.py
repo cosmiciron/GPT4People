@@ -2,11 +2,12 @@ import json
 import os
 import uuid
 
+from base.util import Util
+
 # Set up the directory path
-home_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 #home_dir = os.path.expanduser("~")
-memory_dir = os.path.join(home_dir, "mem")
-os.makedirs(memory_dir, exist_ok=True)
+memory_dir = Util.data_path()
+#os.makedirs(memory_dir, exist_ok=True)
 
 
 def setup_config():

@@ -102,7 +102,7 @@ class LLMServiceManager:
     async def start_llama_cpp_server(self, name:str, host:str, port:int, model_path:str, 
                                      ctx_size:str = '2048', predict:str = '1024', temp:str = '0.7', 
                                      threads:str = '8', n_gpu_layers:str = '99', 
-                                     chat_format:str = None, verbose:str = 'false'):
+                                     chat_format:str = None, verbose:str = 'false', pooling:bool = False):
         logger.debug(f"model path {model_path}")
         model_sub_path = os.path.normpath(model_path)
         model_path = os.path.join(Util.models_path(), model_sub_path)
@@ -116,6 +116,8 @@ class LLMServiceManager:
         llama_cpp_args += " --threads " + threads
         llama_cpp_args += " --host " + host
         llama_cpp_args += " --port " + str(port)
+        if pooling:
+            llama_cpp_args += " --pooling mean"
         if chat_format:
             llama_cpp_args += " --chat_format " + chat_format
 
@@ -152,7 +154,7 @@ class LLMServiceManager:
  
     def run_llama_cpp_llm(self, name: str, ctx_size:str = '2048', predict:str = '1024', temp:str = '0.7', 
                                      threads:str = '8', n_gpu_layers:str = '99', 
-                                     chat_format:str = None, verbose:str = 'false'):
+                                     chat_format:str = None, verbose:str = 'false', pooling:bool = False):
         try:
             llm = Util().get_llm(name)
             name = llm.name
@@ -166,7 +168,7 @@ class LLMServiceManager:
             
             # Initialize and start the Uvicorn server for the LLM service
             server_task = asyncio.create_task(self.start_llama_cpp_server(name, host, port, path, ctx_size=ctx_size, predict=predict, temp=temp,
-                                    threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose))
+                                    threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose, pooling=pooling))
             self.apps.append(server_task)
             self.llm_to_app[name] = server_task
             self.llms.append(llm)      
@@ -309,7 +311,7 @@ class LLMServiceManager:
             llm = self.embedding_llm()
             name = llm.name
             ret = self.run_llama_cpp_llm(name, ctx_size=ctx_size, predict=predict, temp=temp,
-                                threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose)
+                                threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose, pooling=True)
             logger.bind(production=True).info("Embedding services added!")
             return ret
         except asyncio.CancelledError:

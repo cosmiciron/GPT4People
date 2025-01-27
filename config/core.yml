@@ -3,7 +3,7 @@ host: 0.0.0.0
 port: 9000
 mode: dev
 model_path: ../models/
-main_llm: deepseek_r1_q4_k_m
+main_llm: deepseek_r1_qwen_14B_q5_k_m
 #qwen2_7b_instruct_q4_k_m
 memory_llm: llama_3_8B_q5_k_m_functionCall
 embedding_llm: llama_3_8B_q5_k_m

@@ -246,7 +246,7 @@ class Core(CoreInterface):
         messages = [{"role": "system", "content": prompt}]
         best_description = await self.openai_chat_completion(messages=messages) # Replace with your actual method to get LLM response
 
-        if best_description.lower() == "none" or best_description is None or best_description.strip() == "":
+        if best_description.lower().strip() == "none" or best_description is None or best_description.strip() == "":
             return None
 
         logger.debug(f"Best description: {best_description}")
@@ -891,7 +891,11 @@ class Core(CoreInterface):
                         if isinstance(resp_json['choices'], list) and len(resp_json['choices']) > 0:
                             if 'message' in resp_json['choices'][0] and 'content' in resp_json['choices'][0]['message']:
                                 message_content = resp_json['choices'][0]['message']['content'].strip()
-                                return message_content
+                                logger.debug(f"Message Content from LLM: {message_content}")
+                                # Filter out the <think> tag and its content
+                                filtered_message_content = re.sub(r'<think>.*?</think>', '', message_content, flags=re.DOTALL) 
+                                logger.debug(f"Filtered Message Content from LLM: {filtered_message_content}")                              
+                                return filtered_message_content.strip()
                     logger.error("Invalid response structure")
                     return None
         except Exception as e:

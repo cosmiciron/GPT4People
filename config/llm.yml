@@ -6,7 +6,7 @@ llms:
     path: openai/gpt-4o
     description: openAI's gpt4o
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Functioncall', 'Chat']
     host: 127.0.0.1
     port: 4001
@@ -19,7 +19,7 @@ llms:
     path: gemini/gemini-pro
     description: Google's Gemini-Pro
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Functioncall', 'Chat']
     host: 127.0.0.1
     port: 4002
@@ -31,7 +31,7 @@ llms:
     path: ollama/llama3
     description: Ollama's llama3
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat']
     host: 127.0.0.1
     port: 4003
@@ -55,7 +55,7 @@ llms:
     path: llama-3-8B_functioncall/llama-3-8B-function-calling-Q5_K_M.gguf
     description: Llama3 middle size 8B model support function call
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Functioncall', 'Chat']
     host: 127.0.0.1
     port: 5002
@@ -103,7 +103,7 @@ llms:
     path: llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-v2.Q5_K_M.gguf
     description: Llama3 middle size 8B model
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat']
     host: 127.0.0.1
     port: 5006
@@ -115,7 +115,7 @@ llms:
     path: llama-3-13B-Instruct/Llama-3-13B-Instruct-Q5_K_M.gguf
     description: Llama3 large size 13B model
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat']    
     host: 127.0.0.1
     port: 5007
@@ -127,7 +127,7 @@ llms:
     path: llama-3-1-8B-Instruct/Llama-3.1-8B-Instruct-Q5_K_M.gguf
     description: Llama3.1 middle size 8B model
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat']    
     host: 127.0.0.1
     port: 5008
@@ -139,7 +139,7 @@ llms:
     path: llama-3-1-8B-Instruct/Llama-3.1-8B-Instruct-Q8_0.gguf
     description: Llama3.1 large size 8B model
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat'] 
     host: 127.0.0.1
     port: 5009
@@ -151,7 +151,7 @@ llms:
     path: llama-3-13B-Instruct/Llama-3-13B-Instruct-Q5_K_M.gguf
     description: Llama3.1 large size 13B model
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat'] 
     host: 127.0.0.1
     port: 5010
@@ -163,7 +163,7 @@ llms:
     path: miniCPM-llama-3-8B-Instruct/miniCPM_Q5_K_M.gguf
     description: miniCPM Llama3 middle size 8B. A GPT-4V Level Multimodal LLM
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat', 'PromptWithImage'] 
     host: 127.0.0.1
     port: 5011
@@ -175,7 +175,7 @@ llms:
     path: octopus-v4-Instruct/octopus-v4-Q5_K_M.gguf
     description: Octopus middle size model
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat', 'Math'] 
     host: 127.0.0.1
     port: 5012
@@ -187,15 +187,15 @@ llms:
     path: octopus-v4-Instruct/octopus-v4-F16.gguf
     description: Octopus large size model with f16
     languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speraker. If you have any question, please let me know. 
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
     capabilities: ['Chat', 'Math'] 
     host: 127.0.0.1
     port: 5013
     parameters: {'API_KEY': 'your_api_key'} 
 
-  deepseek_r1_q4_k_m:
+  deepseek_r1_qwen_32B_q4_k_m:
     type: local
-    alias: DeepSeek-R1
+    alias: DeepSeek-R1_qwen_32B
     path: deepseek-r1/deepseek-qwen-32B_q4_k_m/DeepSeek-R1-Distill-Qwen-32B-Q4_K_M.gguf
     description: DeepSeek-R1 distill model using qwen 32B
     languages: ['cn', 'en']
@@ -203,6 +203,30 @@ llms:
     capabilities: ['Chat']
     host: 127.0.0.1
     port: 5014
+    parameters: {'API_KEY': 'your_api_key'}
+
+  deepseek_r1_qwen_14B_q5_k_m:
+    type: local
+    alias: DeepSeek-R1_qwen_14B
+    path: deepseek-r1/deepseek-qwen-14B_q5_k_m/DeepSeek-R1-Distill-Qwen-14B-Q5_K_M.gguf
+    description: DeepSeek-R1 distill model using qwen 14B
+    languages: ['cn', 'en']
+    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+    capabilities: ['Chat']
+    host: 127.0.0.1
+    port: 5015
+    parameters: {'API_KEY': 'your_api_key'}
+
+  deepseek_r1_llama_8B_q5_k_m:
+    type: local
+    alias: DeepSeek-R1_llama_8B
+    path: deepseek-r1/deepseek-llama-8B_q5_k_m/DeepSeek-R1-Distill-Llama-8B-Q5_K_M.gguf
+    description: DeepSeek-R1 distill model using llama 8B
+    languages: ['en', 'cn']
+    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
+    capabilities: ['Chat']
+    host: 127.0.0.1
+    port: 5016
     parameters: {'API_KEY': 'your_api_key'}
 
 

@@ -64,6 +64,11 @@ class Util:
     @staticmethod
     def log_path():
         root = Util.root_path()
+        return os.path.join(Util.root_path(), 'database')
+    
+    @staticmethod
+    def data_path():
+        root = Util.root_path()
         return os.path.join(Util.root_path(), 'logs')
     
     @staticmethod
@@ -168,6 +173,7 @@ class Util:
                 async with session.post(chat_completion_api_url, headers=headers, data=data_json) as resp:
                     resp_json = await resp.text(encoding='utf-8')
                     # Ensure resp_json is a dictionary
+                    logger.debug(f"openai_chat_completion response: {resp_json}")
                     while isinstance(resp_json, dict) == False:
                         resp_json = json.loads(resp_json)
 
@@ -175,7 +181,11 @@ class Util:
                         if isinstance(resp_json['choices'], list) and len(resp_json['choices']) > 0:
                             if 'message' in resp_json['choices'][0] and 'content' in resp_json['choices'][0]['message']:
                                 message_content = resp_json['choices'][0]['message']['content'].strip()
-                                return message_content
+                                logger.debug(f"Message Content from LLM: {message_content}")
+                                # Filter out the <think> tag and its content
+                                filtered_message_content = re.sub(r'<think>.*?</think>', '', message_content, flags=re.DOTALL) 
+                                logger.debug(f"Filtered Message Content from LLM: {filtered_message_content}") 
+                                return filtered_message_content.strip()
                     logger.error("Invalid response structure")
                     return None
         except Exception as e:

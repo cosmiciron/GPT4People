@@ -40,6 +40,7 @@ class LlamaCppEmbedding(EmbeddingBase):
                 data=json.dumps({"input": text}),
             ) as response:
                 response_json = await response.json()
+                logger.debug(f"LlamaCppEmbedding.embed: response_json: {response_json}")
                 ret = response_json["data"][0]["embedding"]
                 return ret
     
