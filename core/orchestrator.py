@@ -131,10 +131,10 @@ class Orchestrator:
         logger.debug(f'Orchestrator Prompt: {prompt}')       
         messages = [{"role": "system", "content": prompt}]
         intent_str = await Util().openai_chat_completion(messages)
-        intent_str = intent_str.strip()
         if not intent_str:
             logger.error('Orchestrator response is empty')
             return None
+        intent_str = intent_str.strip()
         logger.debug(f'Orchestrator got intent: {intent_str}')
         # Process the intent string to create an Intent object
         intent = await self.process_intent(hist, text, intent_str, request)
