@@ -245,8 +245,9 @@ class Core(CoreInterface):
 
         messages = [{"role": "system", "content": prompt}]
         best_description = await self.openai_chat_completion(messages=messages) # Replace with your actual method to get LLM response
-
-        if best_description.lower().strip() == "none" or best_description is None or best_description.strip() == "":
+        if best_description is None:
+            return None
+        if best_description.lower().strip() == "none" or best_description.strip() == "":
             return None
 
         logger.debug(f"Best description: {best_description}")
