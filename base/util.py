@@ -64,12 +64,12 @@ class Util:
     @staticmethod
     def log_path():
         root = Util.root_path()
-        return os.path.join(Util.root_path(), 'database')
+        return os.path.join(Util.root_path(), 'logs')
     
     @staticmethod
     def data_path():
         root = Util.root_path()
-        return os.path.join(Util.root_path(), 'logs')
+        return os.path.join(Util.root_path(), 'database')
     
     @staticmethod
     def plugins_path():
