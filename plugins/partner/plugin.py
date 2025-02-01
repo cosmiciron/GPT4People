@@ -234,6 +234,7 @@ class PartnerPlugin(BasePlugin):
         
 
     async def check_best_plugin(self, text: str) -> Tuple[bool, str]:
+        return False, ''
         logger.debug("checking partner plugin")
         chat_hist = self.coreInst.get_latest_chats_by_role(sender_name=self.promptRequest.user_name, responder_name=self.config['partner_name'], num_rounds=10)
         user_input = text
