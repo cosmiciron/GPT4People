@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="GPT4People_Banner.jpg" alt="GPT4People Banner">
+</p>
+
 # Introduction to GPT4People
 GPT4People is a groundbreaking decentralized AI system where each installation is an Autonomous Agent running locally on the user’s hardware. Unlike traditional AI models, which rely on centralized servers and app-centric UIs, GPT4People AIs operate independently, interact via natural communication channels, and adapt through ongoing relationships rather than just data accumulation.
 
