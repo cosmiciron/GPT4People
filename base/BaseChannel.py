@@ -157,7 +157,6 @@ class BaseChannel:
         """Get the core url from sub class's .env file"""
         channels_path = Util().root_path() + '/channels/'
         env_path = os.path.join(channels_path, '.env')
-        logger.debug('env_path: ' + env_path)
         env_vars = dotenv_values(env_path)
         core_url = None
         if 'core_host' in env_vars and 'core_port' in env_vars:
@@ -169,7 +168,7 @@ class BaseChannel:
         return core_url
     
 
-    async def transferTocore(self, request: PromptRequest) -> str | None:
+    async def transferTocore(self, request: PromptRequest) -> bool | None:
         logger.debug("channel transfering messages to core...")
         try:
             core_url = self.core()
@@ -192,6 +191,27 @@ class BaseChannel:
         except Exception as err:
             logger.exception(f"Unexpected error: {err}")
             return False
+        
+    async def localChatWithcore(self, request: PromptRequest) -> str | None:
+        try:
+            core_url = self.core()
+            process_url = f"{core_url}/local_chat"
+            request_json = request.model_dump()
+            request_json['channelType'] = request.channelType.value
+            request_json['contentType'] = request.contentType.value
+            async with httpx.AsyncClient() as client:
+                response = await client.post(process_url, json=request_json, timeout=60.0)
+
+            if response.status_code == 200:
+                return response.text
+            else:
+                return None
+        except httpx.HTTPError as err:
+            logger.error(f"core Process failed: {err}")
+            return None
+        except Exception as err:
+            logger.exception(f"Unexpected error: {err}")
+            return None
         
 
     def syncTransferTocore(self, request: PromptRequest) -> str | None:

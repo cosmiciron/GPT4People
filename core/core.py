@@ -233,6 +233,9 @@ class Core(CoreInterface):
         return await plugin.check_best_plugin(text)
     
     async def find_plugin_for_text(self, text: str) -> Optional[BasePlugin]:
+        if self.plugin_manager.num_plugins() == 0:
+            logger.debug("No plugins loaded.")
+            return None
         # Prioritize the active plugin if it is set
         if self.active_plugin:
             result, text = await self.is_proper_plugin(self.active_plugin, text)
@@ -418,6 +421,35 @@ class Core(CoreInterface):
                 await self.request_queue.put(request)
                 
                 return Response(content="Request received", status_code=200)
+            except Exception as e:
+                logger.exception(e)
+                return Response(content="Server Internal Error", status_code=500)
+                     
+        # add more endpoints here    
+        logger.debug("core initialized and all the endpoints are registered!")
+
+
+        @self.app.post("/local_chat")
+        async def process_request(request: PromptRequest):
+            try:
+                user_name: str = request.user_name
+                user_id: str = request.user_id
+                channel_type: ChannelType = request.channelType
+                content_type: ContentType = request.contentType
+                logger.debug(f"Received request from channel: {user_name}, {user_id}, {channel_type}, {content_type}")
+                user: User = None
+                has_permission, user = self.check_permission(user_name, user_id, channel_type, content_type)
+                if not has_permission or user is None:
+                    return Response(content="Permission denied", status_code=401)
+                
+                if len(user.name) > 0:
+                    request.user_name = user.name
+                
+                resp_text = await self.process_text_message(request)
+                if resp_text is None:
+                    return Response(content="Response is None", status_code=200)
+                
+                return Response(content=resp_text, status_code=200)
             except Exception as e:
                 logger.exception(e)
                 return Response(content="Server Internal Error", status_code=500)
@@ -701,6 +733,8 @@ class Core(CoreInterface):
             if channel_type == ChannelType.IM:
                 if user_id in user.im:
                     return (ChannelType.IM in user.permissions or len(user.permissions) == 0), user
+                elif user_id  == 'gpt4people:local':
+                    return True, user
             if channel_type == ChannelType.Phone:           
                 if user_id in user.phone:
                     return (ChannelType.Phone in user.permissions or len(user.permissions) == 0), user

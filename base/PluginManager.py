@@ -13,6 +13,8 @@ from base.BasePlugin import BasePlugin
 from base.util import Util
 from core.coreInterface import CoreInterface
 
+disable_plugins = True
+
 class PluginManager:
     def __init__(self, coreInst: CoreInterface):
         self.coreInst = coreInst
@@ -31,7 +33,13 @@ class PluginManager:
         self.plugin_descriptions[plugin.description] = plugin
 
 
+    def num_plugins(self):
+        return len(self.plugin_instances)
+
+
     def load_plugins(self):
+        if disable_plugins:
+            return
         current_plugins = set()
         for folder_name in os.listdir(self.plugins_dir):
             plugin_folder = os.path.join(self.plugins_dir, folder_name)
@@ -89,6 +97,8 @@ class PluginManager:
 
 
     def unload_plugin(self, module_path):
+        if disable_plugins:
+            return
         # Find the plugin instance to remove
         plugin_instance = next((plugin for plugin in self.plugin_instances if plugin.__module__ == module_path), None)
         if plugin_instance:
@@ -107,13 +117,19 @@ class PluginManager:
             del self.loaded_plugins[module_path]
 
     def initialize_plugins(self):
+        if  disable_plugins:
+            return
         for plugin in self.plugin_instances:
             plugin.initialize()
 
     def run(self):
+        if disable_plugins:
+            return
         pass
 
     def hot_reload(self):
+        if disable_plugins:
+            return
         while not self.stop_hot_reload.is_set():
             self.load_plugins()
             time.sleep(60)  # Adjust the interval as needed
@@ -121,6 +137,8 @@ class PluginManager:
         logger.debug("Hot reload thread stopped.")
 
     def start_hot_reload(self):
+        if disable_plugins:
+            return
         self.hot_reload_thread = threading.Thread(target=self.hot_reload)
         self.hot_reload_thread.daemon = True
         self.hot_reload_thread.start()

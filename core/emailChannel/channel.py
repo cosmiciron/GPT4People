@@ -251,6 +251,10 @@ class Channel(BaseChannel):
                 sys.exit(0)
 
 
+    def register_channel(self, name, host, port, endpoints):
+        pass
+
+
     def deregister_channel(self, name, host, port, endpoints):
         pass
 

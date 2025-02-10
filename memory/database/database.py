@@ -10,6 +10,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from .models import Base
 from loguru import logger
+from base.util import Util
 
 
 class DatabaseManager:
@@ -24,7 +25,8 @@ class DatabaseManager:
         return cls._instance
     
     def __init__(self, echo: bool = False):
-        self.database_uri = 'sqlite:///../database/chats.db' #os.environ.get("MEMORY_DB_URI")
+        database_path = os.path.join(Util().data_path(), 'chats.db')
+        self.database_uri = f'sqlite:///{database_path}'
         self.echo = echo
         self.engine: Engine = None
         self._session_factory = None
