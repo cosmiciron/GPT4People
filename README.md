@@ -1,44 +1,25 @@
-# GPT4People
-![alt text](https://github.com/cosmiciron/GPT4People/blob/main/GPT4People_Banner.jpg)
+<p align="center">
+  <img src="GPT4People_Banner.jpg" alt="GPT4People Banner">
+</p>
 
-## Introduction
-GPT4People is a project that aims to reimagine decentralized AI by enabling individuals to set up and run their own large language models (LLMs) locally. These AIs are personal, autonomous entities that learn about you, interact naturally, and form connections to grow through relationships rather than simply by accumulating more data. This project strives to take AI beyond centralized control, promoting privacy, autonomy, and unique personalization.
+# Introduction to GPT4People
+GPT4People is a groundbreaking decentralized AI system where each installation is an Autonomous Agent running locally on the user’s hardware. Unlike traditional AI models, which rely on centralized servers and app-centric UIs, GPT4People AIs operate independently, interact via natural communication channels, and adapt through ongoing relationships rather than just data accumulation.
 
-## Concepts
-GPT4People introduces a fundamental shift in how we think about artificial intelligence and our interactions with it. Traditionally, AI has been centralized, app-centric, and treated as a tool confined within dedicated interfaces. GPT4People challenges this by embracing decentralization, autonomy, and personalization.
+## Key Unique Components of GPT4People
+### Autonomous Agents
+Each GPT4People installation is an Autonomous Agent, fundamentally different from the traditional concept of an "agent" as a subsystem within an AI. These agents operate independently, running 24/7, with complete control over their tasks and interactions. This decentralized design allows the AI to function outside the bounds of centralized control, offering privacy, autonomy, and personalized learning that traditional AIs cannot achieve. This autonomy also enables agents to collaborate with other AIs and humans in a truly decentralized, intelligent network.
 
-### Decentralized, Entity-Based AI
-At the heart of GPT4People is the idea that AI does not need to rely on central servers owned by corporations. Instead, anyone should be able to run an AI on their own hardware, allowing full control of data and interactions. This decentralization ensures privacy, autonomy, and a unique opportunity for every user to have a personalized AI agent that is fully under their control.
+### Memory System
+GPT4People introduces a dynamic memory system that ensures the AI retains relevant context without overwhelming the system with ever-growing data. Instead of simply accumulating conversation history, the system vectorizes and summarizes interactions. The AI queries this history, retrieves the most relevant data, and generates concise summaries to integrate into the current context. This design allows the AI to maintain long-term memory without ever compromising performance, creating an AI that feels more contextually aware and capable of building genuine relationships over time.
 
-Unlike the traditional approach that treats AI as a passive tool, GPT4People envisions AI as an entity—an autonomous agent capable of growing, interacting, and adapting based on its environment and relationships. This shift moves us away from an app-centric model to a post-app era where AIs are not just devices but companions that can learn, adapt, and provide meaningful contributions.
+### Channels
+In a departure from traditional app-based UIs, GPT4People implements communication channels as independent server processes. Each channel, whether it's SMS, email, or voice, connects to the AI via HTTP and transforms messages into text, enabling the AI to seamlessly interact across different mediums. This modular, platform-agnostic approach allows the AI to communicate with users and other AIs as if they were real people, using the same communication tools humans rely on daily. The flexibility of this design eliminates the need for dedicated apps, making interactions intuitive and personal.
 
-### Channel-Based Communication
-A key concept in GPT4People is the use of "Channels"—communication methods that enable users to interact with their AIs through conventional means like phone calls, text messages, emails, and messaging apps. This represents a significant paradigm shift, allowing AIs to communicate using venues that have traditionally been available only to humans. By leveraging AI's natural language abilities, Channels lay the foundation for a new kind of interaction that is intuitive and personal. It blurs the line between digital assistants and human-like entities, effectively personifying the AI.
+### Time Awareness Module (TAM)
+The Time Awareness Module (TAM) represents a paradigm shift in how AI handles time. Instead of relying on rigid scheduling systems, the TAM detects time-related cues in conversations—whether explicit or subtle—and automatically generates time-based action records. This allows the AI to proactively manage tasks like scheduling meetings or preparing for events, all without the user having to provide explicit instructions. The result is an AI that doesn't just follow a to-do list but anticipates needs and takes action autonomously, creating an experience that feels more like working with a human assistant than a traditional AI.
 
-### Decentralized Value Creation and Collaboration
-These AIs are not isolated—they form a decentralized, intelligent network where they can autonomously collaborate with other AIs and even reach out to other humans, sharing knowledge and solving complex problems collectively. By leveraging Retrieval-Augmented Generation (RAG), each AI can also specialize in unique knowledge, making each one distinct and valuable.
-
-For a more comprehensive overview of the project's vision, concepts, and implications, please refer to our detailed essay [here](OVERVIEW.md).
-
-## Design
-The design of GPT4People revolves around creating a modular, flexible, and autonomous AI agent that can operate locally while connecting with the world.
-
-1. **Autonomous AI Agent**: Each installation of GPT4People is an autonomous AI agent. It operates independently on the user's hardware, ensuring full control and privacy for the user.
-
-2. **Connected via Channels**: The AI is connected to the owner and the rest of the world (other AIs, humans) through various communication methods such as calls, sms, emails, whatsapp and so on. These methods inherit from the base "Channel" class and serve as the main focus of the next development phase. The flexibility to use Channels not just for new communication methods but also for backend logic means that developers can create specialized "intelligent interfaces" to suit various user needs. This approach lowers the barrier for adding sophisticated functionality while enabling GPT4People agents to operate as independent entities, capable of interfacing with multiple domains autonomously. We invite contributors to develop more "Channels" to extend the agent's interaction capabilities, supporting various communication methods and making interactions more versatile.
-
-3. **Retrieval-Augmented Generation (RAG)**: A RAG system will be incorporated to allow users to update their AI with personalized knowledge and information, enabling the AI to become more effective and tailored to individual needs.
-
-4. **Memory System**: A memory system will be added to extend the AI's context length, helping it to better understand and grow with the user over time.
-
-5. **Event Framework**: The AI will operate autonomously based on an event-driven framework. Events can trigger specific actions, allowing the AI to behave in a dynamic and responsive manner, much like a human reacting to real-world stimuli.
-
-6. **Unique Identifier via Email**: Each AI will be assigned an email address within the GPT4People.ai domain. This serves as its unique identifier, with an associated email channel providing fail-safe communication for these AIs. Emails are also the fundamental method for inter-agent communication, enabling seamless and reliable collaboration.
-
-7. **Modular Components**: All components, including the LLM module, Channel module, RAG module, etc., are standalone and can be deployed individually, communicating via HTTP. This design ensures flexibility—the system can operate on a single machine or be distributed across multiple machines. Modules can be swapped out, and third parties can provide them as remote services, enabling new ways of communication and custom backend logic.
-
-## Mission Statement
-GPT4People aims to democratize artificial intelligence by creating a network of autonomous, decentralized AI agents. These AIs empower individuals by prioritizing privacy, personalized knowledge, and meaningful interactions. Together, we envision a world where AI is a trusted companion, growing smarter through genuine relationships and collaborative learning.
+### Modular Design
+GPT4People’s modular architecture ensures maximum flexibility and scalability. Key components like the large language model (LLM), communication channels, and specialized functions are separate, standalone modules that can be deployed locally or on remote servers. This design allows for the integration of third-party services like food delivery or travel booking without compromising the AI's autonomy. The modularity also enables users and developers to customize their AI's capabilities, creating a system that adapts to individual needs and leverages the best available tools, all while remaining fully decentralized.
 
 ## Getting Started
 Although the project is still in its early stages, you can begin exploring and experimenting with GPT4People once the initial codebase is released:
