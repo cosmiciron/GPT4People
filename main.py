@@ -24,7 +24,7 @@ path = os.path.join(Util().root_path(), 'config')
 core_config_file_path = os.path.join(path, 'core.yml')
 llm_config_file_path = os.path.join(path, 'llm.yml')
 user_config_file_path = os.path.join(path, 'user.yml')
-llm_process: subprocess.Popen = None
+
 
 def read_config(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -312,13 +312,7 @@ class Channel(BaseChannel):
     async def handle_async_response(self, response: AsyncResponse):
         logger.debug(f"Put response: {response} into message queue")
         await self.message_queue.put(response)        
-        
-def start_core():
-    root = Util().root_path()
-    core_path = os.path.join(root, 'core', 'core.py')
-    logger.debug("Starting GPT4People Core...\n")
-    global llm_process
-    llm_process = subprocess.Popen(["python", core_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
 
 async def main():
     # If we want to add some  parameters,  we can use the following code.
@@ -340,7 +334,6 @@ async def main():
     #    parser.print_help()
     if not account_exists():
         register_user()
-    global llm_process
     gpt4people_account = Util().get_gpt4people_account()
     email = gpt4people_account.email_user
     password = gpt4people_account.email_pass
@@ -348,8 +341,10 @@ async def main():
 
     #start_core()
     # Running start_core in a background thread
-    thread = threading.Thread(target=start_core)
-    thread.start()
+    root = Util().root_path()
+    core_path = os.path.join(root, 'core', 'core.py')
+    logger.debug("Starting GPT4People Core...\n")
+    llm_process = subprocess.Popen(["python", core_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     channel_metadata = ChannelMetadata(name="gpt4people", host="", port=0, endpoints=[])
     sleep(30)
     with Channel(metadata=channel_metadata) as channel:
