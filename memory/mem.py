@@ -71,7 +71,6 @@ class Memory(MemoryBase):
         if metadata is None:
             metadata = {}
         logger.debug(f"#########Data send to embedding: {data}#########")
-        embedding_result = await self.embedding_model.embed(data)
 
         filters = filters or {}
         if user_name:
@@ -83,6 +82,9 @@ class Memory(MemoryBase):
         if run_id:
             filters["run_id"] = metadata["run_id"] = run_id
 
+        ret = []
+
+        # The commented code is using tool calls to add or update memory, but it is not working properly for many models. ignore it for now.
         '''
         if not prompt:
             prompt = MEMORY_DEDUCTION_PROMPT.format(user_input=data, metadata=metadata)
@@ -97,7 +99,8 @@ class Memory(MemoryBase):
             ]
         )
         logger.debug(f"Extracted memories: {extracted_memories}\n")
-        '''
+        
+        embedding_result = await self.embedding_model.embed(data)
         existing_memories = self.vector_store.search(
             query=embedding_result,
             limit=5,
@@ -105,7 +108,7 @@ class Memory(MemoryBase):
         )
         logger.debug(f"Total existing memories: {len(existing_memories)}")
         messages = []
-        ret = []
+        
         # If find some similar exiting memories, using prompt to check whether they need to be updated or just 
         # need to add the new memory
         if len(existing_memories) > 0:
@@ -163,7 +166,7 @@ class Memory(MemoryBase):
                     )
                     logger.debug(f"Memory saved!")
                     return ret
-
+        '''
         # If there is no similar memories, just add the new memory
         # If the LLM didn't return tool_call, just add the new memory
         function_result = await self._create_memory_tool(data, metadata)

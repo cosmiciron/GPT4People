@@ -117,7 +117,9 @@ class LLMServiceManager:
         llama_cpp_args += " --host " + host
         llama_cpp_args += " --port " + str(port)
         if pooling:
-            llama_cpp_args += " --pooling mean"
+            llama_cpp_args += " --embedding"
+            llama_cpp_args += " --pooling cls -ub 8192"
+            logger.debug("Pooling is enabled.")
         if chat_format:
             llama_cpp_args += " --chat_format " + chat_format
 
@@ -312,7 +314,7 @@ class LLMServiceManager:
             name = llm.name
             ret = self.run_llama_cpp_llm(name, ctx_size=ctx_size, predict=predict, temp=temp,
                                 threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose, pooling=True)
-            logger.bind(production=True).info("Embedding services added!")
+            logger.debug("Embedding services added!")
             return ret
         except asyncio.CancelledError:
             logger.info("LLM for embeddingwas cancelled.")

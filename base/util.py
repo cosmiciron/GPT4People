@@ -131,6 +131,7 @@ class Util:
         embedding_llm = self.core_metadata.embedding_llm
         for llm in self.llms:
             if llm.name == embedding_llm:
+                #llm.port = 5066
                 return llm
             
 
@@ -202,15 +203,19 @@ class Util:
         
 
     async def llm_summarize(self, text: str) -> str:
-        #if len(text) == 512:
-        #return text
+        if len(text) == 512:
+            return text
         resp = await self.openai_chat_completion([{"role": "user", "content": 
                                                    '''Summarize the given chats and please give a concise and short summary as much as possible.
                                                    guidelines:
                                                    1. The given text is chats between LLM and user.
                                                    2. The summary should be no more than 512 words.
                                                    3. Please reduce the rounds of chats, maybe just keep one round.
-                                                   4. The summary should be concise and as short as possible.
+                                                   4. Do not add new content and guess the chats. You only need to summarize the given chats or text.
+                                                   5. If the text is clear, concise and short, just return the text as the summary.
+                                                   5. The summary should be concise and as short as possible.
+                                                   6. The returned summary should be no more than 512 tokens and didn't lose the meaning. That's the major target.
+
                                                      \n''' + text}])
         return resp
                           
