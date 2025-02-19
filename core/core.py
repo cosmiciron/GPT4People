@@ -41,7 +41,7 @@ from llm.llmService import LLMServiceManager
 from memory.chat.message import ChatMessage
 from memory.chat.chat import ChatHistory
 from memory.base import MemoryBase, VectorStoreBase, EmbeddingBase, LLMBase
-from memory.prompts import RESPONSE_TEMPLATE
+from memory.prompts import RESPONSE_TEMPLATE, MEMORY_CHECK_PROMPT
 from coreInterface import CoreInterface
 
 
@@ -61,6 +61,7 @@ class Core(CoreInterface):
     def __init__(self):
         if not hasattr(self, 'initialized'):
             self.initialized = True
+            self.orchestratorAndTAM_enabled = False
             self.latestPromptRequest: PromptRequest = None
             Util().setup_logging("core", Util().get_core_metadata().mode)
             root = Util().root_path()
@@ -491,31 +492,32 @@ class Core(CoreInterface):
             try:
                 if request is None:
                     return
-                intent: Intent = await self.orchestratorInst.translate_to_intent(request)
-                if intent is not None:
-                    logger.debug(f"Got intent: {intent.type} {intent.intent_text}")
-                    if intent.type == IntentType.OTHER:
-                        plugin: BasePlugin = await self.find_plugin_for_text(intent.text)
-                        if plugin is not None:
-                            plugin.user_input = intent.text
-                            if plugin.promptRequest is not None:
-                                plugin.promptRequest.app_id = request.app_id
-                                plugin.promptRequest.request_id = request.request_id
-                                plugin.promptRequest.request_metadata = request.request_metadata
-                                plugin.promptRequest.channel_name = request.channel_name
-                                plugin.promptRequest.user_name = request.user_name
-                                plugin.promptRequest.user_id = request.user_id
-                                plugin.promptRequest.contentType = request.contentType
-                                plugin.promptRequest.channelType = request.channelType
-                                plugin.promptRequest.text = request.text
-                            else:
-                                plugin.promptRequest = PromptRequest(**request.__dict__)
-                            logger.debug(f"Found plugin's description: {plugin.get_description()}")
-                            if plugin == self.active_plugin:
+                if self.orchestratorAndTAM_enabled:
+                    intent: Intent = await self.orchestratorInst.translate_to_intent(request)
+                    if intent is not None:
+                        logger.debug(f"Got intent: {intent.type} {intent.intent_text}")
+                        if intent.type == IntentType.OTHER:
+                            plugin: BasePlugin = await self.find_plugin_for_text(intent.text)
+                            if plugin is not None:
+                                plugin.user_input = intent.text
+                                if plugin.promptRequest is not None:
+                                    plugin.promptRequest.app_id = request.app_id
+                                    plugin.promptRequest.request_id = request.request_id
+                                    plugin.promptRequest.request_metadata = request.request_metadata
+                                    plugin.promptRequest.channel_name = request.channel_name
+                                    plugin.promptRequest.user_name = request.user_name
+                                    plugin.promptRequest.user_id = request.user_id
+                                    plugin.promptRequest.contentType = request.contentType
+                                    plugin.promptRequest.channelType = request.channelType
+                                    plugin.promptRequest.text = request.text
+                                else:
+                                    plugin.promptRequest = PromptRequest(**request.__dict__)
+                                logger.debug(f"Found plugin's description: {plugin.get_description()}")
+                                if plugin == self.active_plugin:
+                                    continue
+                                await plugin.run()
+                                self.active_plugin = plugin
                                 continue
-                            await plugin.run()
-                            self.active_plugin = plugin
-                            continue
 
                 #if intent is not None and (intent.type == IntentType.RESPOND or intent.type == IntentType.QUERY):
                 if request.contentType == ContentType.TEXT:
@@ -691,11 +693,7 @@ class Core(CoreInterface):
                     messages.append({'role': 'user', 'content': item.human_message.content})
                     messages.append({'role': 'assistant', 'content': item.ai_message.content})
             messages.append({'role': 'user', 'content': human_message})
-            logger.debug(f"Input message: {messages}")
-            answer = ''
-
             answer = await self.answer_from_memory(query=human_message, messages=messages, app_id=app_id, user_name=user_name, user_id=user_id, agent_id=app_id, session_id=session_id, run_id=run_id)
-            logger.debug(f"Output message: {answer}")
             return answer
         except Exception as e:
             logger.exception(e)
@@ -914,6 +912,7 @@ class Core(CoreInterface):
                 'Authorization': 'Anything'
             }
             data_json = json.dumps(data, ensure_ascii=False).encode('utf-8')
+            logger.debug(f"Messages input into LLM: {messages}")
             chat_completion_api_url = 'http://' + model_host + ':' + str(model_port) + '/v1/chat/completions'
             async with aiohttp.ClientSession() as session:
                 async with session.post(chat_completion_api_url, headers=headers, data=data_json) as resp:
@@ -921,7 +920,6 @@ class Core(CoreInterface):
                     # Ensure resp_json is a dictionary
                     while isinstance(resp_json, dict) == False:
                         resp_json = json.loads(resp_json)
-                    logger.debug(f"Resp: {resp_json}")
                     if isinstance(resp_json, dict) and 'choices' in resp_json:
                         if isinstance(resp_json['choices'], list) and len(resp_json['choices']) > 0:
                             if 'message' in resp_json['choices'][0] and 'content' in resp_json['choices'][0]['message']:
@@ -1045,29 +1043,38 @@ class Core(CoreInterface):
             raise ValueError("One of user_name, user_id, agent_id, run_id must be provided")
         try:
             relevant_memories = await self._fetch_relevant_memories(
-                messages, user_name, user_id, agent_id, run_id, filters, limit
+                messages, user_name, user_id, agent_id, run_id, filters, 3
             )
             memories_text = ""
             if relevant_memories:
-                logger.debug(f"Relevant memories: {relevant_memories}")
-                memories_text = "\n".join(memory["memory"] for memory in relevant_memories)
+                i = 1
+                for memory in relevant_memories:
+                    memories_text += (str(i) + ". " + memory["memory"] + " ")
+                    i += 1
+                    logger.debug(f"RelevantMemory: {memory['memory']}\n\n")
             else: 
                 memories_text = ""
             prompt = RESPONSE_TEMPLATE
-            prompt = prompt.format(memory=memories_text)
+            #prompt = prompt.format(memory=memories_text)
 
-            if not messages or messages[0]["role"] != "system":
-                messages = [{"role": "system", "content": prompt}] + messages
-            else:
-                messages[0]["content"] = prompt
+            if not messages or messages[0]["role"] == "system":
+                messages.pop(0)
 
-            main_llm = Util().main_llm()          
+            messages = [{"role": "system", "content": prompt}] + [{"role": "user", "content": memories_text}]  + [{"role": "assistant", "content": "I will refer to these memories."}] + messages
+
+            main_llm = Util().main_llm()     
             response = await self.openai_chat_completion(messages=messages, llm_name=main_llm.name)
             message: ChatMessage = ChatMessage()
             message.add_user_message(query)
             message.add_ai_message(response)
             self.chatDB.add(app_id=app_id, user_name=user_name, user_id=user_id, session_id=session_id, chat_message=message)
-            await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
+            messages = []
+            messages = [{"role": "system", "content": MEMORY_CHECK_PROMPT}] 
+            messages += [{"role": "user", "content": query}]
+            result =await self.openai_chat_completion(messages=messages, llm_name=main_llm.name)
+            if result.strip().lower() == "yes":
+                await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
+                logger.debug(f"User input added to memory: {query}")
             return response
         except Exception as e:  
             logger.exception(e)
@@ -1101,8 +1108,9 @@ class Core(CoreInterface):
         message_input = [
             f"{message['role']}: {message['content']}\n" for message in messages
         ][-6:]
-        # TODO: Make it better by summarizing the past conversation
-        return await self.mem_instance.search(
+        logger.debug(f"Memory: Message Input: {message_input}")
+
+        memories= await self.mem_instance.search(
             query="\n".join(message_input),
             user_name=user_name,
             user_id=user_id,
@@ -1111,6 +1119,35 @@ class Core(CoreInterface):
             filters=filters,
             limit=limit,
         )
+        logger.debug(f"Memory: Memories from chats: {memories}")
+
+        message_input = [
+            f"{message['role']}: {message['content']}\n" for message in messages
+        ][-1:]
+        logger.debug(f"Memory: Message Input, latest chat: {message_input}")
+        tmp_memories = await self.mem_instance.search(
+            query="\n".join(message_input),
+            user_name=user_name,
+            user_id=user_id,
+            agent_id=agent_id,
+            run_id=run_id,
+            filters=filters,
+            limit=limit,
+        )
+        logger.debug(f"Memory: Memories from latest chat: {tmp_memories}")
+        for item in  tmp_memories:
+            existed: bool = False
+            for memory in memories:
+                if item['memory'] == memory['memory']:
+                    memory['score'] *= 2
+                    existed = True
+                    break
+            if not existed:
+                memories.append(item)
+
+        return  memories
+
+
     
     def get_grammar(self, file: str, path: str = None) -> str | None:
         try:

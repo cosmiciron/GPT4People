@@ -434,7 +434,7 @@ class Memory(MemoryBase):
         return self.db.get_history(memory_id)
 
     async def _create_memory_tool(self, data, metadata=None):
-        logging.info(f"Creating memory with {data=}")
+        logging.info(f"Creating memory with {data}")
         embeddings = await self.embedding_model.embed(data)
         memory_id = str(uuid.uuid4())
         metadata = metadata or {}

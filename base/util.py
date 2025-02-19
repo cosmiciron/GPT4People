@@ -174,7 +174,6 @@ class Util:
                 async with session.post(chat_completion_api_url, headers=headers, data=data_json) as resp:
                     resp_json = await resp.text(encoding='utf-8')
                     # Ensure resp_json is a dictionary
-                    logger.debug(f"openai_chat_completion response: {resp_json}")
                     while isinstance(resp_json, dict) == False:
                         resp_json = json.loads(resp_json)
 
@@ -213,8 +212,9 @@ class Util:
                                                    3. Please reduce the rounds of chats, maybe just keep one round.
                                                    4. Do not add new content and guess the chats. You only need to summarize the given chats or text.
                                                    5. If the text is clear, concise and short, just return the text as the summary.
-                                                   5. The summary should be concise and as short as possible.
-                                                   6. The returned summary should be no more than 512 tokens and didn't lose the meaning. That's the major target.
+                                                   6. The summary should be concise and as short as possible.
+                                                   7. Please do not add new content or guess the chats. Just summarize the given text. If it is a question, the summary should be the question.
+                                                   8. The returned summary should be no more than 512 tokens and didn't lose the meaning. That's the major target.
 
                                                      \n''' + text}])
         return resp

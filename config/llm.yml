@@ -2,8 +2,9 @@ llms:
   embedding_granite_278m_multilingual:
     type: local
     alias: embedding
-    path: embedding/granite-embedding-278m-multilingual-Q4_K_M.gguf
-    description: embedding-granite-278m-multilingual
+    path: embedding/nomic-embed-text-v1.5.Q5_K_M.gguf
+    #embedding/granite-embedding-278m-multilingual-Q4_K_M.gguf
+    description: embedding-multilingual
     languages: ['en', 'cn']
     introduction: 我是embedding model 
     capabilities: ['embedding']
