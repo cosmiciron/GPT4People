@@ -13,6 +13,7 @@ import watchdog.events
 import watchdog.observers
 
 from memory.chat.message import ChatMessage
+from memory.prompts import MEMORY_SUMMARIZATION_PROMPT
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from base.base import CoreMetadata, User, LLM, GPT4PeopleAccount
 
@@ -135,6 +136,25 @@ class Util:
                 return llm
             
 
+    def process_text(self, text):
+        # Check if both <think> and </think> are in the text
+        if '<think>' in text and '</think>' in text:
+            # If so, remove the entire content within the first <think> to </think> (inclusive)
+            processed_text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
+        elif '<think>' in text:
+            # If there is a <think> without a corresponding </think>, remove the <think> tag
+            processed_text = re.sub(r'<think>', '', text)
+        elif '</think>' in text:
+            # If there is a </think> without a corresponding <think>, keep the text after </think>
+            processed_text = text.split('</think>', 1)[-1]
+        else:
+            # If neither tag is present, keep the text as is
+            processed_text = text
+        
+        if len(processed_text.strip()) >0:
+            return processed_text.strip()
+            
+
     async def openai_chat_completion(self, messages: list[dict], 
                                      grammar: str=None,
                                      tools: Optional[List[Dict]] = None,
@@ -183,9 +203,9 @@ class Util:
                                 message_content = resp_json['choices'][0]['message']['content'].strip()
                                 logger.debug(f"Message Content from LLM: {message_content}")
                                 # Filter out the <think> tag and its content
-                                filtered_message_content = re.sub(r'<think>.*?</think>', '', message_content, flags=re.DOTALL) 
+                                filtered_message_content = self.process_text(message_content) 
                                 logger.debug(f"Filtered Message Content from LLM: {filtered_message_content}") 
-                                return filtered_message_content.strip()
+                                return filtered_message_content
                     logger.error("Invalid response structure")
                     return None
         except Exception as e:
@@ -202,23 +222,17 @@ class Util:
         
 
     async def llm_summarize(self, text: str) -> str:
-        if len(text) == 512:
+        if len(text) <= 512 or text == None:
             return text
-        resp = await self.openai_chat_completion([{"role": "user", "content": 
-                                                   '''Summarize the given chats and please give a concise and short summary as much as possible.
-                                                   guidelines:
-                                                   1. The given text is chats between LLM and user.
-                                                   2. The summary should be no more than 512 words.
-                                                   3. Please reduce the rounds of chats, maybe just keep one round.
-                                                   4. Do not add new content and guess the chats. You only need to summarize the given chats or text.
-                                                   5. If the text is clear, concise and short, just return the text as the summary.
-                                                   6. The summary should be concise and as short as possible.
-                                                   7. Please do not add new content or guess the chats. Just summarize the given text. If it is a question, the summary should be the question.
-                                                   8. The returned summary should be no more than 512 tokens and didn't lose the meaning. That's the major target.
-
-                                                     \n''' + text}])
-        return resp
-                          
+        prompt = MEMORY_SUMMARIZATION_PROMPT
+        prompt = prompt.format(text=text)
+        resp = await self.openai_chat_completion([{"role": "user", "content": prompt}])
+        if resp:
+            logger.debug(f"Summary from LLM: {resp}")
+            return resp
+        else:
+            logger.debug(f"Failed to get summary from LLM, return the original text, {text}")
+            return text   
 
     def get_users(self):
         """

@@ -264,13 +264,11 @@ Guidelines:
    - **Example**: If the user queries about a preferred programming language and a context states "I'm currently enjoying learning Python," prioritize this specific detail in your response.
 
 **Context Prioritization**:
-- **Direct Answers from Memories**: When a query matches information explicitly shared in memories, use this information verbatim or with minimal modification for clarity.
+- **Direct Answers from Memories**: When a query matches information explicitly shared in memories, use this information verbatim or with minimal modification for clarity. Eg, change "I" to "you" and "my" to "your" or "我" to "你".
 - **General Knowledge as Secondary**: Resort to the LLM's general knowledge only when the memories do not furnish a complete answer or when additional context might enrich the response.
 - **Less Relevant Memories**: While all memories provided are from the user's perspective, some may not be directly useful for the current query. Use your judgment to prioritize the information that is most likely to be helpful and relevant.
 
 Please refer to the context from the user and extract the most relevant information to craft a personalized and accurate response to the user's query.
-
-
 
 Remember, the effectiveness of your response depends not just on using the memories provided, but on selecting and prioritizing those that are most relevant to the user's current needs and queries.
 """
@@ -342,4 +340,38 @@ As an intelligent assistant, your main task is to listen to the information shar
 
 By adhering to these guidelines, you ensure a focused and valuable collection of information that enhances personalized and contextually relevant responses in future interactions.
 
+"""
+
+MEMORY_PREPROCESSING_PROMPT = """
+Please process the user's input text according to the instructions below. 
+1. Remove any punctuation and special characters to focus on textual content.
+   - Example: Before: "Hello, world!" After: "Hello world"
+   - Example: Before: "你好，世界！" After: "你好世界"
+2. Identify and remove stop words, which are common words that add little semantic value.
+   - Example: Before: "The quick brown fox jumps over the lazy dog." After: "quick brown fox jumps lazy dog."
+   - Example: Before: "这是一个非常美丽的地方。" After: "美丽 地方"
+3. Lemmatize the remaining words to their base or dictionary form, ensuring verbs are in their infinitive form and plural nouns become singular.
+   - Note: For Chinese, instead of lemmatization, focus on word segmentation and removing stop words, as Chinese words are often in their base form already.
+   - Example: Before: "The geese fly south for the winter." After: "goose fly south for winter."
+   - Example: Before: "我在学习自然语言处理。" After: "学习 自然语言处理"
+4. Only ouput the processed text without any additional information.
+
+"""
+#3. Replace all URLs with the word 'URL'.
+
+MEMORY_SUMMARIZATION_PROMPT = """
+Please summarize the given chats according to the guidelines below, ensuring the summary is provided in the same language as the input text. The summary should be concise, not exceeding 512 tokens, and capture the essence of the conversation accurately.
+
+Guidelines:
+1. The input text is chats between an LLM and a user.
+2. The summary should be brief, ideally within 512 tokens.
+3. Minimize the chat rounds in the summary, focusing on the core interaction.
+4. Do not introduce new content or assumptions beyond the provided chats.
+5. If the original text is already clear and concise, return it as the summary.
+6. The summary must not add new information or speculate on the chat content. If the input includes a question, the summary should encapsulate this question.
+7. Ensure the summary adheres to the token limit without losing the original message's meaning.
+8. Most importantly, the summary should be in the same language as the input text to maintain clarity and relevance to the user.
+
+Given text:
+{text}
 """

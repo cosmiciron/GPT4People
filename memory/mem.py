@@ -16,7 +16,7 @@ from memory.util import (
     DELETE_MEMORY_TOOL,
     UPDATE_MEMORY_TOOL,
 )
-from memory.prompts import MEMORY_DEDUCTION_PROMPT
+from memory.prompts import MEMORY_DEDUCTION_PROMPT, MEMORY_PREPROCESSING_PROMPT
 from memory.base import MemoryBase, VectorStoreBase, EmbeddingBase, LLMBase
 
 from memory.setup import setup_config
@@ -24,6 +24,7 @@ from memory.util import get_update_memory_messages, get_add_memory_messages
 from memory.storage import SQLiteManager
 from memory.configs import MemoryItem, MemoryConfig
 from loguru import logger
+from base.util import Util
 
 
 # Setup user config
@@ -315,8 +316,17 @@ class Memory(MemoryBase):
         if run_id:
             filters["run_id"] = run_id
 
-        embedding_result = await self.embedding_model.embed(query)
-        logger.debug(f"Memory search string: {query}")   
+        prompt = MEMORY_PREPROCESSING_PROMPT
+        messages = []
+        messages = [{"role": "system", "content": prompt}] 
+        messages.append({"role": "user", "content": query.lower()})
+        result = await Util().openai_chat_completion(messages=messages)
+        logger.debug(f"Search Memory Preprocessing: {query}")
+        if result:
+            query = result
+        logger.debug(f"Search Memory Preprocessed: {query}")
+
+        embedding_result = await self.embedding_model.embed(query) 
         memories = self.vector_store.search(
             query=embedding_result, limit=limit, filters=filters
         )
@@ -434,7 +444,16 @@ class Memory(MemoryBase):
         return self.db.get_history(memory_id)
 
     async def _create_memory_tool(self, data, metadata=None):
-        logging.info(f"Creating memory with {data}")
+        prompt = MEMORY_PREPROCESSING_PROMPT
+        messages = []
+        messages = [{"role": "system", "content": prompt}] 
+        messages.append({"role": "user", "content": data.lower()})
+        result = await Util().openai_chat_completion(messages=messages)
+        logger.debug(f"Add Memory Preprocessing: {data}")
+        if result:
+            data = result
+        logger.debug(f"Add Memory Preprocessed: {data}")
+
         embeddings = await self.embedding_model.embed(data)
         memory_id = str(uuid.uuid4())
         metadata = metadata or {}

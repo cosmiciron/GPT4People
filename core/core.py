@@ -41,7 +41,7 @@ from llm.llmService import LLMServiceManager
 from memory.chat.message import ChatMessage
 from memory.chat.chat import ChatHistory
 from memory.base import MemoryBase, VectorStoreBase, EmbeddingBase, LLMBase
-from memory.prompts import RESPONSE_TEMPLATE, MEMORY_CHECK_PROMPT
+from memory.prompts import RESPONSE_TEMPLATE, MEMORY_CHECK_PROMPT, MEMORY_PREPROCESSING_PROMPT
 from coreInterface import CoreInterface
 
 
@@ -882,7 +882,15 @@ class Core(CoreInterface):
                                      grammar: str=None,
                                      tools: Optional[List[Dict]] = None,
                                      tool_choice: str = "auto", 
-                                     llm_name: str = None) -> str | None:    
+                                     llm_name: str = None) -> str | None:  
+        try: 
+            resp = await Util().openai_chat_completion(messages, grammar, tools, tool_choice, llm_name) 
+            return resp
+        except Exception as e:
+            logger.exception(e)
+            return None
+        
+        '''
         try:      
             if not llm_name:
                 llm_name = Util().main_llm().name              
@@ -926,14 +934,15 @@ class Core(CoreInterface):
                                 message_content = resp_json['choices'][0]['message']['content'].strip()
                                 logger.debug(f"Message Content from LLM: {message_content}")
                                 # Filter out the <think> tag and its content
-                                filtered_message_content = re.sub(r'<think>.*?</think>', '', message_content, flags=re.DOTALL) 
+                                filtered_message_content = Util().process_text(message_content)
                                 logger.debug(f"Filtered Message Content from LLM: {filtered_message_content}")                              
-                                return filtered_message_content.strip()
+                                return filtered_message_content
                     logger.error("Invalid response structure")
                     return None
         except Exception as e:
             logger.exception(e)
             return None
+        '''
         
     def extract_json_str(self, response) -> str:
         # Allow {} to be matched in response
@@ -1072,7 +1081,7 @@ class Core(CoreInterface):
             messages = [{"role": "system", "content": MEMORY_CHECK_PROMPT}] 
             messages += [{"role": "user", "content": query}]
             result =await self.openai_chat_completion(messages=messages, llm_name=main_llm.name)
-            if result.strip().lower() == "yes":
+            if result.strip().lower() == "yes":               
                 await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
                 logger.debug(f"User input added to memory: {query}")
             return response
