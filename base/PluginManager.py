@@ -18,7 +18,7 @@ disable_plugins = True
 class PluginManager:
     def __init__(self, coreInst: CoreInterface):
         self.coreInst = coreInst
-        self.plugins_dir = Util.plugins_path()
+        self.plugins_dir = Util().plugins_path()
         self.loaded_plugins = {}
         self.plugin_instances: list[BasePlugin] = []
         self.hot_reload_thread = None

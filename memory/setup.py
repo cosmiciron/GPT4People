@@ -6,7 +6,7 @@ from base.util import Util
 
 # Set up the directory path
 #home_dir = os.path.expanduser("~")
-memory_dir = Util.data_path()
+memory_dir = Util().data_path()
 #os.makedirs(memory_dir, exist_ok=True)
 
 

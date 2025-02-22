@@ -31,7 +31,7 @@ class PartnerPlugin(BasePlugin):
         if not os.path.exists(config_path):
             logger.debug(f"Config file does not exist: {config_path}")  # Debugging line
             return
-        self.config = Util.load_yml_config(config_path)
+        self.config = Util().load_yml_config(config_path)
         logger.debug(f'PartnerPlugin config: {self.config}')   
         self.last_interaction_time = datetime.now()
         self.idle_duration = self.config['idle_duration'] * 3600  # convert hours to seconds

@@ -31,7 +31,7 @@ class QuotePlugin(SchedulerPlugin):
         if not os.path.exists(config_path):
             logger.debug(f"Config file does not exist: {config_path}")  # Debugging line
             return
-        self.config = Util.load_yml_config(config_path) 
+        self.config = Util().load_yml_config(config_path) 
         logger.debug(f'QuotePlugin config: {self.config}')   
 
 

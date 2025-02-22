@@ -34,17 +34,16 @@ class Util:
         if not hasattr(self, 'initialized'):
             self.initialized = True
             self.config_observer = None
-            self.core_metadata : CoreMetadata = CoreMetadata.from_yaml(os.path.join(Util.config_path(), 'core.yml'))
-            self.users : list = User.from_yaml(os.path.join(Util.config_path(), 'user.yml'))
-            self.llms: list[LLM]= LLM.from_yaml(os.path.join(Util.config_path(), 'llm.yml'))
-            self.gpt4people_account: GPT4PeopleAccount = GPT4PeopleAccount.from_yaml(os.path.join(Util.config_path(), 'gpt4people_account.yml'))
+            self.core_metadata : CoreMetadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
+            self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
+            self.llms: list[LLM]= LLM.from_yaml(os.path.join(self.config_path(), 'llm.yml'))
+            self.gpt4people_account: GPT4PeopleAccount = GPT4PeopleAccount.from_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
             
             # Start to monitor the specified config files
             self.watch_config_file()
 
 
-    @staticmethod
-    def load_yml_config(config_path):
+    def load_yml_config(self, config_path):
         """
         Load configuration from a YAML file.
         """
@@ -56,42 +55,35 @@ class Util:
             config = yaml.safe_load(file)
         return config
     
-    
-    @staticmethod    
-    def root_path():
+      
+    def root_path(self):
         current_path = os.path.dirname(os.path.abspath(__file__))
         return os.path.dirname(current_path)
     
-    @staticmethod
-    def log_path():
-        root = Util.root_path()
-        return os.path.join(Util.root_path(), 'logs')
+    def log_path(self):
+        root = self.root_path()
+        return os.path.join(root, 'logs')
     
-    @staticmethod
-    def data_path():
-        root = Util.root_path()
-        return os.path.join(Util.root_path(), 'database')
+    def data_path(self):
+        root = self.root_path()
+        return os.path.join(root, 'database')
     
-    @staticmethod
-    def plugins_path():
-        root = Util.root_path()
-        return os.path.join(Util.root_path(), 'plugins')
-            
-    @staticmethod     
-    def config_path():
-        return os.path.join(Util.root_path(), 'config')
+    def plugins_path(self):
+        root = self.root_path()
+        return os.path.join(root, 'plugins')
+                 
+    def config_path(self):
+        return os.path.join(self.root_path(), 'config')
     
+      
+    def models_path(self):
+        return os.path.join(self.root_path(), 'models')
     
-    @staticmethod     
-    def models_path():
-        return os.path.join(Util.root_path(), 'models')
-    
-    @staticmethod
-    def setup_logging(module_name, mode):
+    def setup_logging(self, module_name, mode):
         """
         Setup logging configuration using the configuration file.
         """
-        log_path = Util.log_path()
+        log_path = self.log_path()
         log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
         def filter_production(record):
             return record["extra"].get("production", False)
@@ -213,7 +205,7 @@ class Util:
                     # Ensure resp_json is a dictionary
                     while isinstance(resp_json, dict) == False:
                         resp_json = json.loads(resp_json)
-
+                    logger.debug(f"Original Response from LLM: {resp_json}")
                     if isinstance(resp_json, dict) and 'choices' in resp_json:
                         if isinstance(resp_json['choices'], list) and len(resp_json['choices']) > 0:
                             if 'message' in resp_json['choices'][0] and 'content' in resp_json['choices'][0]['message']:
@@ -258,26 +250,26 @@ class Util:
             Users: The users object, or None if the loading failed.
         """
         if self.users == None:
-            self.users = User.from_yaml(os.path.join(Util.config_path(), 'user.yml'))    
+            self.users = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))    
         return self.users
     
     def get_gpt4people_account(self):
         if self.gpt4people_account == None:
-            self.gpt4people_account = GPT4PeopleAccount.from_yaml(os.path.join(Util.config_path(), 'gpt4people_account.yml'))
+            self.gpt4people_account = GPT4PeopleAccount.from_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
         return self.gpt4people_account
     
     def save_gpt4people_account(self):
-        self.gpt4people_account.to_yaml(os.path.join(Util.config_path(), 'gpt4people_account.yml'))
+        self.gpt4people_account.to_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
 
     def get_core_metadata(self):
         if self.core_metadata == None:
-            self.core_metadata = CoreMetadata.from_yaml(os.path.join(Util.config_path(), 'core.yml'))
+            self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
         return self.core_metadata
         
         
     def get_llms(self):
         if self.llms == None:
-            self.llms = LLM.from_yaml(os.path.join(Util.config_path(), 'llm.yml'))
+            self.llms = LLM.from_yaml(os.path.join(self.config_path(), 'llm.yml'))
         return self.llms
         
     def get_llm(self, name: str) -> LLM:        
@@ -353,7 +345,7 @@ class Util:
         
       
             self.config_observer = watchdog.observers.Observer()
-            self.config_observer.schedule(Handler(self), Util.config_path(), recursive=False)
+            self.config_observer.schedule(Handler(self), self.config_path(), recursive=False)
             self.config_observer.start()
                 
             # Gracefully stop the observer

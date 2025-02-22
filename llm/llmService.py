@@ -105,7 +105,7 @@ class LLMServiceManager:
                                      chat_format:str = None, verbose:str = 'false', pooling:bool = False):
         logger.debug(f"model path {model_path}")
         model_sub_path = os.path.normpath(model_path)
-        model_path = os.path.join(Util.models_path(), model_sub_path)
+        model_path = os.path.join(Util().models_path(), model_sub_path)
         logger.debug(f"Full model path: {model_path}")
         llama_cpp_args = "-m " + model_path
         if verbose != 'false' and verbose != 'False':
@@ -123,7 +123,7 @@ class LLMServiceManager:
         if chat_format:
             llama_cpp_args += " --chat_format " + chat_format
 
-        root_path = Util.root_path()
+        root_path = Util().root_path()
         llama_cpp_path = os.path.join(root_path, 'llama.cpp-master')
         if platform.system() == "Windows":
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
