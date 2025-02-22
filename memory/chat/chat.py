@@ -114,7 +114,7 @@ class ChatHistory:
             self.db_session.rollback()
 
 
-    def get_hist_by_role(self, sender_name: Optional[str] = None, responder_name: Optional[str] = None, num_rounds: int = 10, fetch_all: bool = False) -> list:
+    def get_hist_by_role(self, sender_name: Optional[str] = None, responder_name: Optional[str] = None, num_rounds: int = 10, fetch_all: bool = False, desc: bool = True) -> list:
         """
         Get the chat history based on sender_name and/or responder_name.
 
@@ -127,17 +127,30 @@ class ChatHistory:
         """
         if not sender_name or not responder_name:
             raise ValueError("Both sender_name and responder_name must be provided to get chat history by role")
-
-        results = (
-            self.db_session.query(ChatHistoryByRoleModel)
-            .filter(
-                or_(
-                    (ChatHistoryByRoleModel.sender_name == sender_name) & (ChatHistoryByRoleModel.responder_name == responder_name),
-                    (ChatHistoryByRoleModel.sender_name == responder_name) & (ChatHistoryByRoleModel.responder_name == sender_name),
+        results = ()
+        if desc == True:
+            results = (
+                self.db_session.query(ChatHistoryByRoleModel)
+                .filter(
+                    or_(
+                        (ChatHistoryByRoleModel.sender_name == sender_name) & (ChatHistoryByRoleModel.responder_name == responder_name),
+                        (ChatHistoryByRoleModel.sender_name == responder_name) & (ChatHistoryByRoleModel.responder_name == sender_name),
+                    )
                 )
+                .order_by(ChatHistoryByRoleModel.created_at.desc())
             )
-            .order_by(ChatHistoryByRoleModel.created_at.asc())
-        )
+        else:
+            results = (
+                self.db_session.query(ChatHistoryByRoleModel)
+                .filter(
+                    or_(
+                        (ChatHistoryByRoleModel.sender_name == sender_name) & (ChatHistoryByRoleModel.responder_name == responder_name),
+                        (ChatHistoryByRoleModel.sender_name == responder_name) & (ChatHistoryByRoleModel.responder_name == sender_name),
+                    )
+                )
+                .order_by(ChatHistoryByRoleModel.created_at.asc())
+            )
+
         results = results.limit(num_rounds) if not fetch_all else results
         history = []
         for result in results:
@@ -151,6 +164,8 @@ class ChatHistory:
                     "created_at": result.created_at,
                 }
             )
+        if desc:
+            history.reverse()
         return history
 
     def add_session(self,
@@ -321,7 +336,7 @@ class ChatHistory:
             self.db_session.rollback()
 
     def get(
-        self, app_id: Optional[str] = None, user_name: Optional[str] = None, user_id: Optional[str] = None, session_id: Optional[str] = None, num_rounds=10, fetch_all: bool = False, display_format=False
+        self, app_id: Optional[str] = None, user_name: Optional[str] = None, user_id: Optional[str] = None, session_id: Optional[str] = None, num_rounds=10, fetch_all: bool = False, display_format=False, desc: bool = True
     ) -> list[ChatMessage]:
         """
         Get the chat history for a given app_id.
@@ -342,18 +357,29 @@ class ChatHistory:
                 params["user_name"] = user_name
             if user_id:
                 params["user_id"] = user_id
-            if session_id:
-                params["session_id"] = session_id
+            #if session_id:
+            #    params["session_id"] = session_id
 
         result = ()
-        if params == None:
-            results = (
-                self.db_session.query(ChatHistoryModel).order_by(ChatHistoryModel.created_at.asc())
-            )
+        if desc:
+            if params == None:
+                results = (
+                    self.db_session.query(ChatHistoryModel).order_by(ChatHistoryModel.created_at.desc())
+                )
+            else:
+                results = (
+                    self.db_session.query(ChatHistoryModel).filter_by(**params).order_by(ChatHistoryModel.created_at.desc())
+                )
         else:
-            results = (
-                self.db_session.query(ChatHistoryModel).filter_by(**params).order_by(ChatHistoryModel.created_at.asc())
-            )
+            if params == None:
+                results = (
+                    self.db_session.query(ChatHistoryModel).order_by(ChatHistoryModel.created_at.asc())
+                )
+            else:
+                results = (
+                    self.db_session.query(ChatHistoryModel).filter_by(**params).order_by(ChatHistoryModel.created_at.asc())
+                )
+
         results = results.limit(num_rounds) if not fetch_all else results
         history = []
         for result in results:
@@ -378,11 +404,13 @@ class ChatHistory:
                 memory.add_ai_message(result.answer, metadata=metadata)
                 memory.timestamp = result.created_at
                 history.append(memory)
+        if desc:
+            history.reverse()
         return history
     
 
     def get_sessions(
-        self, app_id: Optional[str] = None, user_name: Optional[str] = None, user_id: Optional[str] = None, session_id: Optional[str] = None, num_rounds=10, fetch_all: bool = False) -> list:
+        self, app_id: Optional[str] = None, user_name: Optional[str] = None, user_id: Optional[str] = None, session_id: Optional[str] = None, num_rounds=10, fetch_all: bool = False, desc: bool = True) -> list:
         """
         Get the chat history for a given app_id.
 
@@ -405,14 +433,25 @@ class ChatHistory:
                 params["session_id"] = session_id
 
         result = ()
-        if params == None:
-            results = (
-                self.db_session.query(ChatSessionModel).order_by(ChatSessionModel.created_at.asc())
-            )
+        if desc:
+            if params == None:
+                results = (
+                    self.db_session.query(ChatSessionModel).order_by(ChatSessionModel.created_at.desc())
+                )
+            else:
+                results = (
+                    self.db_session.query(ChatSessionModel).filter_by(**params).order_by(ChatSessionModel.created_at.desc())
+                )
         else:
-            results = (
-                self.db_session.query(ChatSessionModel).filter_by(**params).order_by(ChatSessionModel.created_at.asc())
-            )
+            if params == None:
+                results = (
+                    self.db_session.query(ChatSessionModel).order_by(ChatSessionModel.created_at.asc())
+                )
+            else:
+                results = (
+                    self.db_session.query(ChatSessionModel).filter_by(**params).order_by(ChatSessionModel.created_at.asc())
+                )
+
         results = results.limit(num_rounds) if not fetch_all else results
         history = []
         for result in results:
@@ -428,11 +467,13 @@ class ChatHistory:
                     "created_at": result.created_at,
                 }
             )
+        if desc:
+            history.reverse()
         return history
     
 
     def get_runs(
-        self, agent_id: Optional[str] = None, user_name: Optional[str] = None, user_id: Optional[str] = None, run_id: Optional[str] = None, num_rounds=10, fetch_all: bool = False) -> list:
+        self, agent_id: Optional[str] = None, user_name: Optional[str] = None, user_id: Optional[str] = None, run_id: Optional[str] = None, num_rounds=10, fetch_all: bool = False, desc: bool = True) -> list:
         """
         Get the chat history for a given agent_id.
 
@@ -455,14 +496,24 @@ class ChatHistory:
                 params["run_id"] = run_id
 
         result = ()
-        if params == None:
-            results = (
-                self.db_session.query(MemoryRunModel).order_by(MemoryRunModel.created_at.asc())
-            )
+        if desc:
+            if params == None:
+                results = (
+                    self.db_session.query(MemoryRunModel).order_by(MemoryRunModel.created_at.desc())
+                )
+            else:
+                results = (
+                    self.db_session.query(MemoryRunModel).filter_by(**params).order_by(MemoryRunModel.created_at.desc())
+                )
         else:
-            results = (
-                self.db_session.query(MemoryRunModel).filter_by(**params).order_by(MemoryRunModel.created_at.asc())
-            )
+            if params == None:
+                results = (
+                    self.db_session.query(MemoryRunModel).order_by(MemoryRunModel.created_at.asc())
+                )
+            else:
+                results = (
+                    self.db_session.query(MemoryRunModel).filter_by(**params).order_by(MemoryRunModel.created_at.asc())
+                )            
         results = results.limit(num_rounds) if not fetch_all else results
         history = []
         for result in results:
@@ -478,6 +529,8 @@ class ChatHistory:
                     "created_at": result.created_at,
                 }
             )
+        if desc:
+            history.reverse()
         return history
     
 

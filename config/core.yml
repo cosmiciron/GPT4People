@@ -17,8 +17,6 @@ vectorDB:
     host: 0.0.0.0
     port: 5000
     api: chromadb.api.fastapi.FastAPI
-    path: ../data
-    persist_path: ../database
     is_persistent: true
     anonymized_telemetry: false
 endpoints:

@@ -153,6 +153,17 @@ class Util:
         
         if len(processed_text.strip()) >0:
             return processed_text.strip()
+        
+
+    def is_utf8_compatible(self, data):
+        try:
+            # Attempt to convert the data to a JSON string without ASCII encoding,
+            # then encode it to UTF-8. This will raise an error if data can't be
+            # represented in UTF-8.
+            json.dumps(data, ensure_ascii=False).encode('utf-8')
+        except UnicodeEncodeError:
+            return False
+        return True
             
 
     async def openai_chat_completion(self, messages: list[dict], 
@@ -188,7 +199,13 @@ class Util:
                 'Content-Type': 'application/json',
                 'Authorization': 'Anything'
             }
-            data_json = json.dumps(data, ensure_ascii=False).encode('utf-8')
+            data_json = None
+            if self.is_utf8_compatible(data):
+                data_json = json.dumps(data, ensure_ascii=False)
+            else:
+                data_json = json.dumps(data, ensure_ascii=False).encode('utf-8')
+
+            logger.debug(f"Message Request to LLM: {data_json}")
             chat_completion_api_url = 'http://' + model_host + ':' + str(model_port) + '/v1/chat/completions'
             async with aiohttp.ClientSession() as session:
                 async with session.post(chat_completion_api_url, headers=headers, data=data_json) as resp:
@@ -201,10 +218,9 @@ class Util:
                         if isinstance(resp_json['choices'], list) and len(resp_json['choices']) > 0:
                             if 'message' in resp_json['choices'][0] and 'content' in resp_json['choices'][0]['message']:
                                 message_content = resp_json['choices'][0]['message']['content'].strip()
-                                logger.debug(f"Message Content from LLM: {message_content}")
                                 # Filter out the <think> tag and its content
-                                filtered_message_content = self.process_text(message_content) 
-                                logger.debug(f"Filtered Message Content from LLM: {filtered_message_content}") 
+                                filtered_message_content = self.process_text(message_content)
+                                logger.debug(f"Message Response from LLM: {message_content}")
                                 return filtered_message_content
                     logger.error("Invalid response structure")
                     return None
@@ -222,7 +238,7 @@ class Util:
         
 
     async def llm_summarize(self, text: str) -> str:
-        if len(text) <= 512 or text == None:
+        if len(text) <= 1024 or text == None:
             return text
         prompt = MEMORY_SUMMARIZATION_PROMPT
         prompt = prompt.format(text=text)

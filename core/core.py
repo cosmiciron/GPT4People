@@ -41,7 +41,7 @@ from llm.llmService import LLMServiceManager
 from memory.chat.message import ChatMessage
 from memory.chat.chat import ChatHistory
 from memory.base import MemoryBase, VectorStoreBase, EmbeddingBase, LLMBase
-from memory.prompts import RESPONSE_TEMPLATE, MEMORY_CHECK_PROMPT, MEMORY_PREPROCESSING_PROMPT
+from memory.prompts import RESPONSE_TEMPLATE, MEMORY_CHECK_PROMPT
 from coreInterface import CoreInterface
 
 
@@ -652,7 +652,6 @@ class Core(CoreInterface):
         
         new_session_id = uuid.uuid4().hex
         self.session_ids[user_id] = (new_session_id, current_time)
-        logger.debug(f'user_name: {user_name}, user_id: {user_id}, session_id: {new_session_id}')
         self.chatDB.add_session(app_id=app_id, user_name=user_name, user_id=user_id, session_id=new_session_id, created_at=current_time)
         return new_session_id
     
@@ -683,9 +682,7 @@ class Core(CoreInterface):
                 human_message = content
             session_id = self.get_session_id(app_id=app_id, user_name=user_name, user_id=user_id)
             run_id = self.get_run_id(agent_id=app_id, user_name=user_name, user_id=user_id)
-            logger.debug(f"session_id: {session_id}, run_id: {run_id}")
             histories: List[ChatMessage] = self.chatDB.get(app_id=app_id, user_name=user_name, user_id=user_id, num_rounds=10, fetch_all=False, display_format=False)
-            logger.debug(f"histories: {histories}")
             messages = []
 
             if histories is not None and len(histories) > 0: 
@@ -835,8 +832,7 @@ class Core(CoreInterface):
         '''
 
         settings = chromadb.config.Settings(anonymized_telemetry=False)
-        path = db.persist_path
-        settings.persist_directory = path
+        settings.persist_directory = Util().data_path()
         settings.is_persistent = True
         client = chromadb.Client(settings=settings)
         # Here you can initialize collections or add more configurations as needed
@@ -1051,37 +1047,40 @@ class Core(CoreInterface):
         if not any([user_name, user_id, agent_id, run_id]):
             raise ValueError("One of user_name, user_id, agent_id, run_id must be provided")
         try:
-            relevant_memories = await self._fetch_relevant_memories(
-                messages, user_name, user_id, agent_id, run_id, filters, 3
+            relevant_memories = await self._fetch_relevant_memories(query,
+                messages, user_name, user_id, agent_id, run_id, filters, 10
             )
             memories_text = ""
             if relevant_memories:
                 i = 1
                 for memory in relevant_memories:
-                    memories_text += (str(i) + ". " + memory["memory"] + " ")
+                    memories_text += (str(i) + ": " + memory["memory"] + " ")
+                    logger.debug(f"RelevantMemory: {str(i) } ': ' {memory['memory']}")
                     i += 1
-                    logger.debug(f"RelevantMemory: {memory['memory']}\n\n")
             else: 
                 memories_text = ""
             prompt = RESPONSE_TEMPLATE
-            #prompt = prompt.format(memory=memories_text)
+            #prompt = prompt.format(context=memories_text)
+            llm_input = [{"role": "system", "content": prompt}]
+            llm_input += [{"role": "user", "content": f"The following contexts can be used to query or resonate with the user's input: {memories_text}" }]
 
-            if not messages or messages[0]["role"] == "system":
+            if len(messages) > 0 and messages[0]["role"] == "system":
                 messages.pop(0)
-
-            messages = [{"role": "system", "content": prompt}] + [{"role": "user", "content": memories_text}]  + [{"role": "assistant", "content": "I will refer to these memories."}] + messages
-
-            main_llm = Util().main_llm()     
-            response = await self.openai_chat_completion(messages=messages, llm_name=main_llm.name)
+            llm_input += messages
+            logger.debug("Start to generate the response for user input: " + query)
+            response = await self.openai_chat_completion(messages=llm_input)
             message: ChatMessage = ChatMessage()
             message.add_user_message(query)
             message.add_ai_message(response)
             self.chatDB.add(app_id=app_id, user_name=user_name, user_id=user_id, session_id=session_id, chat_message=message)
-            messages = []
-            messages = [{"role": "system", "content": MEMORY_CHECK_PROMPT}] 
-            messages += [{"role": "user", "content": query}]
-            result =await self.openai_chat_completion(messages=messages, llm_name=main_llm.name)
-            if result.strip().lower() == "yes":               
+            prompt = MEMORY_CHECK_PROMPT
+            prompt = prompt.format(chats=messages, user_input=query)
+            llm_input = []
+            llm_input = [{"role": "system", "content": prompt}] 
+            logger.debug("Start to check if the user input should be added to memory")
+            result =await self.openai_chat_completion(messages=llm_input)
+            result = result.strip().lower()
+            if result.find("yes") != -1:               
                 await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
                 logger.debug(f"User input added to memory: {query}")
             return response
@@ -1111,16 +1110,15 @@ class Core(CoreInterface):
             logger.exception(e)
 
     async def _fetch_relevant_memories(
-        self, messages, user_name,user_id, agent_id, run_id, filters, limit
+        self, query, messages, user_name,user_id, agent_id, run_id, filters, limit
     ):
         # Currently, only pass the last 6 messages to the search API to prevent long query
-        message_input = [
-            f"{message['role']}: {message['content']}\n" for message in messages
-        ][-6:]
-        logger.debug(f"Memory: Message Input: {message_input}")
-
+        #message_input = [
+        #    f"{message['role']}: {message['content']}\n" for message in messages
+        #][-6:]
+        #query = "\n".join(message_input)
         memories= await self.mem_instance.search(
-            query="\n".join(message_input),
+            query=query,
             user_name=user_name,
             user_id=user_id,
             agent_id=agent_id,
@@ -1128,8 +1126,8 @@ class Core(CoreInterface):
             filters=filters,
             limit=limit,
         )
-        logger.debug(f"Memory: Memories from chats: {memories}")
 
+        '''
         message_input = [
             f"{message['role']}: {message['content']}\n" for message in messages
         ][-1:]
@@ -1153,7 +1151,7 @@ class Core(CoreInterface):
                     break
             if not existed:
                 memories.append(item)
-
+        '''
         return  memories
 
 

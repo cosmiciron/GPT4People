@@ -278,8 +278,6 @@ class Chroma:
     host: str
     port: int
     api: str
-    path: str
-    persist_path: str
     is_persistent: bool
     anonymized_telemetry: bool
 

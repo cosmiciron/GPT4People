@@ -16,7 +16,8 @@ from memory.util import (
     DELETE_MEMORY_TOOL,
     UPDATE_MEMORY_TOOL,
 )
-from memory.prompts import MEMORY_DEDUCTION_PROMPT, MEMORY_PREPROCESSING_PROMPT
+from memory.prompts import MEMORY_DEDUCTION_PROMPT
+#from memory.prompts import MEMORY_PREPROCESSING_PROMPT
 from memory.base import MemoryBase, VectorStoreBase, EmbeddingBase, LLMBase
 
 from memory.setup import setup_config
@@ -316,17 +317,23 @@ class Memory(MemoryBase):
         if run_id:
             filters["run_id"] = run_id
 
+        '''
         prompt = MEMORY_PREPROCESSING_PROMPT
+        prompt = prompt.format(text = query.lower())
         messages = []
         messages = [{"role": "system", "content": prompt}] 
-        messages.append({"role": "user", "content": query.lower()})
+        logger.debug("Search Memory Preprocessing using LLM")
         result = await Util().openai_chat_completion(messages=messages)
         logger.debug(f"Search Memory Preprocessing: {query}")
+        
+        embedding_result = None
         if result:
-            query = result
-        logger.debug(f"Search Memory Preprocessed: {query}")
-
-        embedding_result = await self.embedding_model.embed(query) 
+            logger.debug(f"Search Memory Preprocessed: {result}")
+            embedding_result = await self.embedding_model.embed(result) 
+        else:
+            embedding_result = await self.embedding_model.embed(query)
+        '''
+        embedding_result = await self.embedding_model.embed(query.lower())
         memories = self.vector_store.search(
             query=embedding_result, limit=limit, filters=filters
         )
@@ -444,17 +451,22 @@ class Memory(MemoryBase):
         return self.db.get_history(memory_id)
 
     async def _create_memory_tool(self, data, metadata=None):
+        '''
         prompt = MEMORY_PREPROCESSING_PROMPT
+        prompt = prompt.format(text = data.lower())
         messages = []
         messages = [{"role": "system", "content": prompt}] 
-        messages.append({"role": "user", "content": data.lower()})
+        logger.debug("Add Memory Preprocessing using LLM")
         result = await Util().openai_chat_completion(messages=messages)
+        embeddings = None
         logger.debug(f"Add Memory Preprocessing: {data}")
         if result:
-            data = result
-        logger.debug(f"Add Memory Preprocessed: {data}")
-
-        embeddings = await self.embedding_model.embed(data)
+            logger.debug(f"Add Memory Preprocessed: {result}")
+            embeddings = await self.embedding_model.embed(result)
+        else:
+            embeddings = await self.embedding_model.embed(data)
+        '''
+        embeddings = await self.embedding_model.embed(data.lower())
         memory_id = str(uuid.uuid4())
         metadata = metadata or {}
         metadata["data"] = data
