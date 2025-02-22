@@ -107,23 +107,23 @@ class Util:
    
               
     def main_llm(self) -> LLM:
-        main_llm = self.core_metadata.main_llm
+        main_llm_name = self.core_metadata.main_llm
         for llm in self.llms:
-            if llm.name == main_llm:
+            if llm.name == main_llm_name:
                 return llm
             
             
     def memory_llm(self) -> LLM:
-        memory_llm = self.core_metadata.memory_llm
+        memory_llm_name = self.core_metadata.memory_llm
         for llm in self.llms:
-            if llm.name == memory_llm:
+            if llm.name == memory_llm_name:
                 return llm
             
             
     def embedding_llm(self) -> LLM:
-        embedding_llm = self.core_metadata.embedding_llm
+        embedding_llm_name = self.core_metadata.embedding_llm
         for llm in self.llms:
-            if llm.name == embedding_llm:
+            if llm.name == embedding_llm_name:
                 #llm.port = 5066
                 return llm
             

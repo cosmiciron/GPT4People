@@ -248,7 +248,7 @@ class LLM:
                 llm.pop('name')
             yaml.safe_dump(llms_dict, file)
     
-
+'''
 class EndPoint(BaseModel):
     path: str
     method: str
@@ -266,7 +266,7 @@ class VectorDB(BaseModel):
     persist_path: str
     is_persistent: bool
     anonymized_telemetry: bool
-    
+'''
 
 import yaml
 from dataclasses import dataclass, field
