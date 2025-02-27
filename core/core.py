@@ -591,21 +591,23 @@ class Core(CoreInterface):
     def get_run_id(self, agent_id, user_name=None, user_id=None, validity_period=timedelta(hours=24)):
         if user_id in self.run_ids:
             run_id, timestamp = self.run_ids[user_id]
-            if datetime.now() - timestamp < validity_period:
-                return run_id
+            return run_id
+            #if datetime.now() - timestamp < validity_period:
+            #    return run_id
         
         current_time = datetime.now()
         runs: List[dict] =self.chatDB.get_runs(agent_id=agent_id, user_name=user_name, user_id=user_id, num_rounds=1, fetch_all=False)
         for run in runs:
             run_id = run['run_id']
-            timestamp = run['created_at']
-            if current_time - timestamp < validity_period:
-                return run_id
-        
-        new_run_id = uuid.uuid4().hex
-        self.run_ids[user_id] = (new_run_id, current_time)
-        self.chatDB.add_run(agent_id=agent_id, user_name=user_name, user_id=user_id, run_id=new_run_id, created_at=current_time)
-        return new_run_id
+            return run_id
+            #timestamp = run['created_at']
+            #if current_time - timestamp < validity_period:
+            #    return run_id
+        return user_id
+        #new_run_id = uuid.uuid4().hex
+        #self.run_ids[user_id] = (new_run_id, current_time)
+        #self.chatDB.add_run(agent_id=agent_id, user_name=user_name, user_id=user_id, run_id=new_run_id, created_at=current_time)
+        #return new_run_id
     
     def get_latest_chat_info(self, app_id=None, user_name=None, user_id=None) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         chat_sessions =  self.chatDB.get_sessions(app_id=app_id, user_name=user_name, user_id=user_id, num_rounds=1)
@@ -639,21 +641,23 @@ class Core(CoreInterface):
     def get_session_id(self, app_id, user_name=None, user_id=None, validity_period=timedelta(hours=24)):
         if user_id in self.session_ids:
             session_id, timestamp = self.session_ids[user_id]
-            if datetime.now() - timestamp < validity_period:
-                return session_id
+            return session_id
+            #if datetime.now() - timestamp < validity_period:
+            #    return session_id
         
         current_time = datetime.now()
         sessions: List[dict] =self.chatDB.get_sessions(app_id=app_id, user_name=user_name, user_id=user_id, num_rounds=1, fetch_all=False)
         for session in sessions:
             session_id = session['session_id']
-            timestamp = session['created_at']
-            if current_time - timestamp < validity_period:
-                return session_id
-        
-        new_session_id = uuid.uuid4().hex
-        self.session_ids[user_id] = (new_session_id, current_time)
-        self.chatDB.add_session(app_id=app_id, user_name=user_name, user_id=user_id, session_id=new_session_id, created_at=current_time)
-        return new_session_id
+            return session_id
+            #timestamp = session['created_at']
+            #if current_time - timestamp < validity_period:
+            #    return session_id
+        return user_id
+        #new_session_id = uuid.uuid4().hex
+        #self.session_ids[user_id] = (new_session_id, current_time)
+        #self.chatDB.add_session(app_id=app_id, user_name=user_name, user_id=user_id, session_id=new_session_id, created_at=current_time)
+        #return new_session_id
     
     
     async def process_text_message(self, request: PromptRequest):
@@ -1061,12 +1065,18 @@ class Core(CoreInterface):
                 memories_text = ""
             prompt = RESPONSE_TEMPLATE
             #prompt = prompt.format(context=memories_text)
-            llm_input = [{"role": "system", "content": prompt}]
-            llm_input += [{"role": "user", "content": f"The following contexts can be used to query or resonate with the user's input: {memories_text}" }]
+            llm_input = []
+            if len(memories_text) > 0 :
+                llm_input = [{"role": "system", "content": prompt}]
+                #llm_input += [{"role": "user", "content": f"Please use the following context to inform your responses to my queries: {memories_text}" }]
+                #llm_input += [{"role": "assistant", "content": "Understood. I'll incorporate the provided context to ensure my responses are as relevant and helpful as possible."}]
 
-            if len(messages) > 0 and messages[0]["role"] == "system":
-                messages.pop(0)
+                #if len(messages) > 0 and messages[0]["role"] == "system":
+                #    messages.pop(0)
             llm_input += messages
+            if len(memories_text) > 0:
+                llm_input[-1]["content"] = f"Context for your reference: '{memories_text}'. When responding to the following user input: {query}, aim for a natural interaction instead of trying to provide a direct response. Let's focus on having an engaging conversation based on the chat histories, using the context only when it seamlessly fits."
+                #llm_input[-1]["content"] = f"Please note, the context '{memories_text}' is provided for background. For inputs unrelated to this context, rely primarily on the chat histories for your responses. For my current question: {query}, use your judgment to decide the relevance of the context."
             logger.debug("Start to generate the response for user input: " + query)
             response = await self.openai_chat_completion(messages=llm_input)
             message: ChatMessage = ChatMessage()
