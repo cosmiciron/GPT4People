@@ -49,6 +49,6 @@ if __name__ == "__main__":
     config = BaseEmbedderConfig(embedding_dims=4096, embedding_base_url="http://localhost:5066")  # Set the correct URL and dimensions
     embedder = LlamaCppEmbedding(config)
     embedding_vector = embedder.embed("Your sample text here")
-    print(embedding_vector)
-    print(len(embedding_vector))
+    logger.debug(embedding_vector)
+    logger.debug(len(embedding_vector))
 

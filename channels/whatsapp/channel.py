@@ -156,8 +156,8 @@ class Channel(BaseChannel):
 
 
 
-    def core(self) -> str | None:
-        core_url = super().core()
+    def core_url(self) -> str | None:
+        core_url = super().core_url()
         if core_url is not None:
             return core_url
         # Read the core host and port from .env file in each helper folder
@@ -225,30 +225,42 @@ def run_client_connect_forever():
     global client
     client.connect()     
 
-          
-async def main():
+shutdown_url = ""         
+def main():
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
     with open(config_path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
         metadata = ChannelMetadata(**config)
+        global shutdown_url
+        host = metadata.host
+        if host == '0.0.0.0':
+            host = '127.0.0.1'
+        shutdown_url = "http://" + host + ":" + str(metadata.port) + "/shutdown"
     
     try:
         global channel
         channel = Channel(metadata=metadata)
-        
+
         # Start client.connect() in a background thread
         thread = threading.Thread(target=run_client_connect_forever, daemon=True)
         thread.start()        
         logger.debug("client connected...")
-        await channel.run()
+        asyncio.run(channel.run()) 
     except KeyboardInterrupt:
-        logger.info("Shutting down...")
+        logger.debug("Shutting down...")
     except Exception as e:
         logger.exception(f"An error occurred: {e}")
     finally:
         channel.stop()
             
+def suicide():
+    try:
+        global shutdown_url
+        httpx.get(shutdown_url)
+    except Exception as e:
+        logger.exception(e)
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
 

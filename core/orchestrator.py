@@ -2,8 +2,11 @@ import asyncio
 from datetime import datetime
 from itertools import count
 from typing import List, Dict
-
 from loguru import logger
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from base.base import IntentType, Intent, PromptRequest
 from base.util import Util
 from core.coreInterface import CoreInterface
@@ -98,7 +101,7 @@ class Orchestrator:
             }}
 
             User Input:
-            User: I am investigating how to travel to WuTaiShan. It's the first time to meet you and I want to do investigation carefully and print the details.
+            User: I am investigating how to travel to WuTaiShan. It's the first time to meet you and I want to do investigation carefully and logger.debug the details.
 
             Determine the user's intent and create a JSON object:
             {{

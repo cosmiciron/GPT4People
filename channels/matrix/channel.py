@@ -178,10 +178,10 @@ class Channel(BaseChannel):
 
     def stop(self):
         # do some deinitialization here
-        super().stop()
         # Implement proper shutdown logic here
         self.bot_task.cancel()
         self.message_queue_task.cancel()
+        super().stop()
         logger.debug("Matrix Channel is stopping!")
         
         
@@ -189,18 +189,19 @@ class Channel(BaseChannel):
         logger.debug(f"Put response: {response} into message queue")
         await self.message_queue.put(response)        
         
-          
-async def main():
+shutdown_url = ""    
+def main():
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
     with open(config_path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
         metadata = ChannelMetadata(**config)
-    
+        global shutdown_url
+        shutdown_url = "http://" + metadata.host + ":" + str(metadata.port) + "/shutdown"
     with Channel(metadata=metadata) as channel:
         try:
-            await channel.run()
+            asyncio.run(channel.run())
         except KeyboardInterrupt:
-            logger.info("Shutting down...")
+            logger.debug("Shutting down...")
         except Exception as e:
             logger.exception(f"An error occurred: {e}")
         finally:
@@ -212,9 +213,9 @@ async def main():
         try:
             await asyncio.gather(bot_task, matrix_task)
         except asyncio.CancelledError:
-            print("Tasks were cancelled")
+            logger.debug("Tasks were cancelled")
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logger.debug(f"An error occurred: {e}")
         finally:
             # Cancel tasks if they haven't completed
             for task in [bot_task, matrix_task]:
@@ -223,9 +224,16 @@ async def main():
             # Wait for tasks to be cancelled
             await asyncio.gather(*[bot_task, matrix_task], return_exceptions=True)    
         '''
+
+
+def suicide():
+    try:
+        global shutdown_url
+        httpx.get(shutdown_url)
+    except Exception as e:
+        logger.exception(e)
             
 
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
 

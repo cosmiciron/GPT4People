@@ -10,7 +10,7 @@ main_llm: deepseek_r1_qwen_7B_q5_k_m
 memory_llm: deepseek_r1_qwen_7B_q5_k_m
 #without funciton call deepseek_r1_qwen_1.5B_q4_k_m
 #with function call: llama_3_8B_q5_k_m_functionCall
-embedding_llm: embedding_granite_278m_multilingual
+embedding_llm: embedding_nomic-embed-text-v1.5_q5_k_m
 #llama_3_8B_q5_k_m
 vectorDB:
   Chroma:

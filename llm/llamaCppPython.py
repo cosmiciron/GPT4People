@@ -1,3 +1,4 @@
+'''
 from http.client import HTTPResponse
 import os
 from types import FrameType
@@ -97,3 +98,4 @@ class LlamaCppPython:
             
     def __exit__(self, exc_type, exc_value, traceback):
         self.llm = None
+'''

@@ -1,22 +1,36 @@
 import atexit
 import json
+from multiprocessing import Process
 import os
 import re
+import runpy
+import subprocess
 import sys
 import threading
 from typing import Dict, List, Optional, Tuple
 import aiohttp
+import uvicorn
 import yaml
 from pathlib import Path
 from loguru import logger
 import watchdog.events
 import watchdog.observers
+import torch
 
 from memory.chat.message import ChatMessage
 from memory.prompts import MEMORY_SUMMARIZATION_PROMPT
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from base.base import CoreMetadata, User, LLM, GPT4PeopleAccount
 
+
+def run_script_silent(script_path):
+    with open(os.devnull, 'w') as devnull:
+        sys.stdout = devnull
+        sys.stderr = devnull
+        result = runpy.run_path(script_path, run_name='__main__')
+
+def run_script(script_path):
+    result = runpy.run_path(script_path, run_name='__main__')
 
 class Util:
     _instance = None
@@ -33,8 +47,16 @@ class Util:
     def __init__(self) -> None:
         if not hasattr(self, 'initialized'):
             self.initialized = True
+            self.silent = True
+
             self.config_observer = None
-            self.core_metadata : CoreMetadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
+            self.core_metadata : CoreMetadata = None
+            if self.has_gpu_cuda():
+                self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
+                #logger.debug("CUDA is available. Using GPU.")
+            else:
+                self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core_cpu.yml'))
+                #logger.debug("CUDA is not available. Using CPU.")
             self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
             self.llms: list[LLM]= LLM.from_yaml(os.path.join(self.config_path(), 'llm.yml'))
             self.gpt4people_account: GPT4PeopleAccount = GPT4PeopleAccount.from_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
@@ -42,6 +64,22 @@ class Util:
             # Start to monitor the specified config files
             self.watch_config_file()
 
+
+    def run_script_in_process(self, script_path) -> Process:
+        process = None
+        if self.silent:
+            process = Process(target=run_script_silent, args=(script_path,))
+        else:
+            process = Process(target=run_script, args=(script_path,))
+
+        process.start()
+        return process
+     
+    
+    def run_script_in_thread(self, script_path):
+        thread = threading.Thread(target=run_script, args=(script_path,))
+        thread.start()
+        return thread
 
     def load_yml_config(self, config_path):
         """
@@ -55,7 +93,10 @@ class Util:
             config = yaml.safe_load(file)
         return config
     
-      
+    def has_gpu_cuda(self) -> bool:
+        return torch.cuda.is_available()
+
+
     def root_path(self):
         current_path = os.path.dirname(os.path.abspath(__file__))
         return os.path.dirname(current_path)
@@ -101,7 +142,10 @@ class Util:
         else:
             file_name = module_name + '_debug.log'
             log_file = os.path.join(log_path, file_name)
-            logger.add(sys.stdout, format=log_format, level="DEBUG")
+            if self.silent:
+                logger.add(sys.stdout, format=log_format, level="INFO")
+            else:
+                logger.add(sys.stdout, format=log_format, level="DEBUG")
             # The filter is to avoid to record long text into file
             logger.add(log_file, format=log_format, filter=filter_debug, level="DEBUG")
    
@@ -263,8 +307,22 @@ class Util:
 
     def get_core_metadata(self):
         if self.core_metadata == None:
-            self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
+            if self.has_gpu_cuda():
+                self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
+                logger.debug("CUDA is available. Using GPU.")
+            else:
+                self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core_cpu.yml'))
+                logger.debug("CUDA is not available. Using CPU.")
         return self.core_metadata
+    
+    def stop_uvicorn_server(self, server: uvicorn.Server):
+        try:
+            if server:
+                server.should_exit = True
+                server.force_exit = True
+                #await server.shutdown()
+        except Exception as e:
+            logger.exception(e)
         
         
     def get_llms(self):
@@ -310,16 +368,7 @@ class Util:
         if matches:
             return matches[0]
         return response
-        
-        
-    def get_core_metadata(self):
-        try:
-            if self.core_metadata is not None:
-                return self.core_metadata
-        except Exception as e:
-            logger.exception(e)
-            return None
-        
+    
         
     def watch_config_file(self):
         """
@@ -329,7 +378,7 @@ class Util:
         if self.config_observer is None:  
             class Handler(watchdog.events.PatternMatchingEventHandler):
                 def __init__(self, util: Util):
-                    super().__init__(patterns=['user.yml', 'core.yml', 'llm.yml'])
+                    super().__init__(patterns=['user.yml', 'core.yml', 'core_cpu.yml', 'llm.yml'])
                     self.util: Util = util
 
                 def on_modified(self, event):
@@ -337,6 +386,9 @@ class Util:
                         self.util.users = None
                         self.util.get_users()
                     elif event.src_path.endswith('core.yml'):
+                        self.util.core_metadata = None
+                        self.util.get_core_metadata()
+                    elif event.src_path.endswith('core_cpu.yml'):
                         self.util.core_metadata = None
                         self.util.get_core_metadata()
                     elif event.src_path.endswith('llm.yml'):
@@ -362,27 +414,27 @@ if __name__ == "__main__":
     # Initialize Util
     util = Util()
     
-    # Load and print core metadata
+    # Load and logger.debug core metadata
     core_metadata = util.get_core_metadata()
-    print("core Metadata:", core_metadata)
+    logger.debug("core Metadata:", core_metadata)
 
-    # Load and print users
+    # Load and logger.debug users
     users = util.get_users()
-    print("Users:", users)
+    logger.debug("Users:", users)
 
-    # Load and print llms
+    # Load and logger.debug llms
     llms = util.get_llms()
-    print("LLMs:", llms)
+    logger.debug("LLMs:", llms)
 
-    # Print main LLM
+    # logger.debug main LLM
     main_llm = util.main_llm()
-    print("Main LLM:", main_llm)
+    logger.debug("Main LLM:", main_llm)
 
-    # Print memory LLM
+    # logger.debug memory LLM
     memory_llm = util.memory_llm()
-    print("Memory LLM:", memory_llm)
+    logger.debug("Memory LLM:", memory_llm)
 
-    # Print embedding LLM
+    # logger.debug embedding LLM
     embedding_llm = util.embedding_llm()
-    print("Embedding LLM:", embedding_llm)
+    logger.debug("Embedding LLM:", embedding_llm)
 

@@ -7,9 +7,11 @@ import sys
 import threading
 import time
 from typing import List, Dict
-
 from loguru import logger
-import schedule
+from pathlib import Path
+from schedule import Scheduler
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from base.base import IntentType, Intent, PromptRequest
 from base.util import Util
 from core.coreInterface import CoreInterface
@@ -19,25 +21,25 @@ class TAM:
         logger.debug("TAM initializing...")
         #self.intent_queue = asyncio.Queue(100)
         #self.intent_queue_task = None
-        self.scheduler = schedule.Scheduler()
+        self.scheduler = Scheduler()
         self.scheduled_jobs = []
         self.coreInst = coreInst
 
         # Start the thread to handle the intent queue
         # Register signal handlers
-        signal.signal(signal.SIGINT, self.signal_handler)
+        #signal.signal(signal.SIGINT, self.signal_handler)
         logger.debug("TAM initialized!")
 
-    def signal_handler(self, signum, frame):
-        logger.info('Received SIGINT, shutting down gracefully...')
-        self.stop_intent_queue_handler()
+    #def signal_handler(self, signum, frame):
+    #    logger.debug('Received SIGINT, shutting down gracefully...')
+    #    self.stop_intent_queue_handler()
         # Exit the program
         # sys.exit(0)
 
-    def add_intent(self, intent: Intent):
-        logger.debug(f"TAM add intent: {intent}")
-        self.intent_queue.put_nowait(intent)
-        logger.debug(f"TAM added intent: {intent}")
+    #def add_intent(self, intent: Intent):
+    #    logger.debug(f"TAM add intent: {intent}")
+    #    self.intent_queue.put_nowait(intent)
+    #    logger.debug(f"TAM added intent: {intent}")
 
     '''
     async def start_intent_queue_handler(self):
@@ -112,7 +114,7 @@ class TAM:
         # Parse the response into a JSON object
         try:
             response_str = Util().extract_json_str(response_str)
-            print(response_str)
+            logger.debug(response_str)
             response_json = json.loads(response_str)
         except json.JSONDecodeError:
             logger.error('TAM: Failed to decode LLM response JSON')
@@ -422,7 +424,7 @@ class TAM:
             raise ValueError(f"Unsupported interval unit: {interval_unit}")
 
         self.scheduled_jobs.append(job)
-        print(f"Scheduled task to repeat every {interval} {interval_unit}")
+        logger.debug(f"Scheduled task to repeat every {interval} {interval_unit}")
 
     def schedule_fixed_task(self, task, run_time_str):
         run_time = datetime.strptime(run_time_str, "%Y-%m-%d %H:%M:%S")
@@ -431,12 +433,12 @@ class TAM:
         delay = (run_time - now).total_seconds()
         
         if delay <= 0:
-            print("The specified run time is in the past.")
+            logger.debug("The specified run time is in the past.")
             return
         
         # Schedule the task to run after the delay
         threading.Timer(delay, lambda: asyncio.run(task())).start()
-        print(f"Task scheduled to run at {run_time}")
+        logger.debug(f"Task scheduled to run at {run_time}")
 
 
     def random_time_within_range(self, min_interval, max_interval):

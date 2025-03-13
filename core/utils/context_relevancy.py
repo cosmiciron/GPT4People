@@ -64,6 +64,6 @@ class ContextRelevance(BaseMetric):
                 try:
                     scores.append(future.result())
                 except Exception as e:
-                    print(f"Error during evaluation: {e}")
+                    logger.debug(f"Error during evaluation: {e}")
 
         return np.mean(scores) if scores else 0.0

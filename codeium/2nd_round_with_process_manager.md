@@ -257,13 +257,13 @@ processes = []
 
 def start_server(script, port):
     process = subprocess.Popen(["python", script])
-    print(f"Started {script} on port {port}")
+    logger.debug(f"Started {script} on port {port}")
     return process
 
 def stop_servers():
     for process in processes:
         os.kill(process.pid, signal.SIGTERM)
-    print("Stopped all servers")
+    logger.debug("Stopped all servers")
 
 if __name__ == "__main__":
     try:

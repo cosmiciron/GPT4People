@@ -129,7 +129,7 @@ class Channel(BaseChannel):
         args = ("name", "IMAPClient", "contact", f'{email_addr}', "version", "1.0.0", "vendor", "myclient")
         imap_server._simple_command('ID', '("' + '" "'.join(args) + '")')
         imap_server.select()
-        logger.bind(production=True).info("Connected to IMAP server!")
+        logger.debug("Connected to IMAP server!")
         return imap_server    
 
 
@@ -251,29 +251,40 @@ class Channel(BaseChannel):
                 sys.exit(0)
 
 
-    def register_channel(self, name, host, port, endpoints):
-        pass
+    #def register_channel(self, name, host, port, endpoints):
+    #    pass
 
 
-    def deregister_channel(self, name, host, port, endpoints):
-        pass
+    #def deregister_channel(self, name, host, port, endpoints):
+    #    pass
 
 
     def stop(self):
         # do some deinitialization here
-        super().stop()
-        self.kill = True
         logger.debug("Email channel is stopping!")
-    
+        self.kill = True
+        super().stop()  
 
-if __name__ == "__main__":
+
+    def deregister_channel(self, name, host, port, endpoints):  
+        pass    
+        
+
+def main():
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
     with open(config_path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
-        logger.debug(config)
+        #logger.debug(config)
         metadata = ChannelMetadata(**config)
-    with Channel(metadata=metadata) as channel:
-        asyncio.run(channel.run())
+
+    channel = Channel(metadata=metadata)
+    try:
+        asyncio.run(channel.run()) # channel.run()
+    except Exception as e:
+        logger.exception(e)
+    
+if __name__ == "__main__":
+    main()
 
 
 

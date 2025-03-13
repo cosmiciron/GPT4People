@@ -35,7 +35,7 @@ class DatabaseManager:
 
     def create_tables(self):
         Base.metadata.create_all(self.engine)
-        logger.info("All the tables created successfully.")
+        logger.debug("All the tables created successfully.")
 
 
     def setup_engine(self) -> None:

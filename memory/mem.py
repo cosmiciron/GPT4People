@@ -1,4 +1,3 @@
-import logging
 import hashlib
 import uuid
 import pytz
@@ -531,7 +530,7 @@ class Memory(MemoryBase):
         logger.debug(f"Updated memory with {memory_id}, old memory={prev_value}, memory={data}")
 
     def _delete_memory_tool(self, memory_id):
-        logging.info(f"Deleting memory with {memory_id=}")
+        logger.debug(f"Deleting memory with {memory_id=}")
         existing_memory = self.vector_store.get(vector_id=memory_id)
         prev_value = existing_memory.payload["data"]
         self.vector_store.delete(vector_id=memory_id)

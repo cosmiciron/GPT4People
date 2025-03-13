@@ -73,7 +73,7 @@ User: I'm interested in acoustic guitars.
 user_input = "Can you suggest some good places in New York to buy guitars?"
 
 response = generate_response(memory, chat_history, user_input)
-print(response)
+logger.debug(response)
 ```
 
 ### Notes
@@ -211,7 +211,7 @@ messages = generate_messages(memory, chat_history, user_input)
 
 # Assuming you have a function `call_openai` to get the response from the model
 response = call_openai(messages)
-print(response)
+logger.debug(response)
 ```
 
 ### Notes
@@ -332,7 +332,7 @@ messages = generate_messages(memory, chat_history, user_input)
 
 # Assuming you have a function `call_openai` to get the response from the model
 response = call_openai(messages)
-print(response)
+logger.debug(response)
 ```
 
 ### Notes
@@ -448,7 +448,7 @@ messages = generate_messages(memory, chat_history, user_input)
 
 # 假设你有一个函数 `call_openai` 来从模型获取回答
 response = call_openai(messages)
-print(response)
+logger.debug(response)
 ```
 
 ### 注意事项
@@ -591,7 +591,7 @@ def send_to_user(content, context):
     if latest_channel:
         # Here you should implement the logic to send the content to the user using the latest channel
         latest_channel.send(content)
-        logger.info(f"Sent {context} to user via {latest_channel}")
+        logger.debug(f"Sent {context} to user via {latest_channel}")
     else:
         logger.warning("No available channel to send the message.")
 ```
@@ -652,7 +652,7 @@ def send_to_user(content, context):
     latest_channel = get_latest_channel()
     if latest_channel:
         latest_channel.send(content)
-        logger.info(f"Sent {context} to user via {latest_channel}")
+        logger.debug(f"Sent {context} to user via {latest_channel}")
     else:
         logger.warning("No available channel to send the message.")
 
@@ -783,7 +783,7 @@ def send_to_user(content, context):
     latest_channel = get_latest_channel()
     if latest_channel:
         latest_channel.send(content)
-        logger.info(f"Sent {context} to user via {latest_channel}")
+        logger.debug(f"Sent {context} to user via {latest_channel}")
     else:
         logger.warning("No available channel to send the message.")
 
@@ -825,7 +825,7 @@ def send_to_user(content, context):
     latest_channel = get_latest_channel()
     if latest_channel:
         latest_channel.send(content)
-        logger.info(f"Sent {context} to user via {latest_channel}")
+        logger.debug(f"Sent {context} to user via {latest_channel}")
     else:
         logger.warning("No available channel to send the message.")
 
@@ -889,7 +889,7 @@ def send_to_user(content, context):
     latest_channel = get_latest_channel()
     if latest_channel:
         latest_channel.send(content)
-        logger.info(f"Sent {context} to user via {latest_channel}")
+        logger.debug(f"Sent {context} to user via {latest_channel}")
     else:
         logger.warning("No available channel to send the message.")
 
@@ -1070,7 +1070,7 @@ def send_to_user(content, context):
     latest_channel = get_latest_channel()
     if (latest_channel):
         latest_channel.send(content)
-        logger.info(f"Sent {context} to user via {latest_channel}")
+        logger.debug(f"Sent {context} to user via {latest_channel}")
     else:
         logger.warning("No available channel to send the message.")
 
@@ -1686,7 +1686,7 @@ class SchedulerPlugin(BasePlugin):
         latest_channel = get_latest_channel()
         if latest_channel:
             latest_channel.send(content)
-            logger.info(f"Sent {context} to user via {latest_channel}")
+            logger.debug(f"Sent {context} to user via {latest_channel}")
         else:
             logger.warning("No available channel to send the message.")
 ```
@@ -1848,7 +1848,7 @@ class SchedulerPlugin(BasePlugin):
         latest_channel = get_latest_channel()
         if latest_channel:
             latest_channel.send(content)
-            logger.info(f"Sent {context} to user via {latest_channel}")
+            logger.debug(f"Sent {context} to user via {latest_channel}")
         else:
             logger.warning("No available channel to send the message.")
 ```
@@ -2087,7 +2087,7 @@ class PluginManager:
                                     plugin_instance = attr(config_path=config_file)
                                     self.plugins.append(plugin_instance)
                                     self.loaded_plugins.add(module_path)
-                                    print(f"Loaded plugin: {module_path}")
+                                    logger.debug(f"Loaded plugin: {module_path}")
 
     def initialize_plugins(self):
         for plugin in self.plugins:
@@ -2184,7 +2184,7 @@ class PluginManager:
                                     plugin_instance = attr(config_path=config_file)
                                     self.plugins.append(plugin_instance)
                                     self.loaded_plugins[module_path] = plugin_mod_time
-                                    print(f"Loaded plugin: {module_path}")
+                                    logger.debug(f"Loaded plugin: {module_path}")
 
     def initialize_plugins(self):
         for plugin in self.plugins:

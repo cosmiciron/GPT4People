@@ -68,12 +68,11 @@ class BaseChannel:
         @self.app.get("/shutdown")
         async def shutdown():
             # Schedule shutdown
-            def shutdown():
+            def close():
                 self.stop()
-                self.server.should_exit = True
-                time.sleep(1)
-                sys.exit(0)
-            threading.Thread(target=shutdown).start()
+            thread = threading.Thread(target=close)
+            thread.start()
+            thread.join()
             return {"message": "channel shutting down..."}
         
         @self.app.post("/get_response")
@@ -98,7 +97,7 @@ class BaseChannel:
         """Run the channel using uvicorn"""
         try:
             logger.debug(f"Running channel {self.metadata.name} on {self.metadata.host}:{self.metadata.port}")
-            config = uvicorn.Config(self.app, host=self.metadata.host, port=self.metadata.port, log_level="info")
+            config = uvicorn.Config(self.app, host=self.metadata.host, port=self.metadata.port, log_level="critical")
             self.initialize()
             self.server = uvicorn.Server(config)
             await self.server.serve()
@@ -109,12 +108,12 @@ class BaseChannel:
     def register_channel(self, name, host, port, endpoints):
         """Register the channel in the core"""
         try:
-            core_url = self.core()
+            core_url = self.core_url()
             logger.debug(f"core url: {core_url}")
             register_url = f"{core_url}/register_channel"
             if host == "0.0.0.0":
                 host = "127.0.0.1"
-            response = httpx.post(register_url, json={"name": name, "host": host, "port": str(port), "endpoints": endpoints}, timeout=60.0)
+            response = httpx.post(register_url, json={"name": name, "host": host, "port": str(port), "endpoints": endpoints}, timeout=120.0)
 
             if response.status_code == 200:
                 resp = response.json()
@@ -124,6 +123,7 @@ class BaseChannel:
                 logger.debug(f"Channel {name} registered result: {resp['result']}")
                 return True
             else:
+                logger.debug(f"Channel {name} registered failed: {response.text}")
                 return False
         except httpx.HTTPError as err:
             logger.error(f"RegisterRequest to core failed: {err}")
@@ -136,7 +136,7 @@ class BaseChannel:
     def deregister_channel(self, name, host, port, endpoints):
         """Deregister the channel from the core"""
         try:
-            core_url = self.core()
+            core_url = self.core_url()
             deregister_url = f"{core_url}/deregister_channel"
             if host == "0.0.0.0":
                 host = "127.0.0.1"
@@ -153,7 +153,7 @@ class BaseChannel:
             return False
         
 
-    def core(self) -> str | None:
+    def core_url(self) -> str | None:
         """Get the core url from sub class's .env file"""
         channels_path = Util().root_path() + '/channels/'
         env_path = os.path.join(channels_path, '.env')
@@ -171,14 +171,14 @@ class BaseChannel:
     async def transferTocore(self, request: PromptRequest) -> bool | None:
         logger.debug("channel transfering messages to core...")
         try:
-            core_url = self.core()
+            core_url = self.core_url()
             logger.debug(f"core url: {core_url}")
             process_url = f"{core_url}/process"
             request_json = request.model_dump()
             request_json['channelType'] = request.channelType.value
             request_json['contentType'] = request.contentType.value
             async with httpx.AsyncClient() as client:
-                response = await client.post(process_url, json=request_json, timeout=60.0)
+                response = await client.post(process_url, json=request_json, timeout=120.0)
 
             logger.debug(f"core response: {response}")
             if response.status_code == 200:
@@ -194,13 +194,13 @@ class BaseChannel:
         
     async def localChatWithcore(self, request: PromptRequest) -> str | None:
         try:
-            core_url = self.core()
+            core_url = self.core_url()
             process_url = f"{core_url}/local_chat"
             request_json = request.model_dump()
             request_json['channelType'] = request.channelType.value
             request_json['contentType'] = request.contentType.value
             async with httpx.AsyncClient() as client:
-                response = await client.post(process_url, json=request_json, timeout=60.0)
+                response = await client.post(process_url, json=request_json, timeout=120.0)
 
             if response.status_code == 200:
                 return response.text
@@ -217,14 +217,14 @@ class BaseChannel:
     def syncTransferTocore(self, request: PromptRequest) -> str | None:
         logger.debug("channel transfering messages to core...")
         try:
-            core_url = self.core()
+            core_url = self.core_url()
             logger.debug(f"core url: {core_url}")
             process_url = f"{core_url}/process"
             request_json = request.model_dump()
             request_json['channelType'] = request.channelType.value
             request_json['contentType'] = request.contentType.value
             with httpx.Client() as client:
-                response = client.post(process_url, json=request_json, timeout=60.0)
+                response = client.post(process_url, json=request_json, timeout=120.0)
 
             logger.debug(f"core response: {response}")
             if response.status_code == 200:
@@ -241,15 +241,15 @@ class BaseChannel:
 
     def stop(self):
         """Deinitialize something before the helper is shutdown. Eg, Deregister the helper from the core"""
-        self.deregister_channel(self.metadata.name, self.metadata.host, self.metadata.port, self.metadata.endpoints)
-        def shutdown():
-            self.server.should_exit = True
-            self.server.force_exit= True
-        threading.Thread(target=shutdown).start()
-        
-        
-    
-    
+        try:
+            self.deregister_channel(self.metadata.name, self.metadata.host, self.metadata.port, self.metadata.endpoints)
+            if self.server is not None:
+                #asyncio.run(Util().stop_uvicorn_server(self.server))
+                Util().stop_uvicorn_server(self.server)
+        except Exception as e:
+            logger.debug("channel stopped")
+
+          
     def exit_gracefully(self, signum, frame):
         try: 
             logger.debug("CTRL+C received, shutting down...")
@@ -261,9 +261,16 @@ class BaseChannel:
             logger.debug("channel stopped")
     
     def __enter__(self):
-        logger.debug("channel initializing..., register the ctrl+c signal handler")
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
+        if threading.current_thread() == threading.main_thread():
+            try:
+                #logger.debug("channel initializing..., register the ctrl+c signal handler")
+                signal.signal(signal.SIGINT, self.exit_gracefully)
+                signal.signal(signal.SIGTERM, self.exit_gracefully)
+            except Exception as e:
+                # It's a good practice to at least log the exception
+                # logger.error(f"Error setting signal handlers: {e}")
+                pass
+
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

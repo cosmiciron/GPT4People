@@ -1,5 +1,5 @@
 import concurrent.futures
-import logging
+from loguru import logger
 import os
 from string import Template
 from typing import Optional
@@ -11,8 +11,6 @@ from tqdm import tqdm
 from middleware.utils.config.evaluation_config import GroundednessConfig
 from middleware.utils.base import BaseMetric
 from middleware.utils.evaluation import EvalData, EvalMetric
-
-logger = logging.getLogger(__name__)
 
 
 class Groundedness(BaseMetric):

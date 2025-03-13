@@ -121,7 +121,7 @@ variables = {
 # Render the template with the variables
 rendered_input = template.render(variables)
 
-print(rendered_input)
+logger.debug(rendered_input)
 ```
 
 This will output:

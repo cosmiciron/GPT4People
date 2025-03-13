@@ -108,8 +108,8 @@ class Channel(BaseChannel):
     
 
 
-    def core(self) -> str | None:
-        core_url = super().core()
+    def core_url(self) -> str | None:
+        core_url = super().core_url()
         if core_url is not None:
             return core_url
         # Read the core host and port from .env file in each helper folder
@@ -135,8 +135,8 @@ class Channel(BaseChannel):
 
     def stop(self):
         # do some deinitialization here
-        super().stop()
         self.wcf.cleanup()
+        super().stop()    
         logger.debug("Wechat Channel is stopping!")
         
         
@@ -162,14 +162,34 @@ class Channel(BaseChannel):
         if 'audio' in response_data:
             audio_path = response_data['audio']
             await asyncio.to_thread(self.wcf.send_file, audio_path, sender)   
-    
+
+shutdown_url = ""
+def main():
+    try:
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
+        with open(config_path, 'r', encoding='utf-8') as file:
+            config = yaml.safe_load(file)
+            #logger.debug(config)
+            metadata = ChannelMetadata(**config)
+
+        global shutdown_url
+        host = metadata.host
+        if host == '0.0.0.0':
+            host = '127.0.0.1'
+        shutdown_url = "http://" + host + ":" + str(metadata.port) + "/shutdown"
+        with Channel(metadata=metadata) as channel:
+                asyncio.run(channel.run())
+    except Exception as e:
+        logger.exception(e)
+
+
+def suicide():
+    try:
+        global shutdown_url
+        httpx.get(shutdown_url)
+    except Exception as e:
+        logger.exception(e)
 
 if __name__ == "__main__":
-    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
-    with open(config_path, 'r', encoding='utf-8') as file:
-        config = yaml.safe_load(file)
-        logger.debug(config)
-        metadata = ChannelMetadata(**config)
-    with Channel(metadata=metadata) as channel:
-        asyncio.run(channel.run())
+    main()
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-import logging
+from loguru import logger
 from pathlib import Path
 import sys
 import uuid
@@ -13,8 +13,6 @@ from chat.message import ChatMessage
 from chat.utils import merge_metadata_dict
 from loguru import logger
 from memory.database.database import DatabaseManager
-
-logger = logging.getLogger(__name__)
 
 
 class ChatHistory:
@@ -57,7 +55,7 @@ class ChatHistory:
             self.db_session.rollback()
             return None
 
-        logger.info(f"Added chat history to db with id: {memory_id}, app_id: {app_id}, user_name: {user_name}, user_id: {user_id}, session_id: {session_id}")
+        logger.debug(f"Added chat history to db with id: {memory_id}, app_id: {app_id}, user_name: {user_name}, user_id: {user_id}, session_id: {session_id}")
         return memory_id
     
 
@@ -83,7 +81,7 @@ class ChatHistory:
             self.db_session.rollback()
             return None
 
-        logger.info(f"Added chat history by role to db with id: {memory_id}, sender_name: {sender_name}, responder_name: {responder_name}")
+        logger.debug(f"Added chat history by role to db with id: {memory_id}, sender_name: {sender_name}, responder_name: {responder_name}")
         return memory_id
     
 
@@ -201,7 +199,7 @@ class ChatHistory:
             self.db_session.rollback()
             return None
 
-        logger.info(f"Added chat session to db with id: {memory_id}, app_id: {app_id}, user_name: {user_name}, user_id: {user_id}, session_id: {session_id}")
+        logger.debug(f"Added chat session to db with id: {memory_id}, app_id: {app_id}, user_name: {user_name}, user_id: {user_id}, session_id: {session_id}")
         return memory_id
     
 
@@ -239,7 +237,7 @@ class ChatHistory:
             self.db_session.rollback()
             return None
 
-        logger.info(f"Added memory run to db with id: {memory_id}, agent_id: {agent_id}, user_name: {user_name}, user_id: {user_id}, run_id: {run_id}")
+        logger.debug(f"Added memory run to db with id: {memory_id}, agent_id: {agent_id}, user_name: {user_name}, user_id: {user_id}, run_id: {run_id}")
         return memory_id
 
 

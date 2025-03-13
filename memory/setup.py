@@ -1,7 +1,10 @@
 import json
 import os
+from pathlib import Path
+import sys
 import uuid
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from base.util import Util
 
 # Set up the directory path

@@ -61,39 +61,39 @@ class PluginManager:
                                         # Check if this plugin instance already exists
                                                                             # Skip loading intermediate base classes
                                     if len(attr.__subclasses__()) > 0:
-                                        logger.info(f"Skipping intermediate base class: {attr.__name__}")
+                                        logger.debug(f"Skipping intermediate base class: {attr.__name__}")
                                         continue
 
                                     existing_instance = next((instance for instance in self.plugin_instances if isinstance(instance, attr)), None)
                                     if not existing_instance:
-                                        logger.info(f"Loading plugin: {module_path} - {attr_name}")
+                                        logger.debug(f"Loading plugin: {module_path} - {attr_name}")
                                         # Log the [__init__](cci:1://file:///d:/GPT4People/base/PluginManager.py:15:4-19:52) method signature of the class
                                         init_method = attr.__init__
                                         
                                         if isfunction(init_method):
                                             init_signature = signature(init_method)
-                                            logger.info(f"__init__ signature for {attr_name}: {init_signature}")
+                                            logger.debug(f"__init__ signature for {attr_name}: {init_signature}")
                                         #init_signature = signature(attr.__init__)
                                             if 'coreInst' in init_signature.parameters:
                                                 plugin_instance = attr(coreInst=self.coreInst)
 
                                                 if hasattr(plugin_instance, 'initialize'):
-                                                    logger.info(f"Calling initialize for plugin: {module_path} - {attr_name}")
+                                                    logger.debug(f"Calling initialize for plugin: {module_path} - {attr_name}")
                                                     plugin_instance.initialize()
                                                 self.plugin_instances.append(plugin_instance)
                                                 self.loaded_plugins[module_path] = plugin_mod_time
                                                 self.register_plugin(plugin_instance)
-                                                logger.info(f"Loaded plugin: {module_path} - {attr_name}")
+                                                logger.debug(f"Loaded plugin: {module_path} - {attr_name}")
                                             else:
                                                 logger.warning(f"__init__ method for {attr_name} is not a function or not defined")
                                     else:
-                                        logger.info(f"Plugin already loaded: {module_path} - {attr_name}")
+                                        logger.debug(f"Plugin already loaded: {module_path} - {attr_name}")
 
         # Detect and unload deleted plugins
         to_unload = set(self.loaded_plugins.keys()) - current_plugins
         for module_path in to_unload:
             self.unload_plugin(module_path)
-            logger.info(f"Unloaded plugin: {module_path}")
+            logger.debug(f"Unloaded plugin: {module_path}")
 
 
     def unload_plugin(self, module_path):
@@ -106,7 +106,7 @@ class PluginManager:
             if hasattr(plugin_instance, 'cleanup'):
                 plugin_instance.cleanup()
             self.plugin_instances.remove(plugin_instance)
-            logger.info(f"Unloaded plugin: {module_path}")
+            logger.debug(f"Unloaded plugin: {module_path}")
         
         # Remove the plugin module from sys.modules
         if module_path in sys.modules:
@@ -154,11 +154,11 @@ class PluginManager:
         to_unload = set(self.loaded_plugins.keys())
         for module_path in to_unload:
             self.unload_plugin(module_path)
-            logger.info(f"Unloaded plugin: {module_path}")
+            logger.debug(f"Unloaded plugin: {module_path}")
 
         #for plugin in self.plugin_instances:
         #    plugin.cleanup()
         self.loaded_plugins = {}
         self.plugin_instances = []
         self.plugin_descriptions = {}
-        logger.info("Plugins deinitialized and hot reload thread stopped.")
+        logger.debug("Plugins deinitialized and hot reload thread stopped.")

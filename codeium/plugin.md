@@ -254,7 +254,7 @@ class PluginManager:
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
-        print(f"Registered plugin: {plugin.metadata['name']}")
+        logger.debug(f"Registered plugin: {plugin.metadata['name']}")
 
 # Example Plugin class
 class Plugin:

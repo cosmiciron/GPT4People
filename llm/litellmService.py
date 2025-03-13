@@ -1,3 +1,4 @@
+'''
 import os
 from typing import List
 from fastapi import FastAPI, Request
@@ -48,45 +49,6 @@ class LiteLLMService:
 
         @self.app.post("/v1/chat/completions")
         async def chat_completion(request: ChatRequest):
-            '''
-                def completion(
-                    model: str,
-                    messages: List = [],
-                    # Optional OpenAI params
-                    timeout: Optional[Union[float, int]] = None,
-                    temperature: Optional[float] = None,
-                    top_p: Optional[float] = None,
-                    n: Optional[int] = None,
-                    stream: Optional[bool] = None,
-                    stream_options: Optional[dict] = None,
-                    stop=None,
-                    max_tokens: Optional[int] = None,
-                    presence_penalty: Optional[float] = None,
-                    frequency_penalty: Optional[float] = None,
-                    logit_bias: Optional[dict] = None,
-                    user: Optional[str] = None,
-                    # openai v1.0+ new params
-                    response_format: Optional[dict] = None,
-                    seed: Optional[int] = None,
-                    tools: Optional[List] = None,
-                    tool_choice: Optional[str] = None,
-                    parallel_tool_calls: Optional[bool] = None,
-                    logprobs: Optional[bool] = None,
-                    top_logprobs: Optional[int] = None,
-                    deployment_id=None,
-                    # soon to be deprecated params by OpenAI
-                    functions: Optional[List] = None,
-                    function_call: Optional[str] = None,
-                    # set api_base, api_version, api_key
-                    base_url: Optional[str] = None,
-                    api_version: Optional[str] = None,
-                    api_key: Optional[str] = None,
-                    model_list: Optional[list] = None,  # pass in a list of api_base,keys, etc.
-                    # Optional liteLLM function params
-                    **kwargs,
-
-                ) -> ModelResponse:
-            '''
             try:
                 model = request.model
                 messages = request.messages
@@ -142,18 +104,8 @@ class LiteLLMService:
                                   response_format=request.response_format, size=request.size, style=request.style, timeout=request.timeout,
                                   api_base=request.api_base, api_version=request.api_version, 
                                   api_key=request.api_key)
-                '''
-                {
-                    "created": 1703658209,
-                    "data": [{
-                        'b64_json': None, 
-                        'revised_prompt': 'Adorable baby sea otter with a coat of thick brown fur, playfully swimming in blue ocean waters. Its curious, bright eyes gleam as it is surfaced above water, tiny paws held close to its chest, as it playfully spins in the gentle waves under the soft rays of a setting sun.', 
-                        'url': 'https://oaidalleapiprodscus.blob.core.windows.net/private/org-ikDc4ex8NB5ZzfTf8m5WYVB7/user-JpwZsbIXubBZvan3Y3GchiiB/img-dpa3g5LmkTrotY6M93dMYrdE.png?st=2023-12-27T05%3A23%3A29Z&se=2023-12-27T07%3A23%3A29Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-12-26T13%3A22%3A56Z&ske=2023-12-27T13%3A22%3A56Z&sks=b&skv=2021-08-06&sig=hUuQjYLS%2BvtsDdffEAp2gwewjC8b3ilggvkd9hgY6Uw%3D'
-                    }],
-                    "usage": {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}
-                }
-                '''
                 return response  # #List[List[float]]
             except Exception as e:
                 logger.exception(e)
                 return JSONResponse(status_code=500, content={"detail": str(e)})    
+'''

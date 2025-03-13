@@ -3,13 +3,17 @@ import copy
 from datetime import datetime, timedelta
 import importlib
 import json
+import logging
+from multiprocessing import Process
 import os
+import runpy
 import signal
 import socket
 import subprocess
 import sys
 from pathlib import Path
 import threading
+import time
 import uuid
 import chromadb
 import chromadb.config
@@ -27,6 +31,7 @@ import httpx
 from contextlib import asynccontextmanager
 import re
 from jinja2 import Template
+#import logging
 
 # Ensure the project root is in the PYTHONPATH
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -42,10 +47,10 @@ from memory.chat.message import ChatMessage
 from memory.chat.chat import ChatHistory
 from memory.base import MemoryBase, VectorStoreBase, EmbeddingBase, LLMBase
 from memory.prompts import RESPONSE_TEMPLATE, MEMORY_CHECK_PROMPT
-from coreInterface import CoreInterface
+from core.coreInterface import CoreInterface
+from core.emailChannel import channel
 
-
-
+logging.basicConfig(level=logging.CRITICAL)
 
 class Core(CoreInterface):   
     _instance = None
@@ -147,7 +152,6 @@ class Core(CoreInterface):
             logger.debug(f"Unknown error: {response.json()}")
 
         return response.status_code
-
 
 
     def find_plugin_prompt(self, user_input: str) -> str:
@@ -398,6 +402,15 @@ class Core(CoreInterface):
                 logger.exception(e)
                 return {"result": str(e)}
             
+        @self.app.get("/shutdown")
+        async def shutdown():
+            try:
+                logger.debug("Shutdown request received, shutting down...")
+                self.stop()
+
+            except Exception as e:
+                logger.exception(e)
+            
         @self.app.post("/process")
         async def process_request(request: PromptRequest):
             try:
@@ -425,10 +438,7 @@ class Core(CoreInterface):
             except Exception as e:
                 logger.exception(e)
                 return Response(content="Server Internal Error", status_code=500)
-                     
-        # add more endpoints here    
-        logger.debug("core initialized and all the endpoints are registered!")
-
+                    
 
         @self.app.post("/local_chat")
         async def process_request(request: PromptRequest):
@@ -694,7 +704,12 @@ class Core(CoreInterface):
                     messages.append({'role': 'user', 'content': item.human_message.content})
                     messages.append({'role': 'assistant', 'content': item.ai_message.content})
             messages.append({'role': 'user', 'content': human_message})
+            start = time.time()
             answer = await self.answer_from_memory(query=human_message, messages=messages, app_id=app_id, user_name=user_name, user_id=user_id, agent_id=app_id, session_id=session_id, run_id=run_id)
+            end = time.time()
+            logger.debug(f"LLM handling time: {end - start} seconds")
+            if answer is None:
+                answer = "I'm sorry, I don't have the answer to that question. Please try asking a different question or restart your system."
             return answer
         except Exception as e:
             logger.exception(e)
@@ -741,8 +756,12 @@ class Core(CoreInterface):
 
 
     def start_email_channel(self):
-        subprocess.Popen(["python", os.path.join(Util().root_path(), 'core', 'emailChannel', "channel.py")])
- 
+        try:
+            thread = threading.Thread(target=channel.main)
+            thread.start()
+
+        except Exception as e:
+           logger.exception(e)
    
     async def run(self):
         """Run the core using uvicorn"""
@@ -750,7 +769,7 @@ class Core(CoreInterface):
             logger.debug("core is running!")
             core_metadata: CoreMetadata = Util().get_core_metadata()
             logger.debug(f"Running core on {core_metadata.host}:{core_metadata.port}")
-            config = uvicorn.Config(self.app, host=core_metadata.host, port=core_metadata.port, log_level="info")
+            config = uvicorn.Config(self.app, host=core_metadata.host, port=core_metadata.port, log_level="critical")
             self.server = Server(config=config)
             self.initialize()
             self.start_email_channel()
@@ -761,13 +780,15 @@ class Core(CoreInterface):
             self.start_hot_reload()
 
             # Schedule llmManager.run() to run concurrently
-            llm_task = asyncio.create_task(self.llmManager.run())
-
+            #llm_task = asyncio.create_task(self.llmManager.run())
+            self.llmManager.run()
             # Start the server
-            server_task = asyncio.create_task(self.server.serve())
-            await asyncio.gather(llm_task, server_task)
+            #server_task = asyncio.create_task(self.server.serve())
+            #await asyncio.gather(llm_task, server_task)
+            await self.server.serve()
+
         except asyncio.CancelledError:
-            logger.info("core uvicorn server was cancelled.")
+            logger.debug("core uvicorn server was cancelled.")
             sys.exit(0)
 
             
@@ -777,6 +798,8 @@ class Core(CoreInterface):
 
 
     def stop(self):
+        self.shutdown_all_channels()
+        self.llmManager.stop_all_llama_cpp_processes()
         # do some deinitialization here
         logger.debug("core is stopping!")
         self.llmManager.stop_all_apps()
@@ -784,7 +807,19 @@ class Core(CoreInterface):
 
         self.plugin_manager.deinitialize_plugins()
         logger.debug("Plugins are deinitialized!")
+        self.stop_chroma_client()
 
+        def shutdown():
+            try:
+                #asyncio.run(Util().stop_uvicorn_server(self.server))
+                Util().stop_uvicorn_server(self.server)
+            except Exception as e:
+                logger.exception(e)
+       
+        thread = threading.Thread(target=shutdown)
+        thread.start()
+        thread.join()
+        logger.debug("Uvicorn server is stopped!")
 
     def register_channel(self, name: str, host: str, port: str, endpoints: list):
         channel = {
@@ -807,20 +842,21 @@ class Core(CoreInterface):
                 return
             
 
-    async def shutdown_channel(self, name: str, host: str, port: str):
+    def shutdown_channel(self, name: str, host: str, port: str):
         for channel in self.channels:
             if channel["name"] == name and channel["host"] == host and channel["port"] == port:
-                async with httpx.AsyncClient() as client:
-                    await client.get(f"http://{host}:{port}/shutdown")
+                with httpx.Client() as client:
+                    client.get(f"http://{host}:{port}/shutdown")
 
                 self.channels.remove(channel)
                 logger.debug(f"Channel {name} is deregistered from {host}:{port}")
                 return
             
 
-    async def shutdown_all_channels(self):
-        for channel in self.channels.copy():
-            await self.shutdown_channel(channel["name"], channel["host"], channel["port"])
+    def shutdown_all_channels(self):
+        for channel in self.channels:
+            self.shutdown_channel(channel["name"], channel["host"], channel["port"])
+            logger.debug(f"Channel {channel['name']} is shutdown from {channel['host']}:{channel['port']}")
         
 
     def start_chroma_client(self):  
@@ -1079,6 +1115,8 @@ class Core(CoreInterface):
                 #llm_input[-1]["content"] = f"Please note, the context '{memories_text}' is provided for background. For inputs unrelated to this context, rely primarily on the chat histories for your responses. For my current question: {query}, use your judgment to decide the relevance of the context."
             logger.debug("Start to generate the response for user input: " + query)
             response = await self.openai_chat_completion(messages=llm_input)
+            if response is None or len(response) == 0:
+                return None
             message: ChatMessage = ChatMessage()
             message.add_user_message(query)
             message.add_ai_message(response)
@@ -1089,10 +1127,11 @@ class Core(CoreInterface):
             llm_input = [{"role": "system", "content": prompt}] 
             logger.debug("Start to check if the user input should be added to memory")
             result =await self.openai_chat_completion(messages=llm_input)
-            result = result.strip().lower()
-            if result.find("yes") != -1:               
-                await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
-                logger.debug(f"User input added to memory: {query}")
+            if result is not None and len(result) > 0:
+                result = result.strip().lower()
+                if result.find("yes") != -1:               
+                    await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
+                    logger.debug(f"User input added to memory: {query}")
             return response
         except Exception as e:  
             logger.exception(e)
@@ -1177,41 +1216,45 @@ class Core(CoreInterface):
         except Exception as e:
             logger.exception(e)
             return None
-
-    def stop_uvicorn_server(self):
-        if self.server:
-            logger.debug("Stopping uvicorn server...")
-            self.server.should_exit = True
                        
     def exit_gracefully(self, signum, frame):
         try:
             logger.debug("CTRL+C received, shutting down...")
             # shut down the chromadb server
             # self.shutdown_chroma_server()  # Shut down ChromaDB server
-            self.stop_chroma_client()
-            self.stop_uvicorn_server()
             # End the main thread
             self.stop()
-            # Schedule shutdown
-            #def shutdown():
-            #    self.server.should_exit = True
-            #threading.Thread(target=shutdown).start()
             #sys.exit(0)
+            logger.debug("CTRL+C Done...")
         except Exception as e:
-            sys.exit(0)
+            logger.exception(e)
     
     def __enter__(self):
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
+        if threading.current_thread() == threading.main_thread():
+            try:
+                #logger.debug("channel initializing..., register the ctrl+c signal handler")
+                signal.signal(signal.SIGINT, self.exit_gracefully)
+                signal.signal(signal.SIGTERM, self.exit_gracefully)
+            except Exception as e:
+                # It's a good practice to at least log the exception
+                # logger.error(f"Error setting signal handlers: {e}")
+                pass
+
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         pass
 
-    
-if __name__ == "__main__":
+def main():
     try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         with Core() as core:
-            asyncio.run(core.run()) # core.run()
+            loop.run_until_complete(core.run())
     except Exception as e:
-        sys.exit(0)
+        logger.exception(e)
+    finally:
+        loop.close()
+
+if __name__ == "__main__":
+    main()

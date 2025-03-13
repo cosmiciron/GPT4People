@@ -45,7 +45,7 @@ class SchedulerPlugin(BasePlugin):
 
             delay = (start_time_obj - now).total_seconds()
             threading.Timer(delay, job_wrapper).start()
-            print(f"Scheduled task to start at {start_time_obj} and repeat every {interval} {interval_unit}")
+            logger.debug(f"Scheduled task to start at {start_time_obj} and repeat every {interval} {interval_unit}")
         else:
             self._schedule_interval_task(task, interval_unit, interval)
 
@@ -64,7 +64,7 @@ class SchedulerPlugin(BasePlugin):
             raise ValueError(f"Unsupported interval unit: {interval_unit}")
 
         self.scheduled_jobs.append(job)
-        print(f"Scheduled task to repeat every {interval} {interval_unit}")
+        logger.debug(f"Scheduled task to repeat every {interval} {interval_unit}")
 
     def schedule_fixed_task(self, task, frequency, time_str, day_of_week=None, day_of_month=None, month=None):
         if frequency == 'daily':
@@ -92,7 +92,7 @@ class SchedulerPlugin(BasePlugin):
             raise ValueError(f"Unsupported frequency: {frequency}")
 
         self.scheduled_jobs.append(job)
-        print(f"Scheduled {frequency} task at {time_str}")
+        logger.debug(f"Scheduled {frequency} task at {time_str}")
 
     def random_time_within_range(self, min_interval, max_interval):
         return random.uniform(min_interval, max_interval)

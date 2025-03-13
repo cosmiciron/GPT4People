@@ -1,5 +1,5 @@
 import json
-import logging
+from loguru import logger
 from string import Template
 from typing import Any, Type, TypeVar, Union
 
@@ -8,7 +8,6 @@ T = TypeVar("T", bound="JSONSerializable")
 # NOTE: Through inheritance, all of our classes should be children of JSONSerializable. (highest level)
 # NOTE: The @register_deserializable decorator should be added to all user facing child classes. (lowest level)
 
-logger = logging.getLogger(__name__)
 
 
 def register_deserializable(cls: Type[T]) -> Type[T]:

@@ -16,11 +16,11 @@ async def start_all_apps(self):
         results = await self.gather_task
         for i, result in enumerate(results):
             if isinstance(result, asyncio.CancelledError):
-                logger.info(f"App {self.apps[i]} cancelled successfully.")
+                logger.debug(f"App {self.apps[i]} cancelled successfully.")
             elif isinstance(result, Exception):
                 logger.error(f"Exception in app {self.apps[i]}: {result}")
             else:
-                logger.info(f"App {self.apps[i]} completed with result: {result}")
+                logger.debug(f"App {self.apps[i]} completed with result: {result}")
 
     except asyncio.CancelledError:
         logger.debug("Gathering task was cancelled.")
@@ -205,11 +205,11 @@ class AppManager:
             results = await self.gather_task
             for i, result in enumerate(results):
                 if isinstance(result, asyncio.CancelledError):
-                    logger.info(f"App {self.apps[i]} cancelled successfully.")
+                    logger.debug(f"App {self.apps[i]} cancelled successfully.")
                 elif isinstance(result, Exception):
                     logger.error(f"Exception in app {self.apps[i]}: {result}")
                 else:
-                    logger.info(f"App {self.apps[i]} completed with result: {result}")
+                    logger.debug(f"App {self.apps[i]} completed with result: {result}")
 
         except asyncio.CancelledError:
             logger.debug("Gathering task was cancelled.")
@@ -221,9 +221,9 @@ class AppManager:
         # Start the new app separately
         try:
             result = await new_app
-            logger.info(f"New app completed with result: {result}")
+            logger.debug(f"New app completed with result: {result}")
         except asyncio.CancelledError:
-            logger.info(f"New app cancelled successfully.")
+            logger.debug(f"New app cancelled successfully.")
         except Exception as e:
             logger.error(f"Exception in new app: {e}")
 
@@ -1141,7 +1141,7 @@ class core:
             # Wait for both tasks to complete
             await asyncio.gather(llm_task, server_task)
         except asyncio.CancelledError:
-            logger.info("core uvicorn server was cancelled.")
+            logger.debug("core uvicorn server was cancelled.")
             await self.server.shutdown()
             raise
         except Exception as e:
@@ -1242,7 +1242,7 @@ class core:
             # Wait for both tasks to complete
             await asyncio.gather(llm_task, server_task)
         except asyncio.CancelledError:
-            logger.info("core uvicorn server was cancelled.")
+            logger.debug("core uvicorn server was cancelled.")
             await self.server.shutdown()
             raise
         except Exception as e:
@@ -1250,7 +1250,7 @@ class core:
 
     def shutdown(self, loop):
         """Shutdown the server and the event loop."""
-        logger.info("Received shutdown signal. Shutting down...")
+        logger.debug("Received shutdown signal. Shutting down...")
         for task in asyncio.all_tasks(loop):
             task.cancel()
         loop.stop()
@@ -1327,7 +1327,7 @@ class BaseChannel:
         self.running = True
 
     def signal_handler(self, signal, frame):
-        logger.info("Received shutdown signal (Ctrl+C).")
+        logger.debug("Received shutdown signal (Ctrl+C).")
         self.running = False
         asyncio.get_event_loop().stop()
 
@@ -1339,27 +1339,27 @@ class BaseChannel:
                 loop.add_signal_handler(sig, self.signal_handler, sig, None)
 
             # Your asynchronous tasks
-            logger.info("Starting tasks...")
+            logger.debug("Starting tasks...")
             task1 = asyncio.create_task(self.task1())
             task2 = asyncio.create_task(self.task2())
 
             # Wait for tasks to complete
             await asyncio.gather(task1, task2)
         except asyncio.CancelledError:
-            logger.info("Tasks were cancelled.")
+            logger.debug("Tasks were cancelled.")
         except Exception as e:
             logger.exception(f"Unexpected error in run: {e}")
         finally:
-            logger.info("Shutting down...")
+            logger.debug("Shutting down...")
 
     async def task1(self):
         while self.running:
-            logger.info("Running task1...")
+            logger.debug("Running task1...")
             await asyncio.sleep(1)
 
     async def task2(self):
         while self.running:
-            logger.info("Running task2...")
+            logger.debug("Running task2...")
             await asyncio.sleep(1)
 
 # Usage example:
@@ -1373,7 +1373,7 @@ class BaseChannel:
    - `signal_handler` method handles the `SIGINT` signal and stops the event loop.
    ```python
    def signal_handler(self, signal, frame):
-       logger.info("Received shutdown signal (Ctrl+C).")
+       logger.debug("Received shutdown signal (Ctrl+C).")
        self.running = False
        asyncio.get_event_loop().stop()
    ```
@@ -1433,45 +1433,45 @@ class BaseChannel:
         self.running = True
 
     def __enter__(self):
-        logger.info("Entering context and setting up signal handlers.")
+        logger.debug("Entering context and setting up signal handlers.")
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        logger.info("Exiting context and cleaning up.")
+        logger.debug("Exiting context and cleaning up.")
         self.running = False
         asyncio.get_event_loop().stop()
 
     def signal_handler(self, signum, frame):
-        logger.info(f"Received signal {signum}. Shutting down...")
+        logger.debug(f"Received signal {signum}. Shutting down...")
         self.running = False
         asyncio.get_event_loop().stop()
 
     async def run(self):
         try:
             # Your asynchronous tasks
-            logger.info("Starting tasks...")
+            logger.debug("Starting tasks...")
             task1 = asyncio.create_task(self.task1())
             task2 = asyncio.create_task(self.task2())
 
             # Wait for tasks to complete
             await asyncio.gather(task1, task2)
         except asyncio.CancelledError:
-            logger.info("Tasks were cancelled.")
+            logger.debug("Tasks were cancelled.")
         except Exception as e:
             logger.exception(f"Unexpected error in run: {e}")
         finally:
-            logger.info("Shutting down...")
+            logger.debug("Shutting down...")
 
     async def task1(self):
         while self.running:
-            logger.info("Running task1...")
+            logger.debug("Running task1...")
             await asyncio.sleep(1)
 
     async def task2(self):
         while self.running:
-            logger.info("Running task2...")
+            logger.debug("Running task2...")
             await asyncio.sleep(1)
 
 # Usage example:
@@ -1546,18 +1546,18 @@ class BaseChannel:
         self.running = True
 
     def __enter__(self):
-        logger.info("Entering context and setting up signal handlers.")
+        logger.debug("Entering context and setting up signal handlers.")
         loop = asyncio.get_running_loop()
         for sig in (signal.SIGINT, signal.SIGTERM):
             loop.add_signal_handler(sig, self.signal_handler, sig, frame=None)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        logger.info("Exiting context and cleaning up.")
+        logger.debug("Exiting context and cleaning up.")
         self.running = False
 
     def signal_handler(self, signum, frame):
-        logger.info(f"Received signal {signum}. Shutting down...")
+        logger.debug(f"Received signal {signum}. Shutting down...")
         self.running = False
         loop = asyncio.get_running_loop()
         loop.stop()
@@ -1565,34 +1565,34 @@ class BaseChannel:
     async def run(self):
         try:
             # Your asynchronous tasks
-            logger.info("Starting tasks...")
+            logger.debug("Starting tasks...")
             task1 = asyncio.create_task(self.task1())
             task2 = asyncio.create_task(self.task2())
 
             # Wait for tasks to complete
             await asyncio.gather(task1, task2)
         except asyncio.CancelledError:
-            logger.info("Tasks were cancelled.")
+            logger.debug("Tasks were cancelled.")
         except Exception as e:
             logger.exception(f"Unexpected error in run: {e}")
         finally:
-            logger.info("Shutting down...")
+            logger.debug("Shutting down...")
 
     async def task1(self):
         try:
             while self.running:
-                logger.info("Running task1...")
+                logger.debug("Running task1...")
                 await asyncio.sleep(1)
         except asyncio.CancelledError:
-            logger.info("Task1 was cancelled.")
+            logger.debug("Task1 was cancelled.")
 
     async def task2(self):
         try:
             while self.running:
-                logger.info("Running task2...")
+                logger.debug("Running task2...")
                 await asyncio.sleep(1)
         except asyncio.CancelledError:
-            logger.info("Task2 was cancelled.")
+            logger.debug("Task2 was cancelled.")
 
 # Usage example:
 async def main():
@@ -1603,7 +1603,7 @@ async def main():
 try:
     asyncio.run(main())
 except asyncio.CancelledError:
-    logger.info("Main was cancelled.")
+    logger.debug("Main was cancelled.")
 ```
 
 ### Explanation
@@ -1612,7 +1612,7 @@ except asyncio.CancelledError:
    - The `signal_handler` method stops the event loop when a signal is received.
    ```python
    def signal_handler(self, signum, frame):
-       logger.info(f"Received signal {signum}. Shutting down...")
+       logger.debug(f"Received signal {signum}. Shutting down...")
        self.running = False
        loop = asyncio.get_running_loop()
        loop.stop()
@@ -1622,14 +1622,14 @@ except asyncio.CancelledError:
    - The `CancelledError` is caught and handled in the `run` method and individual tasks.
    ```python
    except asyncio.CancelledError:
-       logger.info("Tasks were cancelled.")
+       logger.debug("Tasks were cancelled.")
    ```
 
 3. **Context Management**:
    - The `__enter__` and `__exit__` methods set up and clean up signal handlers.
    ```python
    def __enter__(self):
-       logger.info("Entering context and setting up signal handlers.")
+       logger.debug("Entering context and setting up signal handlers.")
        loop = asyncio.get_running_loop()
        for sig in (signal.SIGINT, signal.SIGTERM):
            loop.add_signal_handler(sig, self.signal_handler, sig, frame=None)
@@ -1642,7 +1642,7 @@ except asyncio.CancelledError:
    try:
        asyncio.run(main())
    except asyncio.CancelledError:
-       logger.info("Main was cancelled.")
+       logger.debug("Main was cancelled.")
    ```
 
 By incorporating these changes, you ensure that the `Ctrl+C` signal is captured, tasks are canceled gracefully, and the application shuts down cleanly.
@@ -1685,18 +1685,18 @@ class BaseChannel:
         self.running = True
 
     def __enter__(self):
-        logger.info("Entering context and setting up signal handlers.")
+        logger.debug("Entering context and setting up signal handlers.")
         loop = asyncio.get_running_loop()
         for sig in (signal.SIGINT, signal.SIGTERM):
             loop.add_signal_handler(sig, self.signal_handler, sig)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        logger.info("Exiting context and cleaning up.")
+        logger.debug("Exiting context and cleaning up.")
         self.running = False
 
     def signal_handler(self, signum):
-        logger.info(f"Received signal {signum}. Shutting down...")
+        logger.debug(f"Received signal {signum}. Shutting down...")
         self.running = False
         loop = asyncio.get_running_loop()
         loop.stop()
@@ -1704,34 +1704,34 @@ class BaseChannel:
     async def run(self):
         try:
             # Your asynchronous tasks
-            logger.info("Starting tasks...")
+            logger.debug("Starting tasks...")
             task1 = asyncio.create_task(self.task1())
             task2 = asyncio.create_task(self.task2())
 
             # Wait for tasks to complete
             await asyncio.gather(task1, task2)
         except asyncio.CancelledError:
-            logger.info("Tasks were cancelled.")
+            logger.debug("Tasks were cancelled.")
         except Exception as e:
             logger.exception(f"Unexpected error in run: {e}")
         finally:
-            logger.info("Shutting down...")
+            logger.debug("Shutting down...")
 
     async def task1(self):
         try:
             while self.running:
-                logger.info("Running task1...")
+                logger.debug("Running task1...")
                 await asyncio.sleep(1)
         except asyncio.CancelledError:
-            logger.info("Task1 was cancelled.")
+            logger.debug("Task1 was cancelled.")
 
     async def task2(self):
         try:
             while self.running:
-                logger.info("Running task2...")
+                logger.debug("Running task2...")
                 await asyncio.sleep(1)
         except asyncio.CancelledError:
-            logger.info("Task2 was cancelled.")
+            logger.debug("Task2 was cancelled.")
 
 # Uvicorn server setup
 async def start_uvicorn(app, host='127.0.0.1', port=8000):
@@ -1751,13 +1751,13 @@ async def main():
         try:
             await uvicorn_task
         except asyncio.CancelledError:
-            logger.info("Uvicorn server was cancelled.")
+            logger.debug("Uvicorn server was cancelled.")
 
 # Ensure that the event loop is running correctly
 try:
     asyncio.run(main())
 except asyncio.CancelledError:
-    logger.info("Main was cancelled.")
+    logger.debug("Main was cancelled.")
 ```
 
 ### Explanation
@@ -1766,7 +1766,7 @@ except asyncio.CancelledError:
    - `signal_handler` stops the event loop when a signal is received.
    ```python
    def signal_handler(self, signum):
-       logger.info(f"Received signal {signum}. Shutting down...")
+       logger.debug(f"Received signal {signum}. Shutting down...")
        self.running = False
        loop = asyncio.get_running_loop()
        loop.stop()
@@ -1776,7 +1776,7 @@ except asyncio.CancelledError:
    - `CancelledError` is caught and handled in the `run` method and individual tasks.
    ```python
    except asyncio.CancelledError:
-       logger.info("Tasks were cancelled.")
+       logger.debug("Tasks were cancelled.")
    ```
 
 3. **Uvicorn Integration**:
@@ -1794,7 +1794,7 @@ except asyncio.CancelledError:
    try:
        asyncio.run(main())
    except asyncio.CancelledError:
-       logger.info("Main was cancelled.")
+       logger.debug("Main was cancelled.")
    ```
 
 By incorporating these changes, you ensure that `Ctrl+C` is captured, tasks are canceled gracefully, and the application, including the Uvicorn server, shuts down cleanly.
@@ -1849,7 +1849,7 @@ class LLM:
 # Example Usage
 llm = LLM(name="GPT-3", version="3.5")
 json_data = json.dumps(llm, cls=MyEncoder)
-print(json_data)
+logger.debug(json_data)
 ```
 
 ### Serialization Method
@@ -1871,7 +1871,7 @@ class LLM:
 # Example Usage
 llm = LLM(name="GPT-3", version="3.5")
 json_data = llm.to_json()
-print(json_data)
+logger.debug(json_data)
 ```
 
 ### Putting It Together
@@ -1907,7 +1907,7 @@ import json
 
 llm = LLM(name="GPT-3", version="3.5")
 json_data = json.dumps(llm, cls=MyEncoder)
-print(json_data)
+logger.debug(json_data)
 ```
 
 ### Usage in `BaseChannel.py`
@@ -2233,11 +2233,11 @@ class core:
         action: str = request.action
 
         # Your logic to handle text messages
-        print(f"Processing text message from {user_name} ({user_id}): {text}")
+        logger.debug(f"Processing text message from {user_name} ({user_id}): {text}")
 
     async def process_non_text_message(self, request: PromptRequest):
         # Handle other content types
-        print(f"Processing non-text message: {request.contentType}")
+        logger.debug(f"Processing non-text message: {request.contentType}")
 
 # Example Usage
 async def main():
@@ -2275,14 +2275,14 @@ asyncio.run(main())
        action: str = request.action
 
        # Your logic to handle text messages
-       print(f"Processing text message from {user_name} ({user_id}): {text}")
+       logger.debug(f"Processing text message from {user_name} ({user_id}): {text}")
    ```
 
 3. **Non-text Message Processing**:
    - `process_non_text_message` handles other content types.
    ```python
    async def process_non_text_message(self, request: PromptRequest):
-       print(f"Processing non-text message: {request.contentType}")
+       logger.debug(f"Processing non-text message: {request.contentType}")
    ```
 
 By following this approach, you create a unified handler that processes all text messages in a consistent manner, while still allowing for specific handling of different content types when necessary. This makes your code more maintainable and easier to extend in the future.

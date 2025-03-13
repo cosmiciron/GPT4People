@@ -51,7 +51,7 @@ class core:
 # Example usage
 core = core()
 selected_helper = await core.select_helper("some prompt")
-print(selected_helper)
+logger.debug(selected_helper)
 ```
 
 ### Explanation:
@@ -197,7 +197,7 @@ class core:
 # Example usage
 core = core()
 selected_helper = await core.select_helper("some prompt")
-print(selected_helper)
+logger.debug(selected_helper)
 ```
 
 ### Explanation:
@@ -312,7 +312,7 @@ class core:
 # Example usage
 core = core()
 selected_helper, selected_endpoint = await core.select_helper("some prompt")
-print(selected_helper, selected_endpoint)
+logger.debug(selected_helper, selected_endpoint)
 ```
 
 ### Explanation:
@@ -447,7 +447,7 @@ class core:
 # Example usage
 core = core()
 selected_helper, selected_endpoint = await core.select_helper("some prompt")
-print(selected_helper, selected_endpoint)
+logger.debug(selected_helper, selected_endpoint)
 ```
 
 ### Explanation:
@@ -570,7 +570,7 @@ class core:
 # Example usage
 core = core()
 selected_helper, selected_endpoint = await core.select_helper("some prompt")
-print(selected_helper, selected_endpoint)
+logger.debug(selected_helper, selected_endpoint)
 ```
 
 ### Explanation:
@@ -678,7 +678,7 @@ class core:
 # Example usage
 core = core()
 selected_helper, selected_endpoint = await core.select_helper("some prompt")
-print(selected_helper, selected_endpoint)
+logger.debug(selected_helper, selected_endpoint)
 ```
 
 ### Explanation:
@@ -789,7 +789,7 @@ class core:
 # Example usage
 core = core()
 selected_helper, selected_endpoint = await core.select_helper("some prompt")
-print(selected_helper, selected_endpoint)
+logger.debug(selected_helper, selected_endpoint)
 ```
 
 ### Explanation:
@@ -923,7 +923,7 @@ class core:
 # Example usage
 core = core()
 selected_helper, selected_endpoint = await core.select_helper("some prompt")
-print(selected_helper, selected_endpoint)
+logger.debug(selected_helper, selected_endpoint)
 ```
 
 ### Explanation:
@@ -1044,7 +1044,7 @@ class core:
 # Example usage
 core = core()
 selected_helper, selected_endpoint = await core.select_helper("some prompt")
-print(selected_helper, selected_endpoint)
+logger.debug(selected_helper, selected_endpoint)
 ```
 
 ### Explanation:

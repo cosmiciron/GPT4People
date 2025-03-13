@@ -54,7 +54,7 @@ class ChatMessage(JSONSerializable):
 
     def add_user_message(self, message: str, metadata: Optional[dict] = None):
         if self.human_message:
-            logger.info(
+            logger.debug(
                 "Human message already exists in the chat message,\
                 overwriting it with new message."
             )
@@ -63,7 +63,7 @@ class ChatMessage(JSONSerializable):
 
     def add_ai_message(self, message: str, metadata: Optional[dict] = None):
         if self.ai_message:
-            logger.info(
+            logger.debug(
                 "AI message already exists in the chat message,\
                 overwriting it with new message."
             )

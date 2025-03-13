@@ -1,5 +1,5 @@
 llms:
-  embedding_granite_278m_multilingual:
+  embedding_nomic-embed-text-v1.5_q5_k_m:
     type: local
     alias: embedding
     path: embedding/nomic-embed-text-v1.5.Q5_K_M.gguf
@@ -263,7 +263,7 @@ llms:
     introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
     capabilities: ['Chat']
     host: 127.0.0.1
-    port: 5017
+    port: 5018
     parameters: {'API_KEY': 'your_api_key'}
 
 

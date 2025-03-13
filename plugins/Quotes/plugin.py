@@ -75,7 +75,7 @@ class QuotePlugin(SchedulerPlugin):
             return
         logger.debug(f'QuotePlugin generate_random_quote Response: {resp}')
         await self.coreInst.send_response_to_latest_channel(response=resp)
-        logger.info(f"Sent {resp} to user")
+        logger.debug(f"Sent {resp} to user")
 
 
 

@@ -1,4 +1,3 @@
-import logging
 from typing import Optional, List, Dict
 
 from pydantic import BaseModel
@@ -56,11 +55,12 @@ class ChromaDB(VectorStoreBase):
 
             self.settings.persist_directory = path
             self.settings.is_persistent = True
-            
+            logger.debug(f"ChromaDB client created")
 
             self.client = chromadb.Client(self.settings)
 
-        self.collection = self.create_col(name=collection_name)
+        #col_name = self.create_col(name=collection_name)
+        self.collection = self.client.get_or_create_collection(name=collection_name)
 
     def _parse_output(self, data: Dict) -> List[OutputData]:
         """
@@ -119,8 +119,9 @@ class ChromaDB(VectorStoreBase):
         # Skip creating collection if already exists
         collections = self.list_cols()
         for collection in collections:
-            if collection.name == name:
+            if collection == name:
                 logger.debug(f"Collection {name} already exists. Skipping creation.")
+                return self.client.get_collection(name=name)
 
         collection = self.client.get_or_create_collection(
             name=name,

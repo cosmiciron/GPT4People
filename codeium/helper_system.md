@@ -73,10 +73,10 @@ from plugin_channel import PluginChannel
 
 class HelloPlugin(PluginChannel):
     def initialize(self):
-        print("HelloPlugin initialized")
+        logger.debug("HelloPlugin initialized")
 
     def run(self, *args, **kwargs):
-        print("HelloPlugin running")
+        logger.debug("HelloPlugin running")
         return "Hello from HelloPlugin"
 ```
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     manager.initialize_plugins()
     results = manager.run_plugins()
     for result in results:
-        print(result)
+        logger.debug(result)
 ```
 
 ### Directory Structure
@@ -237,10 +237,10 @@ from plugin_channel import PluginChannel
 
 class HelloPlugin(PluginChannel):
     def initialize(self):
-        print("HelloPlugin initialized")
+        logger.debug("HelloPlugin initialized")
 
     def run(self, *args, **kwargs):
-        print("HelloPlugin running")
+        logger.debug("HelloPlugin running")
         return "Hello from HelloPlugin"
 
 # Register the plugin with the plugin manager
@@ -294,7 +294,7 @@ class PluginManager:
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
-        print(f"Registered plugin: {plugin.metadata['name']}")
+        logger.debug(f"Registered plugin: {plugin.metadata['name']}")
 
 # Example Plugin class
 class Plugin:
@@ -382,7 +382,7 @@ class PluginManager:
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
-        print(f"Registered plugin: {plugin.metadata['name']}")
+        logger.debug(f"Registered plugin: {plugin.metadata['name']}")
 
 # Example Plugin class
 class Plugin:
@@ -463,13 +463,13 @@ class PluginManager:
 
             response = s.recv(1024)
             if response == b"Started":
-                print("Remote plugin started successfully.")
+                logger.debug("Remote plugin started successfully.")
             else:
-                print("Failed to start remote plugin.")
+                logger.debug("Failed to start remote plugin.")
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
-        print(f"Registered plugin: {plugin.metadata['name']}")
+        logger.debug(f"Registered plugin: {plugin.metadata['name']}")
 
 # Example Plugin class
 class Plugin:
@@ -550,9 +550,9 @@ class PluginManager:
 
             response = s.recv(1024)
             if response == b"Started":
-                print("Remote plugin started successfully.")
+                logger.debug("Remote plugin started successfully.")
             else:
-                print("Failed to start remote plugin.")
+                logger.debug("Failed to start remote plugin.")
 
     def stop_remote_plugin(self, remote_host, remote_port):
         # Connect to remote plugin and send stop command
@@ -563,13 +563,13 @@ class PluginManager:
 
             response = s.recv(1024)
             if response == b"Stopped":
-                print("Remote plugin stopped successfully.")
+                logger.debug("Remote plugin stopped successfully.")
             else:
-                print("Failed to stop remote plugin.")
+                logger.debug("Failed to stop remote plugin.")
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
-        print(f"Registered plugin: {plugin.metadata['name']}")
+        logger.debug(f"Registered plugin: {plugin.metadata['name']}")
 
 # Example Plugin class
 class Plugin:
@@ -667,13 +667,13 @@ class PluginManager:
 
             response = s.recv(1024)
             if response == b"Started":
-                print(f"Remote plugin at {remote_host}:{remote_port} started successfully.")
+                logger.debug(f"Remote plugin at {remote_host}:{remote_port} started successfully.")
             else:
-                print(f"Failed to start remote plugin at {remote_host}:{remote_port}.")
+                logger.debug(f"Failed to start remote plugin at {remote_host}:{remote_port}.")
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
-        print(f"Registered plugin: {plugin.metadata['name']}")
+        logger.debug(f"Registered plugin: {plugin.metadata['name']}")
 
 # Example Plugin class
 class Plugin:
@@ -762,7 +762,7 @@ class PluginManager:
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
-        print(f"Registered plugin: {plugin.metadata['name']}")
+        logger.debug(f"Registered plugin: {plugin.metadata['name']}")
 
 # Plugin class
 class Plugin:
@@ -847,7 +847,7 @@ class PluginManager:
             if response:
                 response_data = pickle.loads(response)
                 result = plugin.stop_plugin_with_socket_data(response_data)
-                print(result)
+                logger.debug(result)
 
 # Usage
 plugin_manager = PluginManager()
@@ -876,7 +876,7 @@ class Plugin:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(("0.0.0.0", self.metadata["port"]))  # Bind to the plugin's port
         self.server_socket.listen(1)
-        print(f"Plugin {self.metadata['name']} listening on port {self.metadata['port']}")
+        logger.debug(f"Plugin {self.metadata['name']} listening on port {self.metadata['port']}")
 
         @self.app.get("/info")
         def get_info():
@@ -928,11 +928,11 @@ class PluginManager:
                 if response:
                     response_data = pickle.loads(response)
                     if response_data.get("status") == "started":
-                        print(f"Remote plugin {plugin.metadata['name']} started successfully.")
+                        logger.debug(f"Remote plugin {plugin.metadata['name']} started successfully.")
                     else:
-                        print(f"Failed to start remote plugin {plugin.metadata['name']}.")
+                        logger.debug(f"Failed to start remote plugin {plugin.metadata['name']}.")
         except ConnectionRefusedError:
-            print(f"Connection to remote plugin {plugin.metadata['name']} at {plugin_host}:{plugin_port} failed.")
+            logger.debug(f"Connection to remote plugin {plugin.metadata['name']} at {plugin_host}:{plugin_port} failed.")
 
     def check_and_restart_remote_plugins(self):
         for plugin in self.plugins:
@@ -942,7 +942,7 @@ class PluginManager:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.connect((plugin_host, plugin_port))
             except ConnectionRefusedError:
-                print(f"Remote plugin {plugin.metadata['name']} at {plugin_host}:{plugin_port} is down. Restarting...")
+                logger.debug(f"Remote plugin {plugin.metadata['name']} at {plugin_host}:{plugin_port} is down. Restarting...")
                 self.start_remote_plugin(plugin)
 
 # Usage

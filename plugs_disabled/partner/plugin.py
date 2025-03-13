@@ -143,7 +143,7 @@ class PartnerPlugin(BasePlugin):
             logger.debug(f'PartnerPlugin generate Response: {resp}')
             self.coreInst.add_chat_history_by_role(sender_name=self.promptRequest.user_name, responder_name=self.config['partner_name'], sender_text="It's been a while since we last talked.", responder_text=resp)
             await self.coreInst.send_response_to_latest_channel(response=resp)
-            logger.info(f"Sent {resp} to user")
+            logger.debug(f"Sent {resp} to user")
 
             self.last_interaction_time = current_time
 
@@ -162,7 +162,7 @@ class PartnerPlugin(BasePlugin):
         logger.debug(f'PartnerPlugin generate Response: {resp}')
         self.coreInst.add_chat_history_by_role(sender_name=self.promptRequest.user_name, responder_name=self.config['partner_name'], sender_text="Good morning!", responder_text=resp)
         await self.coreInst.send_response_to_latest_channel(response=resp)
-        logger.info(f"Sent {resp} to user")
+        logger.debug(f"Sent {resp} to user")
 
     async def send_sleeping_message(self):
         chat_hist = self.coreInst.get_latest_chats_by_role(sender_name=self.promptRequest.user_name, responder_name=self.config['partner_name'], num_rounds=10)
@@ -179,7 +179,7 @@ class PartnerPlugin(BasePlugin):
         logger.debug(f'PartnerPlugin generate Response: {resp}')
         self.coreInst.add_chat_history_by_role(sender_name=self.promptRequest.user_name, responder_name=self.config['partner_name'], sender_text="Good night!", responder_text=resp)
         await self.coreInst.send_response_to_latest_channel(response=resp)
-        logger.info(f"Sent {resp} to user")
+        logger.debug(f"Sent {resp} to user")
 
 
     async def run(self):
@@ -199,7 +199,7 @@ class PartnerPlugin(BasePlugin):
             logger.debug(f'PartnerPlugin generate Response: {resp}')
             self.coreInst.add_chat_history_by_role(sender_name=self.promptRequest.user_name, responder_name=self.config['partner_name'], sender_text=user_input, responder_text=resp)
             await self.coreInst.send_response_to_latest_channel(response=resp)
-            logger.info(f"Sent {resp} to user")
+            logger.debug(f"Sent {resp} to user")
 
         except Exception as e:
             logger.error(f"Error generating response: {e}")
@@ -263,7 +263,7 @@ class PartnerPlugin(BasePlugin):
             if "Yes" in eval_resp or "yes" in eval_resp:
                 self.coreInst.add_chat_history_by_role(sender_name=self.promptRequest.user_name, responder_name=self.config['partner_name'], sender_text=user_input, responder_text=resp)
                 await self.coreInst.send_response_to_latest_channel(response=resp)
-                logger.info(f"Sent {resp} to user")                
+                logger.debug(f"Sent {resp} to user")                
                 return True, resp
             else:
                 return False, ''
