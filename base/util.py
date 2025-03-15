@@ -53,17 +53,16 @@ class Util:
             self.core_metadata : CoreMetadata = None
             if self.has_gpu_cuda():
                 self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
-                #logger.debug("CUDA is available. Using GPU.")
+                logger.debug("CUDA is available. Using GPU.")
             else:
                 self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core_cpu.yml'))
-                #logger.debug("CUDA is not available. Using CPU.")
+                logger.debug("CUDA is not available. Using CPU.")
             self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
             self.llms: list[LLM]= LLM.from_yaml(os.path.join(self.config_path(), 'llm.yml'))
             self.gpt4people_account: GPT4PeopleAccount = GPT4PeopleAccount.from_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
             
             # Start to monitor the specified config files
             self.watch_config_file()
-
 
     def run_script_in_process(self, script_path) -> Process:
         process = None
@@ -112,6 +111,10 @@ class Util:
     def plugins_path(self):
         root = self.root_path()
         return os.path.join(root, 'plugins')
+    
+    def channels_path(self):
+        root = self.root_path()
+        return os.path.join(root, 'channels')
                  
     def config_path(self):
         return os.path.join(self.root_path(), 'config')

@@ -331,9 +331,6 @@ def start():
     print("Starting GPT4People Core...\n")
     llm_thread = run_core()
 
-    #llm_process = subprocess.Popen(["python", core_path])
-    #subprocess.Popen(["python", Util().root_path(), 'core', 'core.py'])
-    #llm_process = subprocess.Popen(["python", core_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     channel_metadata = ChannelMetadata(name="gpt4people", host="localhost", port=0, endpoints=[])
     with Channel(metadata=channel_metadata) as channel:
         try:
@@ -350,24 +347,27 @@ def start():
             break
         elif user_input == '':
             continue
-        elif  user_input.lower() == 'channel':
-            print("WeChat Channel: Install and login the specific wechat version, then input 'channel wechat' here.\n")
-            print("微信频道: 安装并登录指定的微信版本, 然后在这里输入'channel wechat'。\n")
-            print("Whatsapp Channel: Input 'channel whatsapp' here, then scan the QR code to login using one whatsapp account.\n")
-            print("WhatsApp 频道: 输入'channel whatsapp', 然后扫描二维码登录使用一个 WhatsApp 账号。\n")
-            print("Email Channel: Send email to your GPT4People account directly.\n")
-            print("Email 频道: 直接发送邮件到你的 GPT4People 账户。\n")
-            print("Matrix Channel: Input 'channel matrix' here.\n")
-            print("Matrix 频道: 输入'channel matrix'。\n")
-            continue
-        elif user_input.lower() == 'channel wechat':
-            wechat_thread = run_wechat_channel()
-            continue
-        elif user_input.lower() == 'channel whatsapp':
-
-            continue
-        elif user_input.lower() == 'channel matrix':
-            continue
+            '''
+            elif  user_input.lower() == 'channel':
+                print("WeChat Channel: Install and login the specific wechat version, then input 'channel wechat' here.\n")
+                print("微信频道: 安装并登录指定的微信版本, 然后在这里输入'channel wechat'。\n")
+                print("Whatsapp Channel: Input 'channel whatsapp' here, then scan the QR code to login using one whatsapp account.\n")
+                print("WhatsApp 频道: 输入'channel whatsapp', 然后扫描二维码登录使用一个 WhatsApp 账号。\n")
+                print("Email Channel: Send email to your GPT4People account directly.\n")
+                print("Email 频道: 直接发送邮件到你的 GPT4People 账户。\n")
+                print("Matrix Channel: Input 'channel matrix' here.\n")
+                print("Matrix 频道: 输入'channel matrix'。\n")
+                continue
+            elif user_input.lower() == 'channel wechat':
+                wechat_thread = run_wechat_channel()
+                continue
+            elif user_input.lower() == 'channel whatsapp':
+                whatsapp_thread = run_whatsapp_channel()
+                continue
+            elif user_input.lower() == 'channel matrix':
+                matrix_thread = run_matrix_channel()
+                continue'
+            '''
         else:
             resp = asyncio.run(channel.on_message(user_input)) #channel.on_message(user_input)
             print("GPT4People:", resp)
@@ -376,9 +376,9 @@ def start():
                 comment = False
     url = channel.core_url() + "/shutdown"
     httpx.get(url)
-    shutdown_wechat_channel()
-    shutdown_whatsapp_channel()
-    shutdown_matrix_channel()
+    #shutdown_wechat_channel()
+    #shutdown_whatsapp_channel()
+    #shutdown_matrix_channel()
     sys.exit(0)
 
 if __name__ == "__main__":

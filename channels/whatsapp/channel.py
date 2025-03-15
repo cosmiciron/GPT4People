@@ -30,6 +30,8 @@ from neonize.types import MessageServerID
 from neonize.utils import log
 from neonize.utils.enum import ReceiptType
 
+from base.util import Util
+
 sys.path.insert(0, os.getcwd())
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
@@ -227,7 +229,8 @@ def run_client_connect_forever():
 
 shutdown_url = ""         
 def main():
-    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
+    root = Util().channels_path()
+    config_path = os.path.join(root, 'whatsapp', 'config.yml')
     with open(config_path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
         metadata = ChannelMetadata(**config)

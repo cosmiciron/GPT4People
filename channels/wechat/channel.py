@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 import httpx
 
+from base.util import Util
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from contextlib import asynccontextmanager
@@ -166,7 +168,8 @@ class Channel(BaseChannel):
 shutdown_url = ""
 def main():
     try:
-        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
+        root = Util().channels_path()
+        config_path = os.path.join(root, 'wechat', 'config.yml')
         with open(config_path, 'r', encoding='utf-8') as file:
             config = yaml.safe_load(file)
             #logger.debug(config)

@@ -8,6 +8,8 @@ from pathlib import Path
 import threading
 import httpx
 
+from base.util import Util
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from contextlib import asynccontextmanager
@@ -151,8 +153,8 @@ class Channel(BaseChannel):
 
 
 
-    def core(self) -> str | None:
-        core_url = super().core()
+    def core_url(self) -> str | None:
+        core_url = super().core_url()
         if core_url is not None:
             return core_url
         # Read the core host and port from .env file in each helper folder
@@ -191,12 +193,16 @@ class Channel(BaseChannel):
         
 shutdown_url = ""    
 def main():
-    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
+    root = Util().channels_path()
+    config_path = os.path.join(root, 'matrix' 'config.yml')
     with open(config_path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
         metadata = ChannelMetadata(**config)
         global shutdown_url
-        shutdown_url = "http://" + metadata.host + ":" + str(metadata.port) + "/shutdown"
+        host = metadata.host
+        if host == '0.0.0.0':
+            host = '127.0.0.1'
+        shutdown_url = "http://" + host + ":" + str(metadata.port) + "/shutdown"
     with Channel(metadata=metadata) as channel:
         try:
             asyncio.run(channel.run())
