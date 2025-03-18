@@ -7,23 +7,22 @@ import sys
 from pathlib import Path
 import threading
 import httpx
-
-from base.util import Util
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
-from base.BaseChannel import ChannelMetadata, BaseChannel
-from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
 from dotenv import dotenv_values
 import yaml
 from os import getenv
 import simplematrixbotlib as botlib
 from nio.rooms import MatrixRoom
 from nio.events.room_events import Event
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from base.util import Util
+from base.BaseChannel import ChannelMetadata, BaseChannel
+from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
+
 
 
 @asynccontextmanager
@@ -51,8 +50,28 @@ class MatrixRequest(BaseModel):
 class Channel(BaseChannel):
     def __init__(self, metadata: ChannelMetadata):
         super().__init__(metadata=metadata, app=channel_app)
+        channels_path = Util().root_path() + '/channels/' + 'matrix/'
+        env_path = os.path.join(channels_path, '.env')
+        env_vars = dotenv_values(env_path)
+        home_srv = env_vars['home_server']
+        home_srv = home_srv.strip()
+        username = env_vars['username']
+        username = username.strip()
+        password = env_vars['password']
+        password = password.strip()
+        if home_srv is None or len(home_srv) == 0:
+            print("Please enter the home server of Matrix(输入Matrix的主服务器地址): Eg: https://matrix.org \n")
+            home_srv = input("Input the home server of Matrix：(输入Matrix的主服务器地址): ")
+            print("Please enter the username of Matrix(输入Matrix的用户名): Eg: @allenpeng:matrix.org \n")
+            username = input("Input the username of Matrix(输入Matrix的用户名): ")
+            print("Please enter the password of Matrix(输入Matrix的密码): Eg: Eficode232410@ \n")
+            password = input("Input the password of Matrix(输入Matrix的密码): ")
+            with open(env_path, 'w') as f:
+                f.write(f"home_server={home_srv}\n")
+                f.write(f"username={username}\n")
+                f.write(f"password={password}\n")
 
-        self.creds = botlib.Creds("https://matrix.org", "@allenpeng:matrix.org", "Eficode232410@")
+        self.creds = botlib.Creds(home_srv, username, password)
         self.config = botlib.Config()
         #self.config.encryption_enabled = True
         self.config.ignore_unverified_devices = True
@@ -63,7 +82,21 @@ class Channel(BaseChannel):
         self.bot_task = None
         self.message_queue_task = None
 
-        
+    def core_url(self) -> str | None:
+        """Get the core url from sub class's .env file"""
+        channels_path = Util().root_path() + '/channels/'
+        env_path = os.path.join(channels_path, '.env')
+        env_vars = dotenv_values(env_path)
+        core_url = None
+        if 'core_host' in env_vars and 'core_port' in env_vars:
+            host = env_vars['core_host']
+            port = env_vars['core_port']
+            core_url = f"http://{host}:{port}"
+        else:
+            core_url = None
+        return core_url
+
+
     async def run_bot(self):
         @self.bot.listener.on_message_event
         async def on_message(room: MatrixRoom, message: Event):
@@ -152,24 +185,6 @@ class Channel(BaseChannel):
                 logger.error(f"Error processing message queue: {str(e)}")
 
 
-
-    def core_url(self) -> str | None:
-        core_url = super().core_url()
-        if core_url is not None:
-            return core_url
-        # Read the core host and port from .env file in each helper folder
-        current_path = os.path.dirname(os.path.abspath(__file__))
-        env_path = os.path.join(current_path, '.env')
-        env_vars = dotenv_values(env_path)
-        if 'core_host' in env_vars and 'core_port' in env_vars:
-            host = env_vars['core_host']
-            port = env_vars['core_port']
-            core_url = f"http://{host}:{port}"
-        else:
-            core_url = None
-        return core_url
-
-
     def initialize(self):
         logger.debug("Natrix Channel initializing...")
         self.bot_task = asyncio.create_task(self.run_bot())
@@ -194,7 +209,7 @@ class Channel(BaseChannel):
 shutdown_url = ""    
 def main():
     root = Util().channels_path()
-    config_path = os.path.join(root, 'matrix' 'config.yml')
+    config_path = os.path.join(root, 'matrix', 'config.yml')
     with open(config_path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
         metadata = ChannelMetadata(**config)

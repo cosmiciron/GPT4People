@@ -255,15 +255,6 @@ class Channel(BaseChannel):
             return None
 
 
-
-    def core_url(self) -> str | None:
-        core_url = super().core_url()
-        if core_url is not None:
-            return core_url
-        # Read the core host and port from .env file in each helper folder
-        return "http://127.0.0.1:9000"
-
-
     def initialize(self):
         super().initialize()
 

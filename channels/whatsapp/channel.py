@@ -157,24 +157,6 @@ class Channel(BaseChannel):
                 logger.error(f"Error processing whatsapp message queue: {str(e)}")
 
 
-
-    def core_url(self) -> str | None:
-        core_url = super().core_url()
-        if core_url is not None:
-            return core_url
-        # Read the core host and port from .env file in each helper folder
-        current_path = os.path.dirname(os.path.abspath(__file__))
-        env_path = os.path.join(current_path, '.env')
-        env_vars = dotenv_values(env_path)
-        if 'core_host' in env_vars and 'core_port' in env_vars:
-            host = env_vars['core_host']
-            port = env_vars['core_port']
-            core_url = f"http://{host}:{port}"
-        else:
-            core_url = None
-        return core_url
-
-
     def initialize(self):
         logger.debug("whatsapp Channel initializing...")
         self.message_queue_task = asyncio.create_task(self.process_message_queue())
