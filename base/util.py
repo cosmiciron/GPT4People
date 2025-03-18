@@ -50,12 +50,18 @@ class Util:
             self.silent = True
 
             self.config_observer = None
-            self.core_metadata : CoreMetadata = None
+            self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
             if self.has_gpu_cuda():
-                self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
+                if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
+                    self.core_metadata.main_llm = self.core_metadata.available_llms[:-1]
+                    self.core_metadata.memory_llm = self.core_metadata.available_llms[-1]
+                    CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is available. Using GPU.")
             else:
-                self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core_cpu.yml'))
+                if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
+                    self.core_metadata.main_llm = self.core_metadata.available_llms[0]
+                    self.core_metadata.memory_llm = self.core_metadata.available_llms[0]
+                    CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is not available. Using CPU.")
             self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
             self.llms: list[LLM]= LLM.from_yaml(os.path.join(self.config_path(), 'llm.yml'))
@@ -166,6 +172,21 @@ class Util:
         for llm in self.llms:
             if llm.name == memory_llm_name:
                 return llm
+            
+    def set_mainllm(self, main_llm_name):
+        for llm in self.llms:
+            if llm.name == main_llm_name:
+                self.core_metadata.main_llm = main_llm_name 
+                CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
+                return main_llm_name
+            
+    def set_memoryllm(self, memory_llm_name):
+        for llm in self.llms:
+            if llm.name == memory_llm_name:
+                self.core_metadata.memory_llm = memory_llm_name 
+                CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
+                return memory_llm_name
+
             
             
     def embedding_llm(self) -> LLM:
@@ -345,7 +366,7 @@ class Util:
     def get_first_user(self) -> User:
         self.users = self.get_users()
         if self.users == None or len(self.users) == 0:
-            return None
+            self.create_default_user()
         return self.users[0]
     
     def create_default_user(self):
@@ -355,7 +376,6 @@ class Util:
         user.phone = []
         user.im = []
         self.add_user(user)
-        return user
 
     def change_user_name(self, old_name: str, new_name: str):
         if self.users == None or len(self.users) == 0:
@@ -433,13 +453,30 @@ class Util:
 
     def get_core_metadata(self):
         if self.core_metadata == None:
+            self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
             if self.has_gpu_cuda():
-                self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
-                logger.debug("CUDA is available. Using GPU.")
+                if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
+                    self.core_metadata.main_llm = self.core_metadata.available_llms[:-1]
+                    self.core_metadata.memory_llm = self.core_metadata.available_llms[-1]
+                    CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
+
             else:
-                self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core_cpu.yml'))
-                logger.debug("CUDA is not available. Using CPU.")
+                if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
+                    self.core_metadata.main_llm = self.core_metadata.available_llms[0]
+                    self.core_metadata.memory_llm = self.core_metadata.available_llms[0]
+                    CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
+                
         return self.core_metadata
+    
+    def availabe_llms(self):
+        return self.core_metadata.available_llms
+    
+    def switch_llm(self, llm_name: str):
+        if llm_name not in self.core_metadata.available_llms:
+            return
+        self.core_metadata.main_llm = llm_name
+        self.core_metadata.memory_llm = llm_name
+        CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
     
     def stop_uvicorn_server(self, server: uvicorn.Server):
         try:
@@ -504,19 +541,13 @@ class Util:
         if self.config_observer is None:  
             class Handler(watchdog.events.PatternMatchingEventHandler):
                 def __init__(self, util: Util):
-                    super().__init__(patterns=['user.yml', 'core.yml', 'core_cpu.yml', 'llm.yml'])
+                    super().__init__(patterns=['user.yml', 'llm.yml'])
                     self.util: Util = util
 
                 def on_modified(self, event):
                     if event.src_path.endswith('user.yml'):
                         self.util.users = None
                         self.util.get_users()
-                    elif event.src_path.endswith('core.yml'):
-                        self.util.core_metadata = None
-                        self.util.get_core_metadata()
-                    elif event.src_path.endswith('core_cpu.yml'):
-                        self.util.core_metadata = None
-                        self.util.get_core_metadata()
                     elif event.src_path.endswith('llm.yml'):
                         self.util.llms = None
                         self.util.get_llms()

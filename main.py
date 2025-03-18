@@ -312,7 +312,39 @@ def start():
             break
         elif user_input == '':
             continue
-        
+
+        elif user_input == 'llm':
+            available_llms = Util().availabe_llms()
+            i = 1
+            for llm in available_llms:
+                print(f"{i}. {llm}\n")
+                i += 1
+                
+            current_llm = Util().main_llm().name
+            print(f"Current LLM: {current_llm}\n")
+            continue
+        elif user_input == 'llm set':
+            available_llms = Util().availabe_llms()
+            i = 1
+            for llm in available_llms:
+                print(f"{i}. {llm}\n")
+                i += 1
+
+            current_llm = Util().main_llm().name
+            print(f"Current LLM: {current_llm}\n")
+            llm_index = int(input("Enter the number of the LLM you want to set(输入你要设置的LLM的序号): "))
+            if llm_index < 1 or llm_index > len(available_llms):
+                print("Invalid input. Cancel.(输入无效，退出)\n")
+                continue
+            if current_llm != available_llms[llm_index - 1]:
+                Util().set_mainllm(available_llms[llm_index - 1])
+                Util().set_memoryllm(available_llms[llm_index - 1])
+                print(f"LLM set to（大模型设置为）: {available_llms[llm_index - 1]}\n")
+                print('Restart the app to use new LLM.(重启应用以使用新的大模型)\n')
+                break
+            else:
+                print("Current LLM is already set.(当前大模型已设置)\n")
+                continue       
         elif  user_input == 'channel':
             print('################################################################################################################################\n')
             print("How to use wechat channel: \n")

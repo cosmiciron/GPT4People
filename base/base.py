@@ -301,6 +301,7 @@ class CoreMetadata:
     port: int
     mode: str
     model_path: str
+    available_llms: List[str]
     main_llm: str
     memory_llm: str
     embedding_llm: str
@@ -323,6 +324,7 @@ class CoreMetadata:
             port=data['port'],
             mode=data['mode'],
             model_path=data['model_path'],
+            available_llms=data['available_llms'],
             main_llm=data['main_llm'],
             memory_llm=data['memory_llm'],
             embedding_llm=data['embedding_llm'],
@@ -330,11 +332,36 @@ class CoreMetadata:
             endpoints=endpoints
         )
 
+    # @staticmethod
+    # def to_yaml(core: 'CoreMetadata', yaml_file: str):
+    #     with open(yaml_file, 'w', encoding='utf-8') as file:
+    #         # Convert the core instance to a dictionary
+    #         yaml.safe_dump(core.__dict__, file, default_flow_style=False)
+
     @staticmethod
     def to_yaml(core: 'CoreMetadata', yaml_file: str):
         with open(yaml_file, 'w', encoding='utf-8') as file:
-            # Convert the core instance to a dictionary
-            yaml.safe_dump(core.__dict__, file, default_flow_style=False)
+            # Manually prepare a dictionary to serialize
+            core_dict = {
+                'name': core.name,
+                'host': core.host,
+                'port': core.port,
+                'mode': core.mode,
+                'model_path': core.model_path,
+                'available_llms': core.available_llms,
+                'main_llm': core.main_llm,
+                'memory_llm': core.memory_llm,
+                'embedding_llm': core.embedding_llm,
+                'vectorDB': {
+                    # Assuming Chroma has serializable attributes
+                    'Chroma': vars(core.vectorDB.Chroma)
+                },
+                'endpoints': [
+                    # Convert each Endpoint object to dictionary
+                    vars(ep) for ep in core.endpoints
+                ]
+            }
+            yaml.safe_dump(core_dict, file, default_flow_style=False)
 
  
 class RegisterAgentRequest(BaseModel):

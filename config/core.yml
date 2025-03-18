@@ -1,35 +1,32 @@
-name: core
+available_llms:
+- deepseek_r1_qwen_1.5B_q4_k_m
+- deepseek_r1_qwen_7B_q5_k_m
+embedding_llm: embedding_nomic-embed-text-v1.5_q5_k_m
+endpoints:
+- capabilities: []
+  description: Register a helper with metadata, which can be used for core to select
+    the most proper helper to work.
+  input: {}
+  method: POST
+  output: {}
+  path: /register_helper
+- capabilities: []
+  description: Handle a request from channel or helper.
+  input: {}
+  method: POST
+  output: {}
+  path: /process
 host: 0.0.0.0
-port: 9000
+main_llm: deepseek_r1_qwen_7B_q5_k_m
+memory_llm: deepseek_r1_qwen_7B_q5_k_m
 mode: dev
 model_path: ../models/
-main_llm: deepseek_r1_qwen_7B_q5_k_m
-#deepseek_r1_qwen_1.5B_q4_k_m
-#deepseek_r1_qwen_7B_q5_k_m
-#qwen2_7b_instruct_q4_k_m
-memory_llm: deepseek_r1_qwen_7B_q5_k_m
-#without funciton call deepseek_r1_qwen_1.5B_q4_k_m
-#with function call: llama_3_8B_q5_k_m_functionCall
-embedding_llm: embedding_nomic-embed-text-v1.5_q5_k_m
-#llama_3_8B_q5_k_m
+name: core
+port: 9000
 vectorDB:
   Chroma:
-    host: 0.0.0.0
-    port: 5000
-    api: chromadb.api.fastapi.FastAPI
-    is_persistent: true
     anonymized_telemetry: false
-endpoints:
-- path: /register_helper
-  method: POST
-  description: Register a helper with metadata, which can be used for core to
-    select the most proper helper to work.
-  capabilities: []
-  input: {}
-  output: {}
-- path: /process
-  method: POST
-  description: Handle a request from channel or helper.
-  capabilities: []
-  input: {}
-  output: {}
+    api: chromadb.api.fastapi.FastAPI
+    host: 0.0.0.0
+    is_persistent: true
+    port: 5000
