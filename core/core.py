@@ -742,15 +742,15 @@ class Core(CoreInterface):
             logger.debug(f"User:  + {user}")
             if channel_type == ChannelType.Email:
                 logger.debug(f"Email:  + {user.email}, email_id: {user_id}")
-                if user_id in user.email:
+                if ((user_id in user.email) or (len(user.email) == 0)):
                     return (ChannelType.Email in user.permissions or len(user.permissions) == 0), user
             if channel_type == ChannelType.IM:
-                if user_id in user.im:
+                if ((user_id in user.im) or (len(user.im) == 0)):
                     return (ChannelType.IM in user.permissions or len(user.permissions) == 0), user
                 elif user_id  == 'gpt4people:local':
                     return True, user
             if channel_type == ChannelType.Phone:           
-                if user_id in user.phone:
+                if ((user_id in user.phone) or (len(user.phone) == 0)):
                     return (ChannelType.Phone in user.permissions or len(user.permissions) == 0), user
         return False, None
 

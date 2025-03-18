@@ -64,6 +64,7 @@ class Util:
             # Start to monitor the specified config files
             self.watch_config_file()
 
+
     def run_script_in_process(self, script_path) -> Process:
         process = None
         if self.silent:
@@ -289,6 +290,18 @@ class Util:
             logger.debug(f"Failed to get summary from LLM, return the original text, {text}")
             return text   
 
+
+    def read_config(self, file_path):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            config = yaml.safe_load(file)
+        return config
+
+
+    def write_config(self, file_path, config):
+        with open(file_path, 'w', encoding='utf-8') as file:
+            yaml.safe_dump(config, file, default_flow_style=False, sort_keys=False)
+
+
     def get_users(self):
         """
         Loads the users from the configuration file.
@@ -299,6 +312,116 @@ class Util:
         if self.users == None:
             self.users = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))    
         return self.users
+    
+    def add_user(self, user: User):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if user.name == u.name:
+                return
+        if self.users == None:
+            self.users = []
+        self.users.append(user)
+        self.save_users(self.users)
+
+    def remove_user(self, user: User):
+        if self.users == None or len(self.users) == 0:
+            return
+        self.users = self.get_users()
+        for u in self.users:
+            if user.name == u.name:
+                self.users.remove(u)
+                self.save_users(self.users)
+                break 
+
+    def get_user(self, name: str):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if u.name == name:
+                return u
+        return None
+    
+    def get_first_user(self) -> User:
+        self.users = self.get_users()
+        if self.users == None or len(self.users) == 0:
+            return None
+        return self.users[0]
+    
+    def create_default_user(self):
+        user: User = User()
+        user.name = 'GPT4People'
+        user.email = []
+        user.phone = []
+        user.im = []
+        self.add_user(user)
+        return user
+
+    def change_user_name(self, old_name: str, new_name: str):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if u.name == old_name:
+                u.name = new_name
+                self.save_users(self.users)
+                return
+
+    def add_im_to_user(self, user_name: str, im: str):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if u.name == user_name:
+                u.im.append(im)
+                self.save_users(self.users)
+                return
+
+    def remove_im_from_user(self, user_name: str, im: str):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if u.name == user_name:
+                u.im.remove(im)
+                self.save_users(self.users)
+                return
+            
+    def add_email_to_user(self, user_name: str, email: str):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if u.name == user_name:
+                u.email.append(email)
+                self.save_users(self.users)
+                return
+            
+    def remove_email_from_user(self, user_name: str, email: str):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if u.name == user_name:
+                u.email.remove(email)
+                self.save_users(self.users)
+                return
+            
+    def add_phone_to_user(self, user_name: str, phone: str):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if u.name == user_name:
+                u.phone.append(phone)
+                self.save_users(self.users)
+                return
+            
+    def remove_phone_from_user(self, user_name: str, phone: str):
+        if self.users == None or len(self.users) == 0:
+            self.users = self.get_users()
+        for u in self.users:
+            if u.name == user_name:
+                u.phone.remove(phone)
+                self.save_users(self.users)
+                return
+        
+    def save_users(self, users: List[User] = None):
+        User.to_yaml(users, os.path.join(self.config_path(), 'user.yml'))
     
     def get_gpt4people_account(self):
         if self.gpt4people_account == None:

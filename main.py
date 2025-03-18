@@ -24,6 +24,7 @@ from core import core
 from channels.wechat import channel as wechat
 from channels.whatsapp import channel as whatsapp
 from channels.matrix import channel as matrix
+from base.base import User
 
 
 path = os.path.join(Util().root_path(), 'config')
@@ -277,48 +278,6 @@ def run_core() ->threading.Thread:
     thread.start()
     return thread
 
-wechat_flag = False
-def run_wechat_channel() -> threading.Thread:
-    global wechat_flag
-    wechat_flag = True
-    thread = threading.Thread(target=wechat.main)
-    thread.start()    
-    return thread    
-
-def shutdown_wechat_channel():
-    global wechat_flag
-    if wechat_flag:
-        wechat.suicide()
-        wechat_flag = False
-
-whatsapp_flag = False
-def run_whatsapp_channel() -> threading.Thread:
-    global whatsapp_flag
-    whatsapp_flag = True
-    thread = threading.Thread(target=whatsapp.main)
-    thread.start()    
-    return thread
-
-def shutdown_whatsapp_channel():
-    global whatsapp_flag
-    if whatsapp_flag:
-        whatsapp.suicide()
-        whatsapp_flag = False
-
-matrix_flag = False
-def run_matrix_channel() -> threading.Thread:
-    global matrix_flag
-    matrix_flag = True
-    thread = threading.Thread(target=matrix.main)
-    thread.start()    
-    return thread  
-
-def shutdown_matrix_channel():
-    global matrix_flag
-    if matrix_flag:
-        matrix.suicide()
-        matrix_flag = False 
-
 def start():
     if not account_exists():
         register_user()
@@ -342,32 +301,187 @@ def start():
     comment = True
     while flag:
         user_input = input("You: ")
-        if user_input.lower() == 'quit':
+        print('\n')
+        if user_input == '' or user_input is None:    
+            continue
+        user_input = user_input.lower().strip()
+        if user_input == '':
+            continue
+        if user_input == 'quit':
             flag = False
             break
         elif user_input == '':
             continue
-            '''
-            elif  user_input.lower() == 'channel':
-                print("WeChat Channel: Install and login the specific wechat version, then input 'channel wechat' here.\n")
-                print("微信频道: 安装并登录指定的微信版本, 然后在这里输入'channel wechat'。\n")
-                print("Whatsapp Channel: Input 'channel whatsapp' here, then scan the QR code to login using one whatsapp account.\n")
-                print("WhatsApp 频道: 输入'channel whatsapp', 然后扫描二维码登录使用一个 WhatsApp 账号。\n")
-                print("Email Channel: Send email to your GPT4People account directly.\n")
-                print("Email 频道: 直接发送邮件到你的 GPT4People 账户。\n")
-                print("Matrix Channel: Input 'channel matrix' here.\n")
-                print("Matrix 频道: 输入'channel matrix'。\n")
+        
+        elif  user_input == 'channel':
+            print('################################################################################################################################\n')
+            print("How to use wechat channel: \n")
+            print("Step 1: Install and login the specific wechat version on PC and login using one wechat account, then run wechat_channel app.\n")
+            print("Step 2: Using 'wechat user' to define who can talk with your GPT4People.\n\n")
+            print("如何使用微信连接GPT4People: \n")           
+            print("Step 1: 安装并登录指定的微信版本并登录一个微信账号, 然后运行'wechat_channel' 程序。\n")
+            print("Step 2: 输入'wechat user'来定义可以和你的 GPT4People 机器人交流的微信用户。\n")
+            print('################################################################################################################################\n\n')
+
+            print('################################################################################################################################\n')
+            print("How to use whatsapp channel: \n")
+            print("Step 1: Run whatsapp_channel app, then scan the QR code to login using one whatsapp account.\n")
+            print("Step 2: Using 'whatsapp user' to define who can talk with your GPT4People.\n\n")
+            print("如何使用 WhatsApp 连接 GPT4People: \n")
+            print("Step 1: 运行'whatsapp_channel' 程序，然后扫描二维码登录使用一个 WhatsApp 账号。\n")
+            print("Step 2: 输入'whatsapp user'来定义可以和你的 GPT4People 机器人交流的 WhatsApp 用户。\n")
+            print('################################################################################################################################\n\n')
+
+            print('################################################################################################################################\n')
+            print("How to use email channel: \n")
+            print("Step 1: Send email to your GPT4People account directly.\n")
+            print("Step 2: Using 'email user' to define who can talk with your GPT4People .\n\n")
+            print("如何使用 Email 连接 GPT4People: \n")
+            print("Step 1: 直接发送邮件到你的 GPT4People 账户。\n")
+            print("Step 2: 输入'email user'来定义可以和你的 GPT4People 机器人交流的 Email 用户。\n")
+            print('################################################################################################################################\n\n')
+
+            print('################################################################################################################################\n')
+            print("How to use matrix channel: \n")
+            print("Step 1: Run matrix_channel app, then input the required credentials.\n")
+            print("Step 2: Using 'matrix user' to define who can talk with your GPT4People.\n\n")
+            print("如何使用 Matrix 连接 GPT4People: \n")
+            print("Step 1: 运行'matrix_channel' 程序，然后输入所需的服务器地址以及用户名密码。\n")
+            print("Step 2: 输入'matrix user'来定义可以和你的 GPT4People 机器人交流的 Matrix 用户。\n\n")
+            print('################################################################################################################################\n\n')
+            continue
+
+        elif user_input == 'wechat user':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
                 continue
-            elif user_input.lower() == 'channel wechat':
-                wechat_thread = run_wechat_channel()
+            print("Please input the wechat account accessing GPT4People(请输入微信账号, 用来访问GPT4People)\n")
+            wechat_account = input("Enter the wechat account accessing GPT4People(输入微信账号, 用来访问GPT4People): ")
+            im =  'wechat:' + wechat_account
+            Util().add_im_to_user(user.name, im)
+
+            continue
+        elif user_input == 'whatsapp user':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
                 continue
-            elif user_input.lower() == 'channel whatsapp':
-                whatsapp_thread = run_whatsapp_channel()
+            whatsapp_account = input("Enter the whatsapp account accessing GPT4People(输入whatsapp账号, 用来访问GPT4People): ")
+            im =  'whatsapp:' + whatsapp_account
+            Util().add_im_to_user(user.name, im)
+            continue
+        elif user_input == 'matrix user':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
                 continue
-            elif user_input.lower() == 'channel matrix':
-                matrix_thread = run_matrix_channel()
-                continue'
-            '''
+            matrix_account = input("Enter the matrix account accessing GPT4People(输入matrix账号, 用来访问GPT4People): ")
+            im =  'matrix:' + matrix_account
+            Util().add_im_to_user(user.name, im)
+            continue
+        elif user_input == 'email user':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+            emailaddress = input("Enter the email address accessing GPT4People(输入email地址, 用来访问GPT4People): ")
+            im =  'matrix:' + emailaddress
+            Util().add_email_to_user(user.name, emailaddress)
+            continue
+
+        elif user_input == 'wechat remove':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+            print("Please input the wechat account for removing (请输入微信账号, 用来删除)\n")
+            wechat_account = input("Enter the wechat number for removing(输入微信账号, 用来删除): ")
+            im =  'wechat:' + wechat_account
+            Util().remove_im_from_user(user.name, im)
+
+            continue     
+        elif user_input == 'whatsapp remove':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+            print("Please input the whatsapp account for removing (请输入whatsapp账号, 用来删除)\n")
+            whatsapp_account = input("Enter the whatsapp number for removing(输入whatsapp账号, 用来删除): ")
+            im =  'whatsapp:' + whatsapp_account
+            Util().remove_im_from_user(user.name, im)
+
+            continue
+        elif user_input == 'matrix remove':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+            print("Please input the matrix account for removing (请输入matrix账号, 用来删除)\n")
+            matrix_account = input("Enter the matrix number for removing(输入matrix账号, 用来删除): ")
+            im =  'matrix:' + matrix_account
+            Util().remove_im_from_user(user.name, im)
+
+            continue
+        elif user_input == 'email remove':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+            emailaddress = input("Enter the email address for removing(输入email地址, 用来删除): ")
+            Util().remove_email_from_user(user.name, emailaddress)
+            continue
+        elif user_input == 'wechat list':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+            for im in user.im:
+                im_head = im.split(":")[0]
+                if im_head == 'wechat':
+                    result = im.split(":")[1]
+                    print(result)
+                    print('\n')
+
+            continue     
+        elif user_input == 'whatsapp list':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+
+            for im in user.im:
+                im_head = im.split(":")[0]
+                if im_head == 'whatsapp':
+                    result = im.split(":")[1]
+                    print(result)
+                    print('\n')
+
+            continue 
+        elif user_input == 'matrix list':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+
+            for im in user.im:
+                im_head = im.split(":")[0]
+                if im_head == 'matrix':
+                    result = im.split(":")[1]
+                    print(result)
+                    print('\n')
+
+            continue
+        elif user_input == 'email list':
+            user: User = Util().get_first_user()
+            if user is None:
+                print("No user found. Please add a default user first.(找不到用户，请先添加一个默认用户)")
+                continue
+
+            for email in user.email:
+                print(email)
+                print('\n')
+            continue
         else:
             resp = asyncio.run(channel.on_message(user_input)) #channel.on_message(user_input)
             print("GPT4People:", resp)
@@ -376,9 +490,6 @@ def start():
                 comment = False
     url = channel.core_url() + "/shutdown"
     httpx.get(url)
-    #shutdown_wechat_channel()
-    #shutdown_whatsapp_channel()
-    #shutdown_matrix_channel()
     sys.exit(0)
 
 if __name__ == "__main__":
