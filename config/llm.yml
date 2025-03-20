@@ -170,18 +170,6 @@ llms:
     port: 5015
     parameters: {'API_KEY': 'your_api_key'}
 
-  qwen25_14B_q5_k_m:
-    type: local
-    alias: Qwen25_14B_q5_k_m
-    path: qwen25-14B/Qwen2.5-14B-Instruct-Q5_K_M.gguf
-    description: Qwen2.5 14B Instruct
-    languages: ['cn', 'en']
-    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
-    capabilities: ['Chat']
-    host: 127.0.0.1
-    port: 5015
-    parameters: {'API_KEY': 'your_api_key'}   
-
   # deepseek_r1_llama_8B_q5_k_m:
   #   type: local
   #   alias: DeepSeek-R1_llama_8B
@@ -218,17 +206,17 @@ llms:
     port: 5018
     parameters: {'API_KEY': 'your_api_key'}
 
-  qwq_32B_q4_k_m:
-    type: local
-    alias: QWQ-32B
-    path: qwq-32B/qwq-32b-q4_k_m.gguf
-    description: QWQ large size 32B model
-    languages: ['cn', 'en']
-    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
-    capabilities: ['Chat']
-    host: 127.0.0.1
-    port: 5019
-    parameters: {'API_KEY': 'your_api_key'}
+  # qwq_32B_q4_k_m:
+  #   type: local
+  #   alias: QWQ-32B
+  #   path: qwq-32B/qwq-32b-q4_k_m.gguf
+  #   description: QWQ large size 32B model
+  #   languages: ['cn', 'en']
+  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5019
+  #   parameters: {'API_KEY': 'your_api_key'}
 
   # deepseek_r1_qwen25_7B_1m_q8:
   #   type: local
@@ -265,6 +253,18 @@ llms:
   #   host: 127.0.0.1
   #   port: 5022
   #   parameters: {'API_KEY': 'your_api_key'}
+
+  qwen25_14B_q5_k_m:
+    type: local
+    alias: Qwen25_14B_q5_k_m
+    path: qwen25-14B/Qwen2.5-14B-Instruct-Q5_K_M.gguf
+    description: Qwen2.5 14B Instruct
+    languages: ['cn', 'en']
+    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+    capabilities: ['Chat']
+    host: 127.0.0.1
+    port: 5023
+    parameters: {'API_KEY': 'your_api_key'}   
 
 
 
