@@ -1,4 +1,5 @@
 from asyncio import subprocess
+import multiprocessing
 import os
 import asyncio
 from pathlib import Path
@@ -104,10 +105,11 @@ class LLMServiceManager:
 
 
     def start_llama_cpp_server(self, name:str, host:str, port:int, model_path:str, 
-                                     ctx_size:str = '2048', predict:str = '1024', temp:str = '0.7', 
+                                     ctx_size:str = '32768', predict:str = '8192', temp:str = '0.8', 
                                      threads:str = '8', n_gpu_layers:str = '99', 
                                      chat_format:str = None, verbose:str = 'false', pooling:bool = False):
         logger.debug(f"model path {model_path}")
+        thread_num = multiprocessing.cpu_count()
         model_sub_path = os.path.normpath(model_path)
         model_path = os.path.join(Util().models_path(), model_sub_path)
         logger.debug(f"Full model path: {model_path}")
@@ -116,8 +118,17 @@ class LLMServiceManager:
             llama_cpp_args += " --verbose "
         llama_cpp_args += " --ctx-size " + ctx_size
         llama_cpp_args += " --predict " + predict
+        if pooling == False:
+            llama_cpp_args += " --repeat-penalty " + "1.5"
+            #llama_cpp_args += " --repeat-last-n " + "-1"
+            #llama_cpp_args += " --no-penalize-nl "
+        
         llama_cpp_args += " --temp " + temp
-        llama_cpp_args += " --threads " + threads
+        logger.debug(f"Machine Thread number: {thread_num}")
+        if thread_num == None or thread_num > 8:
+            llama_cpp_args += " --threads " + threads
+        else:
+            llama_cpp_args += " --threads " + str(thread_num)
         llama_cpp_args += " --host " + host
         llama_cpp_args += " --port " + str(port)
         if pooling:
@@ -158,9 +169,7 @@ class LLMServiceManager:
             logger.debug(f"An error occurred: {e}")
             
  
-    def run_llama_cpp_llm(self, name: str, ctx_size:str = '2048', predict:str = '1024', temp:str = '0.7', 
-                                     threads:str = '8', n_gpu_layers:str = '99', 
-                                     chat_format:str = None, verbose:str = 'false', pooling:bool = False):
+    def run_llama_cpp_llm(self, name: str, pooling:bool = False):
         try:
             llm = Util().get_llm(name)
             name = llm.name
@@ -177,26 +186,41 @@ class LLMServiceManager:
             #                        threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose, pooling=pooling))
             #self.apps.append(server_task)
             #self.llm_to_app[name] = server_task
-            self.start_llama_cpp_server(name, host, port, path, ctx_size=ctx_size, predict=predict, temp=temp,
-                                    threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose, pooling=pooling)
+            self.start_llama_cpp_server(name, host, port, path, pooling=pooling)
             self.llms.append(llm)      
             #self.apps.append(self.start_llama_cpp_server(name, host, port, path))
             logger.debug(f"Running LLM Server {path} on {host}:{port}")
         except asyncio.CancelledError:
             logger.debug("LLM from llama.cpp was cancelled.")
             # Handle any cleanup if necessary
+
+    def run_embedding_llm(self):
+        try:
+            llm = Util().get_llm(self.embedding_llm().name)
+            name = llm.name
+            host = llm.host
+            port = llm.port
+            path = llm.path
+            
+            if llm in self.llms:
+                logger.debug(f"LLM {name} is already running")
+                return
+
+            embedding_token_len = Util().embedding_tokens_len()
+            self.start_llama_cpp_server(name, host, port, path, ctx_size=str(embedding_token_len), pooling=True)
+            self.llms.append(llm)
+            logger.debug("Running Embedding services!")
+        except asyncio.CancelledError:
+            logger.debug("LLM for embeddingwas cancelled.")
         
             
-    def run_main_llm(self, ctx_size:str = '2048', predict:str = '1024', temp:str = '0.7', 
-                                     threads:str = '8', n_gpu_layers:str = '99', 
-                                     chat_format:str = None, verbose:str = 'false'):
+    def run_main_llm(self):
         llm = self.main_llm()
         type = llm.type
         name = llm.name
         ret = None
         if type == 'local':       
-            self.run_llama_cpp_llm(name, ctx_size=ctx_size, predict=predict, temp=temp,
-                                threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose)
+            self.run_llama_cpp_llm(name)
         #elif type == 'litellm':
         #    ret = self.run_litellm_service(name)
             
@@ -292,62 +316,12 @@ class LLMServiceManager:
         except asyncio.CancelledError:
             logger.debug("LLM from litellm service was cancelled.")
     '''
-            
-    '''
-    def run_memory_llm(self, chat_format='chatml-function-calling', 
-                                     embedding=False, verbose=False, n_gpu_layers=99, n_ctx=2048):
-        try:
-            llm = self.memory_llm()
-            name = llm.name
-            host = llm.host
-            port = llm.port
-            model_path = llm.path
-            ret = self.run_llama_cpp_python_llm(name, chat_format=chat_format, embedding=embedding, verbose=verbose, n_gpu_layers=n_gpu_layers, n_ctx=n_ctx)
-            logger.debug(f"Memory LLM services running on {host}:{port} with {model_path}!")
-            return ret
-        except asyncio.CancelledError:
-            logger.debug("LLM for memory cancelled.") 
-    '''
-
-    def run_memory_llm_cpp(self, ctx_size:str = '2048', predict:str = '1024', temp:str = '0.7', 
-                                     threads:str = '8', n_gpu_layers:str = '99', 
-                                     chat_format:str = None, verbose:str = 'false'):
-        llm = self.memory_llm()
-        name = llm.name
-        host = llm.host
-        port = llm.port
-        model_path = llm.path
-        ret =  None       
-        if type == 'local':       
-            self.run_llama_cpp_llm(name, ctx_size=ctx_size, predict=predict, temp=temp,
-                                    threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose)
-        #elif type == 'litellm':
-        #    ret = self.run_litellm_service(name)
-        logger.debug(f"Memory LLM services running on {host}:{port} with {model_path}!")   
-
-
-    def run_embedding_llm(self, ctx_size:str = '4096', predict:str = '1024', temp:str = '0.7', 
-                                     threads:str = '8', n_gpu_layers:str = '99', 
-                                     chat_format:str = None, verbose:str = 'false'):
-        try:
-            llm = self.embedding_llm()
-            name = llm.name
-            self.run_llama_cpp_llm(name, ctx_size=ctx_size, predict=predict, temp=temp,
-                                threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose, pooling=True)
-            logger.debug("Embedding services added!")
-        except asyncio.CancelledError:
-            logger.debug("LLM for embeddingwas cancelled.")
-
 
     def main_llm(self):
         return Util().main_llm()
 
-    def memory_llm(self):
-        return Util().memory_llm()
-
     def embedding_llm(self):
         return Util().embedding_llm()
-    
     
     async def add_and_start_new_app(self, app):
         logger.debug("Adding app.")
@@ -457,8 +431,6 @@ class LLMServiceManager:
     def run(self):
         try:
             self.run_main_llm()
-            #self.run_memory_llm()
-            self.run_memory_llm_cpp()
             self.run_embedding_llm()
             
             #await self.start_all_apps()

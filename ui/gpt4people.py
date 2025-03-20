@@ -41,14 +41,13 @@ def get_config():
     port = core_config['port']
     mode = core_config['mode']
     main_llm = core_config['main_llm']
-    memory_llm = core_config['memory_llm']
     embedding_llm = core_config['embedding_llm']
     
     llm_options = list(llm_config['llms'].keys())
     
-    return (name, host, port, mode, main_llm, memory_llm, embedding_llm, llm_options)
+    return (name, host, port, mode, main_llm, embedding_llm, llm_options)
 
-def update_config(host, port, mode, main_llm, memory_llm, embedding_llm):
+def update_config(host, port, mode, main_llm, embedding_llm):
     core_config = read_config(config_file_path)  # Read the existing config to preserve the name field
     name = core_config['name']
     model_path = core_config['model_path']
@@ -61,7 +60,6 @@ def update_config(host, port, mode, main_llm, memory_llm, embedding_llm):
         'mode': mode,
         'model_path': model_path,
         'main_llm': main_llm,
-        'memory_llm': memory_llm,
         'embedding_llm': embedding_llm,
         'vectorDB': vectorDB,
         'endpoints': endpoints
@@ -240,7 +238,6 @@ def render_main_ui(visible=False):
                         port = gr.Number(label="Port")
                         mode = gr.Dropdown(label="Mode", choices=["dev", "production"])
                         main_llm = gr.Dropdown(label="Main LLM", choices=llm_options)
-                        memory_llm = gr.Dropdown(label="Memory LLM", choices=llm_options)
                         embedding_llm = gr.Dropdown(label="Embedding LLM", choices=llm_options)
 
                 update_button = gr.Button("Update Configuration")
@@ -248,7 +245,7 @@ def render_main_ui(visible=False):
 
                 update_button.click(
                     fn=update_config,
-                    inputs=[host, port, mode, main_llm, memory_llm, embedding_llm],
+                    inputs=[host, port, mode, main_llm, embedding_llm],
                     outputs=output
                 )
 
@@ -256,7 +253,7 @@ def render_main_ui(visible=False):
                     values = get_config()
                     return values[0], values[1], values[2], values[3], values[4], values[5], values[6]
 
-                main_ui.load(fn=load_initial_values, outputs=[name, host, port, mode, main_llm, memory_llm, embedding_llm])
+                main_ui.load(fn=load_initial_values, outputs=[name, host, port, mode, main_llm, embedding_llm])
 
             with gr.Tab("Manage LLMs"):
                 llm_list = gr.Dropdown(label="LLM List", choices=list(llm_config['llms'].keys()), value=list(llm_config['llms'].keys())[0])

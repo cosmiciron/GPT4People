@@ -50,15 +50,14 @@ def get_core_config():
     port = core_config['port']
     mode = core_config['mode']
     main_llm = core_config['main_llm']
-    memory_llm = core_config['memory_llm']
     embedding_llm = core_config['embedding_llm']
     
     llm_options = list(llm_config['llms'].keys())
     
-    return (name, host, port, mode, main_llm, memory_llm, embedding_llm, llm_options)
+    return (name, host, port, mode, main_llm, embedding_llm, llm_options)
 
 
-def update_core_config(host, port, mode, main_llm, memory_llm, embedding_llm):
+def update_core_config(host, port, mode, main_llm, embedding_llm):
     core_config = read_config(core_config_file_path)  # Read the existing config to preserve the name field
     name = core_config['name']
     model_path = core_config['model_path']
@@ -71,7 +70,6 @@ def update_core_config(host, port, mode, main_llm, memory_llm, embedding_llm):
         'mode': mode,
         'model_path': model_path,
         'main_llm': main_llm,
-        'memory_llm': memory_llm,
         'embedding_llm': embedding_llm,
         'vectorDB': vectorDB,
         'endpoints': endpoints
@@ -329,7 +327,6 @@ def start():
                 continue
             if current_llm != available_llms[llm_index - 1]:
                 Util().set_mainllm(available_llms[llm_index - 1])
-                Util().set_memoryllm(available_llms[llm_index - 1])
                 print(f"LLM set to（大模型设置为）: {available_llms[llm_index - 1]}\n")
                 print('Restart the app to use new LLM.(重启应用以使用新的大模型)\n')
                 break

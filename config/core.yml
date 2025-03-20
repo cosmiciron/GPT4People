@@ -1,7 +1,12 @@
 available_llms:
+- qwen25_1.5B_q8
 - deepseek_r1_qwen_1.5B_q4_k_m
-- deepseek_r1_qwen_7B_q5_k_m
-embedding_llm: embedding_nomic-embed-text-v1.5_q5_k_m
+- qwq_32B_q4_k_m
+- deepseek_r1_qwen_14B_q5_k_m
+embedding_llm: embedding_text_model
+silent: false
+use_memory: true
+embeddingTokensLen: 8192
 endpoints:
 - capabilities: []
   description: Register a helper with metadata, which can be used for core to select
@@ -17,8 +22,7 @@ endpoints:
   output: {}
   path: /process
 host: 0.0.0.0
-main_llm: deepseek_r1_qwen_7B_q5_k_m
-memory_llm: deepseek_r1_qwen_7B_q5_k_m
+main_llm: deepseek_r1_qwen_14B_q5_k_m
 mode: dev
 model_path: ../models/
 name: core

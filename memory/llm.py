@@ -1,18 +1,15 @@
 import json
 import os
 from typing import Dict, List, Optional
-from abc import ABC, abstractmethod
 
 import httpx
+from base.util import Util
 from memory.base import LLMBase
-from memory.configs import BaseLlmConfig
 from loguru import logger
 
 class LlamaCppLLM(LLMBase):
-    def __init__(self, config: Optional[BaseLlmConfig] = None):
-        super().__init__(config)
-
-        self.base_llm_url = self.config.llama_cpp_base_url
+    def __init__(self):
+        super().__init__()
                 
 
     def _parse_response(self, resp, tools):
@@ -85,13 +82,10 @@ class LlamaCppLLM(LLMBase):
         self,
         messages: List[Dict[str, str]],
         grammar: Optional[str] = None,
-        response_format=None,
         tools: Optional[List[Dict]] = None,
         tool_choice: str = "auto",
         functions: Optional[List] = None,
-        function_call: Optional[str] = None,
-        host: Optional[str] = None,
-        port: Optional[int] = None
+        function_call: Optional[str] = None
     ):
         """
         Generate a response based on the given messages using OpenAI.
@@ -105,43 +99,7 @@ class LlamaCppLLM(LLMBase):
         Returns:
             str: The generated response.
         """
-        params = {}
-        if grammar != None:
-            params = {
-                "model": "gpt4people",
-                "messages": messages,
-                "extra_body": {
-                    "grammar": grammar
-                } 
-            }
-        else:
-            params = {
-                "model": "gpt4people",
-                "messages": messages
-            } 
-
-        if response_format:
-            params["response_format"] = response_format
-        if tools:
-            params["tools"] = tools
-            params["tool_choice"] = tool_choice
-        
-        if functions:
-            params["functions"] = functions
-        if function_call:
-            params["function_call"] = function_call
-
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Anything'
-        }
-        chat_completion_api_url = ''
-        if host and port:
-            chat_completion_api_url = 'http://' + host + ':' + str(port) + '/v1/chat/completions'
-        else:
-            chat_completion_api_url = self.base_llm_url + '/v1/chat/completions'
-
         # sync call using httpx
-        async with httpx.AsyncClient() as client:
-            response = await client.post(chat_completion_api_url, headers=headers, json=params, timeout=60.0)
+        async with httpx.AsyncClient() as client:  
+            response = await Util().openai_chat_completion(messages=messages, grammar=grammar, tools=tools, tool_choice=tool_choice, functions=functions, function_call=function_call)
         return self._parse_response(response.content.decode('utf-8'), tools)

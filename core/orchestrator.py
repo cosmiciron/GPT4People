@@ -127,7 +127,7 @@ class Orchestrator:
         hist = self.get_hist_chats(request)
         logger.debug(f'Orchestrator get Chat history: {hist}')
         if hist is not None and len(hist) > 0:
-            hist = await Util().llm_summarize(hist)
+            hist = await Util().llm_summarize(hist, 4096)
         else:
             hist = ""
         prompt = self.create_prompt(text, hist)

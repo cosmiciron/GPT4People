@@ -19,7 +19,7 @@ from memory.prompts import MEMORY_DEDUCTION_PROMPT
 #from memory.prompts import MEMORY_PREPROCESSING_PROMPT
 from memory.base import MemoryBase, VectorStoreBase, EmbeddingBase, LLMBase
 
-from memory.setup import setup_config
+#from memory.setup import setup_config
 from memory.util import get_update_memory_messages, get_add_memory_messages
 from memory.storage import SQLiteManager
 from memory.configs import MemoryItem, MemoryConfig
@@ -28,7 +28,7 @@ from base.util import Util
 
 
 # Setup user config
-setup_config()
+#setup_config()
 
 
 class Memory(MemoryBase):

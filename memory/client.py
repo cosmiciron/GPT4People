@@ -1,4 +1,3 @@
-import logging
 import os
 from functools import wraps
 from typing import Any, Dict, List, Optional, Union
@@ -6,10 +5,10 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 from loguru import logger
 
-from memory.setup import setup_config
+#from memory.setup import setup_config
 
 # Setup user config
-setup_config()
+#setup_config()
 
 
 class APIError(Exception):

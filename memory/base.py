@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
-from memory.configs import BaseEmbedderConfig, BaseLlmConfig
 
 
 class VectorStoreBase(ABC):
@@ -61,11 +60,8 @@ class EmbeddingBase(ABC):
     :type config: Optional[BaseEmbedderConfig], optional
     """
 
-    def __init__(self, config: Optional[BaseEmbedderConfig] = None):
-        if config is None:
-            self.config = BaseEmbedderConfig()
-        else:
-            self.config = config
+    def __init__(self):
+        pass
 
     @abstractmethod
     async def embed(self, text):
@@ -82,27 +78,16 @@ class EmbeddingBase(ABC):
 
 
 class LLMBase(ABC):
-    def __init__(self, config: Optional[BaseLlmConfig] = None):
-        """Initialize a base LLM class
-
-        :param config: LLM configuration option class, defaults to None
-        :type config: Optional[BaseLlmConfig], optional
-        """
-        if config is None:
-            self.config = BaseLlmConfig()
-        else:
-            self.config = config
+    def __init__(self):
+        pass
 
     @abstractmethod
     async def generate_response(self,
                                 messages: List[Dict[str, str]],
-                                response_format=None,
                                 tools: Optional[List[Dict]] = None,
                                 tool_choice: str = "auto",
                                 functions: Optional[List] = None,
-                                function_call: Optional[str] = None,
-                                host: Optional[str] = None,
-                                port: Optional[int] = None
+                                function_call: Optional[str] = None
                                 ):
         """
         Generate a response based on the given messages.

@@ -43,6 +43,9 @@ from base.BaseChannel import BaseChannel
 from base.BasePlugin import BasePlugin
 from base.base import ChannelType, ContentType, User, CoreMetadata, Server
 from llm.llmService import LLMServiceManager
+from memory.embedding import LlamaCppEmbedding
+from memory.mem import Memory
+from memory.llm import LlamaCppLLM
 from memory.chat.message import ChatMessage
 from memory.chat.chat import ChatHistory
 from memory.base import MemoryBase, VectorStoreBase, EmbeddingBase, LLMBase
@@ -81,7 +84,6 @@ class Core(CoreInterface):
             self.embedder: EmbeddingBase = None
             self.mem_instance: MemoryBase = None
             self.vector_store: VectorStoreBase = None
-            self.memory_llm: LLMBase = None
             self.llmManager: LLMServiceManager = LLMServiceManager()
             
             #self.chroma_server_process = self.start_chroma_server()
@@ -279,34 +281,6 @@ class Core(CoreInterface):
             logger.error(f"Best index {best_index} is out of range for description keys")
             return None
 
-
-    def initialize_embedder(self):
-        from memory.embedding import EmbeddingBase, BaseEmbedderConfig, LlamaCppEmbedding
-        # Initialize the embedder, now it is using one existing llama_cpp server with local LLM model
-        llm: LLM = Util().embedding_llm()
-        host = llm.host
-        port = llm.port
-        embedding_url = "http://" + host + ":" + str(port)
-        embedding_config = BaseEmbedderConfig(embedding_base_url=embedding_url)  # Set the correct URL and dimensions
-        self.embedder = LlamaCppEmbedding(embedding_config)
-        
-        
-    def initialize_memory(self):
-        from memory.mem import Memory  # Import here to avoid circular import
-        self.mem_instance = Memory(embedding_model=self.embedder, vector_store=self.vector_store, llm=self.memory_llm)
-        
-          
-    def initialize_memory_llm(self):
-        from memory.llm import LlamaCppLLM
-        from memory.configs import BaseLlmConfig
-        memory_llm = Util().memory_llm()
-        host = memory_llm.host
-        port = memory_llm.port
-        llama_cpp_base_url = "http://" + host + ":" + str(port)
-        llm_config = BaseLlmConfig(llama_cpp_base_url=llama_cpp_base_url)
-        self.memory_llm = LlamaCppLLM(config=llm_config)
-
-
     def load_plugins(self):
         self.plugin_manager.load_plugins()
 
@@ -359,9 +333,8 @@ class Core(CoreInterface):
     def initialize(self):
         logger.debug("core initializing...")
         self.initialize_vector_store(collection_name="memory")
-        self.initialize_embedder()
-        self.initialize_memory_llm()
-        self.initialize_memory()
+        self.embedder = LlamaCppEmbedding()      
+        self.mem_instance = Memory(embedding_model=self.embedder, vector_store=self.vector_store, llm=LlamaCppLLM())
         
         self.request_queue_task = asyncio.create_task(self.process_request_queue())
         self.response_queue_task = asyncio.create_task(self.process_response_queue())
@@ -696,7 +669,7 @@ class Core(CoreInterface):
                 human_message = content
             session_id = self.get_session_id(app_id=app_id, user_name=user_name, user_id=user_id)
             run_id = self.get_run_id(agent_id=app_id, user_name=user_name, user_id=user_id)
-            histories: List[ChatMessage] = self.chatDB.get(app_id=app_id, user_name=user_name, user_id=user_id, num_rounds=10, fetch_all=False, display_format=False)
+            histories: List[ChatMessage] = self.chatDB.get(app_id=app_id, user_name=user_name, user_id=user_id, num_rounds=6, fetch_all=False, display_format=False)
             messages = []
 
             if histories is not None and len(histories) > 0: 
@@ -1087,51 +1060,62 @@ class Core(CoreInterface):
         if not any([user_name, user_id, agent_id, run_id]):
             raise ValueError("One of user_name, user_id, agent_id, run_id must be provided")
         try:
-            relevant_memories = await self._fetch_relevant_memories(query,
-                messages, user_name, user_id, agent_id, run_id, filters, 10
-            )
-            memories_text = ""
-            if relevant_memories:
-                i = 1
-                for memory in relevant_memories:
-                    memories_text += (str(i) + ": " + memory["memory"] + " ")
-                    logger.debug(f"RelevantMemory: {str(i) } ': ' {memory['memory']}")
-                    i += 1
-            else: 
-                memories_text = ""
-            prompt = RESPONSE_TEMPLATE
-            #prompt = prompt.format(context=memories_text)
+            use_memory = Util().has_memory()
             llm_input = []
-            if len(memories_text) > 0 :
-                llm_input = [{"role": "system", "content": prompt}]
+            response = ''
+            if use_memory:
+                relevant_memories = await self._fetch_relevant_memories(query,
+                    messages, user_name, user_id, agent_id, run_id, filters, 10
+                )
+                memories_text = ""
+                if relevant_memories:
+                    i = 1
+                    for memory in relevant_memories:
+                        memories_text += (str(i) + ": " + memory["memory"] + " ")
+                        logger.debug(f"RelevantMemory: {str(i) } ': ' {memory['memory']}")
+                        i += 1
+                else: 
+                    memories_text = ""
+                prompt = RESPONSE_TEMPLATE
+                prompt = prompt.format(context=memories_text)
+                if len(memories_text) > 0 :
+                    llm_input = [{"role": "system", "content": prompt}]
+                    # llm_input.append({
+                    #         "role": "system",
+                    #         "content": f"Background information: {memories_text}. This context is to provide background and depth."
+                    #     })
                 #llm_input += [{"role": "user", "content": f"Please use the following context to inform your responses to my queries: {memories_text}" }]
                 #llm_input += [{"role": "assistant", "content": "Understood. I'll incorporate the provided context to ensure my responses are as relevant and helpful as possible."}]
 
                 #if len(messages) > 0 and messages[0]["role"] == "system":
                 #    messages.pop(0)
             llm_input += messages
-            if len(memories_text) > 0:
-                llm_input[-1]["content"] = f"Context for your reference: '{memories_text}'. When responding to the following user input: {query}, aim for a natural interaction instead of trying to provide a direct response. Let's focus on having an engaging conversation based on the chat histories, using the context only when it seamlessly fits."
+            #if len(memories_text) > 0:
+            #    llm_input[-1]["content"] = f"Context for your reference: '{memories_text}'. When responding to the following user input: {query}, aim for a natural interaction instead of trying to provide a direct response. Let's focus on having an engaging conversation based on the chat histories, using the context only when it seamlessly fits."
                 #llm_input[-1]["content"] = f"Please note, the context '{memories_text}' is provided for background. For inputs unrelated to this context, rely primarily on the chat histories for your responses. For my current question: {query}, use your judgment to decide the relevance of the context."
             logger.debug("Start to generate the response for user input: " + query)
             response = await self.openai_chat_completion(messages=llm_input)
             if response is None or len(response) == 0:
-                return None
+                return "Sorry, something went wrong and please try again. (对不起，出错了，请再试一次)"
             message: ChatMessage = ChatMessage()
             message.add_user_message(query)
             message.add_ai_message(response)
             self.chatDB.add(app_id=app_id, user_name=user_name, user_id=user_id, session_id=session_id, chat_message=message)
-            prompt = MEMORY_CHECK_PROMPT
-            prompt = prompt.format(chats=messages, user_input=query)
-            llm_input = []
-            llm_input = [{"role": "system", "content": prompt}] 
-            logger.debug("Start to check if the user input should be added to memory")
-            result =await self.openai_chat_completion(messages=llm_input)
-            if result is not None and len(result) > 0:
-                result = result.strip().lower()
-                if result.find("yes") != -1:               
-                    await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
-                    logger.debug(f"User input added to memory: {query}")
+            if use_memory:
+                await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
+
+                # # Check if the user input should be added to memory, For performance, comment this for now. 
+                # prompt = MEMORY_CHECK_PROMPT
+                # prompt = prompt.format(chats=messages, user_input=query)
+                # llm_input = []
+                # llm_input = [{"role": "system", "content": prompt}] 
+                # logger.debug("Start to check if the user input should be added to memory")
+                # result =await self.openai_chat_completion(messages=llm_input)
+                # if result is not None and len(result) > 0:
+                #     result = result.strip().lower()
+                #     if result.find("yes") != -1:               
+                #         await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
+                #         logger.debug(f"User input added to memory: {query}")
             return response
         except Exception as e:  
             logger.exception(e)

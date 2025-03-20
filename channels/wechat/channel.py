@@ -5,21 +5,20 @@ import os
 import sys
 from pathlib import Path
 import httpx
-
-from base.util import Util
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Response
 from loguru import logger
 from pydantic import BaseModel
-from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
-from base.BaseChannel import ChannelMetadata, BaseChannel
 from dotenv import dotenv_values
 import yaml
 from wcferry import Wcf, WxMsg
 from loguru import logger
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from base.util import Util
+from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
+from base.BaseChannel import ChannelMetadata, BaseChannel
+
 
 
 @asynccontextmanager

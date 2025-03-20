@@ -29,21 +29,19 @@ from neonize.proto.waE2E.WAWebProtobufsE2E_pb2 import (
 from neonize.types import MessageServerID
 from neonize.utils import log
 from neonize.utils.enum import ReceiptType
-
-from base.util import Util
-
-sys.path.insert(0, os.getcwd())
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
-from base.BaseChannel import ChannelMetadata, BaseChannel
-from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
 from dotenv import dotenv_values
 import yaml
 from os import getenv
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from base.util import Util
+from base.BaseChannel import ChannelMetadata, BaseChannel
+from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
+
 
 
 @asynccontextmanager

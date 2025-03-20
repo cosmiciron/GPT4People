@@ -302,9 +302,11 @@ class CoreMetadata:
     mode: str
     model_path: str
     available_llms: List[str]
+    embeddingTokensLen: int
     main_llm: str
-    memory_llm: str
     embedding_llm: str
+    silent: bool
+    use_memory: bool
     vectorDB: VectorDB
     endpoints: List[Endpoint]
 
@@ -325,9 +327,11 @@ class CoreMetadata:
             mode=data['mode'],
             model_path=data['model_path'],
             available_llms=data['available_llms'],
+            embeddingTokensLen=data['embeddingTokensLen'],
             main_llm=data['main_llm'],
-            memory_llm=data['memory_llm'],
             embedding_llm=data['embedding_llm'],
+            silent=data['silent'],
+            use_memory=data['use_memory'],
             vectorDB=vectorDB,
             endpoints=endpoints
         )
@@ -349,8 +353,10 @@ class CoreMetadata:
                 'mode': core.mode,
                 'model_path': core.model_path,
                 'available_llms': core.available_llms,
+                'embeddingTokensLen': core.embeddingTokensLen,
                 'main_llm': core.main_llm,
-                'memory_llm': core.memory_llm,
+                'silent': core.silent,
+                'use_memory': core.use_memory,
                 'embedding_llm': core.embedding_llm,
                 'vectorDB': {
                     # Assuming Chroma has serializable attributes

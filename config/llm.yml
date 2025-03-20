@@ -1,9 +1,9 @@
 llms:
-  embedding_nomic-embed-text-v1.5_q5_k_m:
+  embedding_text_model:
     type: local
     alias: embedding
-    path: embedding/nomic-embed-text-v1.5.Q5_K_M.gguf
-    #embedding/granite-embedding-278m-multilingual-Q4_K_M.gguf
+    path: embedding/bge-m3-Q5_K_M.gguf
+    #embedding/nomic-embed-text-v1.5.Q5_K_M.gguf
     description: embedding-multilingual
     languages: ['en', 'cn']
     introduction: 我是embedding model 
@@ -50,173 +50,113 @@ llms:
     port: 4003
     parameters: {'API_KEY': 'your_api_key'}
 
-  qwen2_7b_instruct_q4_k_m:
-    type: local
-    alias: 千问2-7B-Q4
-    path: qwen-2-7B-Instruct/qwen2-7b-instruct-q4_k_m.gguf
-    description: Qwen middle size 7B model
-    languages: ['cn', 'en']
-    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
-    capabilities: ['Chat']
-    host: 127.0.0.1
-    port: 5001
-    parameters: {'API_KEY': 'your_api_key'}
+  # qwen2_7b_instruct_q4_k_m:
+  #   type: local
+  #   alias: 千问2-7B-Q4
+  #   path: qwen-2-7B-Instruct/qwen2-7b-instruct-q4_k_m.gguf
+  #   description: Qwen middle size 7B model
+  #   languages: ['cn', 'en']
+  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5001
+  #   parameters: {'API_KEY': 'your_api_key'}
 
-  llama_3_8B_q5_k_m_functionCall:
-    type: local
-    alias: Llama3-8B-functionCall
-    path: llama-3-8B_functioncall/llama-3-8B-function-calling-Q5_K_M.gguf
-    description: Llama3 middle size 8B model support function call
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Functioncall', 'Chat']
-    host: 127.0.0.1
-    port: 5002
-    parameters: {'API_KEY': 'your_api_key'}
+  # llama_3_8B_q5_k_m_functionCall:
+  #   type: local
+  #   alias: Llama3-8B-functionCall
+  #   path: llama-3-8B_functioncall/llama-3-8B-function-calling-Q5_K_M.gguf
+  #   description: Llama3 middle size 8B model support function call
+  #   languages: ['en', 'cn']
+  #   introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
+  #   capabilities: ['Functioncall', 'Chat']
+  #   host: 127.0.0.1
+  #   port: 5002
+  #   parameters: {'API_KEY': 'your_api_key'}
  
-  qwen_2_7B_q5_k_m_functionCall:
-    type: local
-    alias: Qwen2-7B-functionCall
-    path: qwen2-7B-Instruct-function-calling/qwen2-function-calling_q5_k_m.gguf
-    description: Qwen2 middle size 7B model support function call
-    languages: ['cn', 'en']
-    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
-    capabilities: ['Functioncall', 'Chat']
-    host: 127.0.0.1
-    port: 5003
-    parameters: {'API_KEY': 'your_api_key'}
+  # qwen_2_7B_q5_k_m_functionCall:
+  #   type: local
+  #   alias: Qwen2-7B-functionCall
+  #   path: qwen2-7B-Instruct-function-calling/qwen2-function-calling_q5_k_m.gguf
+  #   description: Qwen2 middle size 7B model support function call
+  #   languages: ['cn', 'en']
+  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+  #   capabilities: ['Functioncall', 'Chat']
+  #   host: 127.0.0.1
+  #   port: 5003
+  #   parameters: {'API_KEY': 'your_api_key'}
 
-  qwen2_7B_instruct_fp16:
-    type: local
-    alias: qwen2-7B-instruct-fp16
-    path: qwen-2-7B-Instruct/qwen2-7b-instruct-fp16.gguf
-    description: Qwen large size 7B model
-    languages: ['cn', 'en']
-    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
-    capabilities: ['Chat']
-    host: 127.0.0.1
-    port: 5004
-    parameters: {'API_KEY': 'your_api_key'}  
+  # qwen2_7B_instruct_fp16:
+  #   type: local
+  #   alias: qwen2-7B-instruct-fp16
+  #   path: qwen-2-7B-Instruct/qwen2-7b-instruct-fp16.gguf
+  #   description: Qwen large size 7B model
+  #   languages: ['cn', 'en']
+  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5004
+  #   parameters: {'API_KEY': 'your_api_key'}  
 
-  qwen2_14B_merge:
-    type: local  
-    alias: qwen2-14B-merge
-    path: qwen-2-14B-merge/qwen2-14b-merge-q4_k_m.gguf
-    description: qwen2 middle size 14B model
-    languages: ['cn', 'en']
-    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
-    capabilities: ['Chat']
-    host: 127.0.0.1
-    port: 5005
-    parameters: {'API_KEY': 'your_api_key', 'max_tokens':1024} 
+  # qwen2_14B_merge:
+  #   type: local  
+  #   alias: qwen2-14B-merge
+  #   path: qwen-2-14B-merge/qwen2-14b-merge-q4_k_m.gguf
+  #   description: qwen2 middle size 14B model
+  #   languages: ['cn', 'en']
+  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5005
+  #   parameters: {'API_KEY': 'your_api_key', 'max_tokens':1024} 
 
-  llama_3_8B_q5_k_m:
-    type: local
-    alias: Llama3-8B-q5-k-m
-    path: llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-v2.Q5_K_M.gguf
-    description: Llama3 middle size 8B model
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat']
-    host: 127.0.0.1
-    port: 5006
-    parameters: {'API_KEY': 'your_api_key'} 
+  # llama_3_8B_q5_k_m:
+  #   type: local
+  #   alias: Llama3-8B-q5-k-m
+  #   path: llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-v2.Q5_K_M.gguf
+  #   description: Llama3 middle size 8B model
+  #   languages: ['en', 'cn']
+  #   introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5006
+  #   parameters: {'API_KEY': 'your_api_key'} 
 
-  llama_3_13B_q5_k_m:
-    type: local
-    alias: Llama3-13B-q5-k-m
-    path: llama-3-13B-Instruct/Llama-3-13B-Instruct-Q5_K_M.gguf
-    description: Llama3 large size 13B model
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat']    
-    host: 127.0.0.1
-    port: 5007
-    parameters: {'API_KEY': 'your_api_key'} 
+  # llama_3_13B_q5_k_m:
+  #   type: local
+  #   alias: Llama3-13B-q5-k-m
+  #   path: llama-3-13B-Instruct/Llama-3-13B-Instruct-Q5_K_M.gguf
+  #   description: Llama3 large size 13B model
+  #   languages: ['en', 'cn']
+  #   introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
+  #   capabilities: ['Chat']    
+  #   host: 127.0.0.1
+  #   port: 5007
+  #   parameters: {'API_KEY': 'your_api_key'} 
 
-  llama_3_1_8B_q5_k_m:
-    type: local
-    alias: Llama3.1-8B-q5
-    path: llama-3-1-8B-Instruct/Llama-3.1-8B-Instruct-Q5_K_M.gguf
-    description: Llama3.1 middle size 8B model
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat']    
-    host: 127.0.0.1
-    port: 5008
-    parameters: {'API_KEY': 'your_api_key'} 
+  # llama_3_1_8B_q5_k_m:
+  #   type: local
+  #   alias: Llama3.1-8B-q5
+  #   path: llama-3-1-8B-Instruct/Llama-3.1-8B-Instruct-Q5_K_M.gguf
+  #   description: Llama3.1 middle size 8B model
+  #   languages: ['en', 'cn']
+  #   introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
+  #   capabilities: ['Chat']    
+  #   host: 127.0.0.1
+  #   port: 5008
+  #   parameters: {'API_KEY': 'your_api_key'} 
 
-  llama_3_1_8B_q8:
-    type: local
-    alias: Llama3.1-8B-q8
-    path: llama-3-1-8B-Instruct/Llama-3.1-8B-Instruct-Q8_0.gguf
-    description: Llama3.1 large size 8B model
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat'] 
-    host: 127.0.0.1
-    port: 5009
-    parameters: {'API_KEY': 'your_api_key'} 
-
-  llama_3_1_70B_q5_k_m:
-    type: local
-    alias: Llama3.1-70B
-    path: llama-3-13B-Instruct/Llama-3-13B-Instruct-Q5_K_M.gguf
-    description: Llama3.1 large size 13B model
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat'] 
-    host: 127.0.0.1
-    port: 5010
-    parameters: {'API_KEY': 'your_api_key'} 
-
-  miniCPM_llama3_8B_q5_k_m:
-    type: local
-    alias: miniCPM-llama3-8B
-    path: miniCPM-llama-3-8B-Instruct/miniCPM_Q5_K_M.gguf
-    description: miniCPM Llama3 middle size 8B. A GPT-4V Level Multimodal LLM
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat', 'PromptWithImage'] 
-    host: 127.0.0.1
-    port: 5011
-    parameters: {'API_KEY': 'your_api_key'} 
-
-  octopus_v4_q5_k_m:
-    type: local
-    alias: octopus-v4-q5
-    path: octopus-v4-Instruct/octopus-v4-Q5_K_M.gguf
-    description: Octopus middle size model
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat', 'Math'] 
-    host: 127.0.0.1
-    port: 5012
-    parameters: {'API_KEY': 'your_api_key'} 
-
-  octopus_v4_f16:
-    type: local
-    alias: octopus-v4-f16
-    path: octopus-v4-Instruct/octopus-v4-F16.gguf
-    description: Octopus large size model with f16
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat', 'Math'] 
-    host: 127.0.0.1
-    port: 5013
-    parameters: {'API_KEY': 'your_api_key'} 
-
-  deepseek_r1_qwen_32B_q4_k_m:
-    type: local
-    alias: DeepSeek-R1_qwen_32B
-    path: deepseek-r1/deepseek-qwen-32B_q4_k_m/DeepSeek-R1-Distill-Qwen-32B-Q4_K_M.gguf
-    description: DeepSeek-R1 distill model using qwen 32B
-    languages: ['cn', 'en']
-    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
-    capabilities: ['Chat']
-    host: 127.0.0.1
-    port: 5014
-    parameters: {'API_KEY': 'your_api_key'}
+  # deepseek_r1_qwen_32B_q4_k_m:
+  #   type: local
+  #   alias: DeepSeek-R1_qwen_32B
+  #   path: deepseek-r1/deepseek-qwen-32B_q4_k_m/DeepSeek-R1-Distill-Qwen-32B-Q4_K_M.gguf
+  #   description: DeepSeek-R1 distill model using qwen 32B
+  #   languages: ['cn', 'en']
+  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5014
+  #   parameters: {'API_KEY': 'your_api_key'}
 
   deepseek_r1_qwen_14B_q5_k_m:
     type: local
@@ -230,17 +170,17 @@ llms:
     port: 5015
     parameters: {'API_KEY': 'your_api_key'}
 
-  deepseek_r1_llama_8B_q5_k_m:
-    type: local
-    alias: DeepSeek-R1_llama_8B
-    path: deepseek-r1/deepseek-llama-8B_q5_k_m/DeepSeek-R1-Distill-Llama-8B-Q5_K_M.gguf
-    description: DeepSeek-R1 distill model using llama 8B
-    languages: ['en', 'cn']
-    introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
-    capabilities: ['Chat']
-    host: 127.0.0.1
-    port: 5016
-    parameters: {'API_KEY': 'your_api_key'}
+  # deepseek_r1_llama_8B_q5_k_m:
+  #   type: local
+  #   alias: DeepSeek-R1_llama_8B
+  #   path: deepseek-r1/deepseek-llama-8B_q5_k_m/DeepSeek-R1-Distill-Llama-8B-Q5_K_M.gguf
+  #   description: DeepSeek-R1 distill model using llama 8B
+  #   languages: ['en', 'cn']
+  #   introduction: I am GPT4People's AI assistant and I am a native English speaker. If you have any question, please let me know. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5016
+  #   parameters: {'API_KEY': 'your_api_key'}
 
   deepseek_r1_qwen_1.5B_q4_k_m:
     type: local
@@ -254,16 +194,64 @@ llms:
     port: 5017
     parameters: {'API_KEY': 'your_api_key'}
 
-  deepseek_r1_qwen_7B_q5_k_m:
+  # deepseek_r1_qwen_7B_q5_k_m:
+  #   type: local
+  #   alias: DeepSeek-R1_qwen_7B
+  #   path: deepseek-r1/deepseek-qwen-7B_q5_k_m/DeepSeek-R1-Distill-Qwen-7B-Q5_K_M.gguf
+  #   description: DeepSeek-R1 distill model using qwen 7B
+  #   languages: ['cn', 'en']
+  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5018
+  #   parameters: {'API_KEY': 'your_api_key'}
+
+  qwq_32B_q4_k_m:
     type: local
-    alias: DeepSeek-R1_qwen_7B
-    path: deepseek-r1/deepseek-qwen-7B_q5_k_m/DeepSeek-R1-Distill-Qwen-7B-Q5_K_M.gguf
-    description: DeepSeek-R1 distill model using qwen 7B
+    alias: QWQ-32B
+    path: qwq-32B/qwq-32b-q4_k_m.gguf
+    description: QWQ large size 32B model
     languages: ['cn', 'en']
     introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
     capabilities: ['Chat']
     host: 127.0.0.1
-    port: 5018
+    port: 5019
+    parameters: {'API_KEY': 'your_api_key'}
+
+  # deepseek_r1_qwen25_7B_1m_q8:
+  #   type: local
+  #   alias: Qwen2-5-7B-DeepSeek-R1-1M
+  #   path: deepseek-r1/deepseek-qwen2-5-7B-1m_q8/Qwen2.5-7B-DeepSeek-R1-1M.Q8_0.gguf
+  #   description: Qwen2-5-7B-DeepSeek-R1-1M
+  #   languages: ['cn', 'en']
+  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+  #   capabilities: ['Chat']
+  #   host: 127.0.0.1
+  #   port: 5020
+  #   parameters: {'API_KEY': 'your_api_key'}
+
+  deepseek_r1_qwen25_7B_1m_q5_k_m:
+    type: local
+    alias: Qwen2-5-7B-DeepSeek-R1-1M
+    path: deepseek-r1/deepseek-qwen2-5-7B-1m_q5_k_m/Qwen2.5-7B-DeepSeek-R1-1M.Q5_K_M.gguf
+    description: Qwen2-5-7B-DeepSeek-R1-1M
+    languages: ['cn', 'en']
+    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+    capabilities: ['Chat']
+    host: 127.0.0.1
+    port: 5021
+    parameters: {'API_KEY': 'your_api_key'}
+
+  qwen25_1.5B_q8:
+    type: local
+    alias: Qwen25-1.5B
+    path: qwen2_5/qwen2.5-1.5b-instruct-q8_0.gguf
+    description: Qwen2.5 1.5B
+    languages: ['cn', 'en']
+    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+    capabilities: ['Chat']
+    host: 127.0.0.1
+    port: 5022
     parameters: {'API_KEY': 'your_api_key'}
 
 

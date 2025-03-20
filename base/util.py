@@ -47,20 +47,17 @@ class Util:
     def __init__(self) -> None:
         if not hasattr(self, 'initialized'):
             self.initialized = True
-            self.silent = True
-
             self.config_observer = None
             self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
+            self.silent = self.core_metadata.silent
             if self.has_gpu_cuda():
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
                     self.core_metadata.main_llm = self.core_metadata.available_llms[:-1]
-                    self.core_metadata.memory_llm = self.core_metadata.available_llms[-1]
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is available. Using GPU.")
             else:
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
                     self.core_metadata.main_llm = self.core_metadata.available_llms[0]
-                    self.core_metadata.memory_llm = self.core_metadata.available_llms[0]
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is not available. Using CPU.")
             self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
@@ -69,6 +66,29 @@ class Util:
             
             # Start to monitor the specified config files
             self.watch_config_file()
+
+    def is_silent(self) -> bool:
+        return self.silent
+    
+    def set_silent(self, silent: bool):
+        self.silent = silent
+        self.core_metadata.silent = silent
+        CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
+
+        log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+        if self.silent:
+            logger.remove(sys.stdout)
+            logger.add(sys.stdout, format=log_format, level="INFO")
+        else:
+            logger.remove(sys.stdout)
+            logger.add(sys.stdout, format=log_format, level="DEBUG")
+
+    def has_memory(self) -> bool:
+        return self.core_metadata.use_memory
+    
+    def set_memory(self, use_memory: bool):
+        self.core_metadata.use_memory = use_memory
+        CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
 
 
     def run_script_in_process(self, script_path) -> Process:
@@ -166,28 +186,13 @@ class Util:
             if llm.name == main_llm_name:
                 return llm
             
-            
-    def memory_llm(self) -> LLM:
-        memory_llm_name = self.core_metadata.memory_llm
-        for llm in self.llms:
-            if llm.name == memory_llm_name:
-                return llm
-            
     def set_mainllm(self, main_llm_name):
         for llm in self.llms:
             if llm.name == main_llm_name:
                 self.core_metadata.main_llm = main_llm_name 
                 CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 return main_llm_name
-            
-    def set_memoryllm(self, memory_llm_name):
-        for llm in self.llms:
-            if llm.name == memory_llm_name:
-                self.core_metadata.memory_llm = memory_llm_name 
-                CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
-                return memory_llm_name
-
-            
+         
             
     def embedding_llm(self) -> LLM:
         embedding_llm_name = self.core_metadata.embedding_llm
@@ -204,7 +209,8 @@ class Util:
             processed_text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
         elif '<think>' in text:
             # If there is a <think> without a corresponding </think>, remove the <think> tag
-            processed_text = re.sub(r'<think>', '', text)
+            logger.debug(f'There is a <think> without a corresponding </think> in the text: {text}')
+            processed_text = ''
         elif '</think>' in text:
             # If there is a </think> without a corresponding <think>, keep the text after </think>
             processed_text = text.split('</think>', 1)[-1]
@@ -212,8 +218,10 @@ class Util:
             # If neither tag is present, keep the text as is
             processed_text = text
         
-        if len(processed_text.strip()) >0:
+        if len(processed_text.strip()) > 0:
             return processed_text.strip()
+        else:
+            return None
         
 
     def is_utf8_compatible(self, data):
@@ -231,6 +239,8 @@ class Util:
                                      grammar: str=None,
                                      tools: Optional[List[Dict]] = None,
                                      tool_choice: str = "auto", 
+                                     functions: Optional[List] = None,
+                                     function_call: Optional[str] = None,
                                      llm_name: str = None) -> str | None:    
         try:      
             if not llm_name:
@@ -256,6 +266,10 @@ class Util:
             if tools:
                 data["tools"] = tools
                 data["tool_choice"] = tool_choice
+            if functions:
+                data["functions"] = functions
+            if function_call:
+                data["function_call"] = function_call
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': 'Anything'
@@ -281,8 +295,12 @@ class Util:
                                 message_content = resp_json['choices'][0]['message']['content'].strip()
                                 # Filter out the <think> tag and its content
                                 filtered_message_content = self.process_text(message_content)
-                                logger.debug(f"Message Response from LLM: {message_content}")
-                                return filtered_message_content
+                                if filtered_message_content is not None:
+                                    logger.debug(f"Message Response from LLM: {message_content}")
+                                    return filtered_message_content
+                                else:
+                                    logger.error("filtered message content is None")
+                                    return None
                     logger.error("Invalid response structure")
                     return None
         except Exception as e:
@@ -298,11 +316,11 @@ class Util:
         return text
         
 
-    async def llm_summarize(self, text: str) -> str:
-        if len(text) <= 1024 or text == None:
+    async def llm_summarize(self, text: str,  lenLimit: int = 4096) -> str:
+        if len(text) <= lenLimit or text == None:
             return text
         prompt = MEMORY_SUMMARIZATION_PROMPT
-        prompt = prompt.format(text=text)
+        prompt = prompt.format(text=text, size=lenLimit)
         resp = await self.openai_chat_completion([{"role": "user", "content": prompt}])
         if resp:
             logger.debug(f"Summary from LLM: {resp}")
@@ -354,6 +372,44 @@ class Util:
                 self.users.remove(u)
                 self.save_users(self.users)
                 break 
+
+    def embedding_tokens_len(self):
+        return self.core_metadata.embeddingTokensLen
+    
+    async def embedding(self, text):
+        """
+        Get the embedding for the given text using OpenAI.
+
+        Args:
+            text (str): The text to embed.
+
+        Returns:
+            list: The embedding vector.
+        """
+        text = text.replace("\n", " ")
+        logger.debug(f"LlamaCppEmbedding.embed: text: {text}")
+        embeddingTokenslen = self.embedding_tokens_len()
+        if len(text) > embeddingTokenslen // 2:
+            text = await self.llm_summarize(text, embeddingTokenslen // 2)
+        logger.debug(f"LlamaCppEmbedding.embed: summarizedtext: {text}")
+        llm: LLM = self.embedding_llm()
+        host = llm.host
+        port = llm.port
+        embedding_url = "http://" + host + ":" + str(port) + "/v1/embeddings"
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    embedding_url,
+                    headers={"accept": "application/json", "Content-Type": "application/json"},
+                    data=json.dumps({"input": text}),
+                ) as response:
+                    response_json = await response.json()
+                    ret = response_json["data"][0]["embedding"]
+                    return ret
+        except Exception as e:
+            logger.debug("Embedding error:Failed to get embedding from LLM")
+            logger.debug(e)
+            return None
 
     def get_user(self, name: str):
         if self.users == None or len(self.users) == 0:
@@ -457,13 +513,11 @@ class Util:
             if self.has_gpu_cuda():
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
                     self.core_metadata.main_llm = self.core_metadata.available_llms[:-1]
-                    self.core_metadata.memory_llm = self.core_metadata.available_llms[-1]
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
 
             else:
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
                     self.core_metadata.main_llm = self.core_metadata.available_llms[0]
-                    self.core_metadata.memory_llm = self.core_metadata.available_llms[0]
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 
         return self.core_metadata
@@ -475,7 +529,6 @@ class Util:
         if llm_name not in self.core_metadata.available_llms:
             return
         self.core_metadata.main_llm = llm_name
-        self.core_metadata.memory_llm = llm_name
         CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
     
     def stop_uvicorn_server(self, server: uvicorn.Server):
@@ -586,10 +639,6 @@ if __name__ == "__main__":
     # logger.debug main LLM
     main_llm = util.main_llm()
     logger.debug("Main LLM:", main_llm)
-
-    # logger.debug memory LLM
-    memory_llm = util.memory_llm()
-    logger.debug("Memory LLM:", memory_llm)
 
     # logger.debug embedding LLM
     embedding_llm = util.embedding_llm()

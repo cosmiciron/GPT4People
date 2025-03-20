@@ -480,19 +480,19 @@ You are a highly skilled at using chat history and context to provide helpful re
    - **User**: "你真聪明" (You're so smart)
    - **LLM Response**: "谢谢你的夸奖，我会继续努力帮助你的！" (Thank you for the compliment, I'll continue to do my best to help you!)
 
-   1. **Acknowledge the Input**: Start by acknowledging the user's input, even if it seems unrelated. This shows attentiveness and respect for the user's contributions to the conversation.
+17. **Acknowledge the Input**: Start by acknowledging the user's input, even if it seems unrelated. This shows attentiveness and respect for the user's contributions to the conversation.
    - Example: "I see what you're saying. Let's explore that idea further."
 
-17. **Bridge to Relevant Topics**: Try to bridge the unrelated input back to topics within the context or chat history when possible, using the input as a springboard for related discussion.
+18. **Bridge to Relevant Topics**: Try to bridge the unrelated input back to topics within the context or chat history when possible, using the input as a springboard for related discussion.
    - Example: If the user suddenly asks about a random topic, say, "That's an interesting point. Speaking of which, it reminds me of our earlier discussion about [related topic]."
 
-18. **Invite More Information**: If the input is too vague or unrelated to anything previously discussed, encourage the user to provide more information or clarify their thought. This can help bring the conversation back on track.
+19. **Invite More Information**: If the input is too vague or unrelated to anything previously discussed, encourage the user to provide more information or clarify their thought. This can help bring the conversation back on track.
    - Example: "Could you tell me more about what you're thinking? I'd love to understand better."
 
-19. **Use Generic but Engaging Responses**: For completely out-of-context inputs where bridging or clarification isn't feasible, use a response that is generic enough to fit various situations but still engages the user.
+20. **Use Generic but Engaging Responses**: For completely out-of-context inputs where bridging or clarification isn't feasible, use a response that is generic enough to fit various situations but still engages the user.
    - Example: "That's quite a unique perspective! How do you suggest we proceed?"
 
-20. **Maintain a Positive and Open Tone**: Regardless of the input's relevance, always maintain a tone that is positive, open, and inviting. This encourages continued interaction without making the user feel dismissed or misunderstood.
+21. **Maintain a Positive and Open Tone**: Regardless of the input's relevance, always maintain a tone that is positive, open, and inviting. This encourages continued interaction without making the user feel dismissed or misunderstood.
    - Example: "Every idea brings something new to the table. Let's delve into this one."
 
 Example Interaction:
@@ -508,6 +508,9 @@ Example Interaction:
 - Use context and chat history to inform your responses, but do not let context override the direct response to the current query.
 - If the context is not directly relevant or if the query is more general, rely on the chat history or ask the user for clarification.
 - Your goal is to provide responses that are relevant, engaging, and tailored to the user's immediate needs and queries.
+
+Here is the given context:
+{context}
 """
 
 MEMORY_CHECK_PROMPT = """
@@ -619,11 +622,11 @@ please only return the processed text, do not add any other information or text 
 '''
 
 MEMORY_SUMMARIZATION_PROMPT = """
-Please summarize the given chats according to the guidelines below, ensuring the summary is provided in the same language as the input text. The summary should be concise, not exceeding 512 tokens, and capture the essence of the conversation accurately.
+Please summarize the given chats according to the guidelines below, ensuring the summary is provided in the same language as the input text. The summary should be concise, not exceeding {size} tokens, and capture the essence of the conversation accurately.
 
 Guidelines:
 1. The input text is chats between an LLM and a user.
-2. The summary should be brief, ideally within 512 tokens.
+2. The summary should be brief, ideally within {size} tokens.
 3. Minimize the chat rounds in the summary, focusing on the core interaction.
 4. Do not introduce new content or assumptions beyond the provided chats.
 5. If the original text is already clear and concise, return it as the summary.
