@@ -201,7 +201,22 @@ class Util:
                 #llm.port = 5066
                 return llm
             
-
+    def main_llm_size(self):
+        name = self.core_metadata.main_llm.lower()  
+        # Regular expression to find the model size (e.g., "14b")
+        model_size_pattern = re.compile(r'(\d+)b')
+        
+        # Find all matches of the pattern in the name
+        matches = model_size_pattern.findall(name)
+        if matches:
+            # Assuming you want the first match if there are multiple
+            size = matches[0]
+            # Convert size to integer representing billions
+            return int(size)
+        else:
+            return None
+        
+            
     def process_text(self, text):
         # Check if both <think> and </think> are in the text
         if '<think>' in text and '</think>' in text:
@@ -218,6 +233,30 @@ class Util:
             # If neither tag is present, keep the text as is
             processed_text = text
         
+        answer_index = processed_text.find('**Step-by-Step Explanation and Answer:**')
+        if answer_index != -1:
+            answer_index = processed_text.find('**Answer:**')
+            if answer_index != -1:
+                processed_text = processed_text[answer_index + len('**Answer:**'):]
+            else:
+                answer_index = processed_text.find('**Final Answer:**')
+                if answer_index != -1:
+                    processed_text = processed_text[answer_index + len('**Final Answer:**'):]
+                else:
+                    processed_text = ''
+        else:
+            answer_index = processed_text.find('**Step-by-Step Explanation:**')
+            if answer_index != -1:
+                answer_index = processed_text.find('**Answer:**')
+                if answer_index != -1:
+                    processed_text = processed_text[answer_index + len('**Answer:**'):]
+                else:
+                    answer_index = processed_text.find('**Final Answer:**')
+                    if answer_index != -1:
+                        processed_text = processed_text[answer_index + len('**Final Answer:**'):]
+                    else:
+                        processed_text = ''
+
         if len(processed_text.strip()) > 0:
             return processed_text.strip()
         else:

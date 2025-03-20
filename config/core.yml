@@ -1,7 +1,6 @@
 available_llms:
-- qwen25_1.5B_q8
-- deepseek_r1_qwen_1.5B_q4_k_m
-- qwq_32B_q4_k_m
+- qwen25_7B_q5_k_m
+- qwen25_14B_q5_k_m
 - deepseek_r1_qwen_14B_q5_k_m
 embedding_llm: embedding_text_model
 silent: false

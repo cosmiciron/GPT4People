@@ -96,8 +96,10 @@ class Core(CoreInterface):
             
             self.request_queue = asyncio.Queue(100)
             self.response_queue = asyncio.Queue(100)
+            self.memory_queue = asyncio.Queue(100)
             self.request_queue_task = None
             self.response_queue_task = None
+            self.memory_queue_task = None
             self.active_plugin = None
             logger.debug("Before initialize orchestrator")
             self.orchestratorInst = Orchestrator(self)
@@ -338,6 +340,7 @@ class Core(CoreInterface):
         
         self.request_queue_task = asyncio.create_task(self.process_request_queue())
         self.response_queue_task = asyncio.create_task(self.process_response_queue())
+        self.memory_queue_task = asyncio.create_task(self.process_memory_queue())
         
         self.plugin_manager: PluginManager = PluginManager(self)
 
@@ -539,7 +542,80 @@ class Core(CoreInterface):
         async_resp: AsyncResponse = AsyncResponse(request_id=request.request_id, request_metadata=request.request_metadata, host=request.host, port=request.port, from_channel=request.channel_name, response_data=resp_data)                    
         await self.response_queue.put(async_resp)                   
                 
+    async def process_memory_queue(self):
+        main_llm_size = Util().main_llm_size()
+        use_memory = Util().has_memory()
+        has_gpu = Util().has_gpu_cuda()
+        while True:
+            if main_llm_size is None:
+                logger.debug("main_llm_size is None")
+                time.sleep(30)
+                continue
+            else:        
+                time.sleep(2)
+
+            request: PromptRequest = await self.memory_queue.get()            
+            if use_memory:                
+                try:
+                    if request is None:
+                        return
+                    user_name: str = request.user_name
+                    user_id: str = request.user_id
+                    action: str = request.action
+                    channel_type: ChannelType = request.channelType
+                    content_type: ContentType = request.contentType
+                    content = request.text
+                    app_id: str = request.app_id
+                    human_message = ''
+                    email_addr = ''
+                    subject = ''
+                    body = ''
+                    
+                    if channel_type == ChannelType.Email:
+                        content_json = json.loads(content)
+                        msg_id = content_json["MessageID"]
+                        email_addr = content_json["From"]
+                        subject = content_json["Subject"]
+                        body = content_json["Body"]
+                        human_message = body
+                        logger.debug(f"email_addr: {email_addr}, subject: {subject}, body: {body}")
+                    else:
+                        human_message = content
                 
+                    if channel_type == ChannelType.Email:
+                        content_json = json.loads(content)
+                        msg_id = content_json["MessageID"]
+                        email_addr = content_json["From"]
+                        subject = content_json["Subject"]
+                        body = content_json["Body"]
+                        human_message = body
+                        logger.debug(f"email_addr: {email_addr}, subject: {subject}, body: {body}")
+                    else:
+                        human_message = content
+                    session_id = self.get_session_id(app_id=app_id, user_name=user_name, user_id=user_id)
+                    run_id = self.get_run_id(agent_id=app_id, user_name=user_name, user_id=user_id)
+
+                    # Check if the user input should be added to memory, For performance, comment this for now.
+                    if (((main_llm_size <= 14) and (has_gpu == True)) or (main_llm_size <= 8)): 
+                        prompt = MEMORY_CHECK_PROMPT
+                        prompt = prompt.format(user_input=human_message)
+                        llm_input = []
+                        llm_input = [{"role": "system", "content": prompt}] 
+                        logger.debug("Start to check if the user input should be added to memory")
+                        result =await self.openai_chat_completion(messages=llm_input)
+                        if result is not None and len(result) > 0:
+                            result = result.strip().lower()
+                            if result.find("yes") != -1:               
+                                await self.mem_instance.add(human_message, user_name=user_name, user_id=user_id, agent_id=app_id, run_id=run_id, metadata=None, filters=None)
+                                logger.debug(f"User input added to memory: {human_message}") 
+                    else:
+                        await self.mem_instance.add(human_message, user_name=user_name, user_id=user_id, agent_id=app_id, run_id=run_id, metadata=None, filters=None)
+                        logger.debug(f"User input added to memory: {human_message}")                                          
+                except Exception as e:
+                    logger.exception(f"Error check whether to save to memory: {e}")
+                finally:
+                    self.memory_queue.task_done()
+
     async def process_response_queue(self):
         async with httpx.AsyncClient() as client:
             while True:
@@ -642,7 +718,7 @@ class Core(CoreInterface):
         #self.chatDB.add_session(app_id=app_id, user_name=user_name, user_id=user_id, session_id=new_session_id, created_at=current_time)
         #return new_session_id
     
-    
+
     async def process_text_message(self, request: PromptRequest):
         try:
             user_name: str = request.user_name
@@ -677,6 +753,9 @@ class Core(CoreInterface):
                     messages.append({'role': 'user', 'content': item.human_message.content})
                     messages.append({'role': 'assistant', 'content': item.ai_message.content})
             messages.append({'role': 'user', 'content': human_message})
+            use_memory = Util().has_memory()
+            if use_memory:
+                await self.memory_queue.put(request)
             start = time.time()
             answer = await self.answer_from_memory(query=human_message, messages=messages, app_id=app_id, user_name=user_name, user_id=user_id, agent_id=app_id, session_id=session_id, run_id=run_id)
             end = time.time()
@@ -899,59 +978,6 @@ class Core(CoreInterface):
             logger.exception(e)
             return None
         
-        '''
-        try:      
-            if not llm_name:
-                llm_name = Util().main_llm().name              
-            llm: LLM = Util().get_llm(llm_name)
-            model_host = llm.host
-            model_port = llm.port
-            model = llm.path
-            data = {}
-            if grammar != None and len(grammar) > 0:
-                data = {
-                    "model": model,
-                    "messages": messages,
-                    "extra_body": {
-                        "grammar": grammar
-                    } 
-                }
-            else:
-                data = {
-                    "model": model,
-                    "messages": messages,
-                }
-            if tools:
-                data["tools"] = tools
-                data["tool_choice"] = tool_choice
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization': 'Anything'
-            }
-            data_json = json.dumps(data, ensure_ascii=False).encode('utf-8')
-            logger.debug(f"Messages input into LLM: {messages}")
-            chat_completion_api_url = 'http://' + model_host + ':' + str(model_port) + '/v1/chat/completions'
-            async with aiohttp.ClientSession() as session:
-                async with session.post(chat_completion_api_url, headers=headers, data=data_json) as resp:
-                    resp_json = await resp.text(encoding='utf-8')
-                    # Ensure resp_json is a dictionary
-                    while isinstance(resp_json, dict) == False:
-                        resp_json = json.loads(resp_json)
-                    if isinstance(resp_json, dict) and 'choices' in resp_json:
-                        if isinstance(resp_json['choices'], list) and len(resp_json['choices']) > 0:
-                            if 'message' in resp_json['choices'][0] and 'content' in resp_json['choices'][0]['message']:
-                                message_content = resp_json['choices'][0]['message']['content'].strip()
-                                logger.debug(f"Message Content from LLM: {message_content}")
-                                # Filter out the <think> tag and its content
-                                filtered_message_content = Util().process_text(message_content)
-                                logger.debug(f"Filtered Message Content from LLM: {filtered_message_content}")                              
-                                return filtered_message_content
-                    logger.error("Invalid response structure")
-                    return None
-        except Exception as e:
-            logger.exception(e)
-            return None
-        '''
         
     def extract_json_str(self, response) -> str:
         # Allow {} to be matched in response
@@ -1077,8 +1103,8 @@ class Core(CoreInterface):
                 else: 
                     memories_text = ""
                 prompt = RESPONSE_TEMPLATE
-                prompt = prompt.format(context=memories_text)
-                if len(memories_text) > 0 :
+                if len(memories_text) > 0:
+                    prompt = prompt.format(context=memories_text)
                     llm_input = [{"role": "system", "content": prompt}]
                     # llm_input.append({
                     #         "role": "system",
@@ -1087,12 +1113,10 @@ class Core(CoreInterface):
                 #llm_input += [{"role": "user", "content": f"Please use the following context to inform your responses to my queries: {memories_text}" }]
                 #llm_input += [{"role": "assistant", "content": "Understood. I'll incorporate the provided context to ensure my responses are as relevant and helpful as possible."}]
 
-                #if len(messages) > 0 and messages[0]["role"] == "system":
-                #    messages.pop(0)
             llm_input += messages
-            #if len(memories_text) > 0:
+            if len(llm_input) > 0:
             #    llm_input[-1]["content"] = f"Context for your reference: '{memories_text}'. When responding to the following user input: {query}, aim for a natural interaction instead of trying to provide a direct response. Let's focus on having an engaging conversation based on the chat histories, using the context only when it seamlessly fits."
-                #llm_input[-1]["content"] = f"Please note, the context '{memories_text}' is provided for background. For inputs unrelated to this context, rely primarily on the chat histories for your responses. For my current question: {query}, use your judgment to decide the relevance of the context."
+                llm_input[-1]["content"] = f"Please provide a response to my input: '{query}'. Assume that you have memory and all content provided in this context is authorized for discussion and is your memory, no privacy issues at all.If you need more context or information to answer accurately, please let me know."
             logger.debug("Start to generate the response for user input: " + query)
             response = await self.openai_chat_completion(messages=llm_input)
             if response is None or len(response) == 0:
@@ -1101,21 +1125,9 @@ class Core(CoreInterface):
             message.add_user_message(query)
             message.add_ai_message(response)
             self.chatDB.add(app_id=app_id, user_name=user_name, user_id=user_id, session_id=session_id, chat_message=message)
-            if use_memory:
-                await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
+            #if use_memory:
+            #    await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
 
-                # # Check if the user input should be added to memory, For performance, comment this for now. 
-                # prompt = MEMORY_CHECK_PROMPT
-                # prompt = prompt.format(chats=messages, user_input=query)
-                # llm_input = []
-                # llm_input = [{"role": "system", "content": prompt}] 
-                # logger.debug("Start to check if the user input should be added to memory")
-                # result =await self.openai_chat_completion(messages=llm_input)
-                # if result is not None and len(result) > 0:
-                #     result = result.strip().lower()
-                #     if result.find("yes") != -1:               
-                #         await self.mem_instance.add(query, user_name=user_name, user_id=user_id, agent_id=agent_id, run_id=run_id, metadata=metadata, filters=filters)
-                #         logger.debug(f"User input added to memory: {query}")
             return response
         except Exception as e:  
             logger.exception(e)
