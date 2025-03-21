@@ -307,6 +307,7 @@ class CoreMetadata:
     embedding_llm: str
     silent: bool
     use_memory: bool
+    reset_memory: bool
     vectorDB: VectorDB
     endpoints: List[Endpoint]
 
@@ -332,6 +333,7 @@ class CoreMetadata:
             embedding_llm=data['embedding_llm'],
             silent=data['silent'],
             use_memory=data['use_memory'],
+            reset_memory=data['reset_memory'],
             vectorDB=vectorDB,
             endpoints=endpoints
         )
@@ -357,6 +359,7 @@ class CoreMetadata:
                 'main_llm': core.main_llm,
                 'silent': core.silent,
                 'use_memory': core.use_memory,
+                'reset_memory': core.reset_memory,
                 'embedding_llm': core.embedding_llm,
                 'vectorDB': {
                     # Assuming Chroma has serializable attributes

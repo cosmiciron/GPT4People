@@ -44,19 +44,7 @@ from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
 
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    #await register_with_core()
-    logger.debug("whatsapp Channel lifespan started!")
-    yield
-    logger.debug("whatsapp Channel lifespan end!")
-    try:
-        # Do some deinitialization
-        pass
-    except:
-        pass
-
-channel_app: FastAPI = FastAPI(lifespan=lifespan)  
+channel_app: FastAPI = FastAPI()  
 
 client: NewClient = NewClient("db.sqlite3")
 

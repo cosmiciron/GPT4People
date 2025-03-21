@@ -25,19 +25,7 @@ from base.base import PromptRequest, AsyncResponse, ChannelType, ContentType
 
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    #await register_with_core()
-    logger.debug("Matrix Channel lifespan started!")
-    yield
-    logger.debug("Matrix Channel lifespan end!")
-    try:
-        # Do some deinitialization
-        pass
-    except:
-        pass
-
-channel_app: FastAPI = FastAPI(lifespan=lifespan)  
+channel_app: FastAPI = FastAPI()  
 
 
 class MatrixRequest(BaseModel):
@@ -82,19 +70,19 @@ class Channel(BaseChannel):
         self.bot_task = None
         self.message_queue_task = None
 
-    def core_url(self) -> str | None:
-        """Get the core url from sub class's .env file"""
-        channels_path = Util().root_path() + '/channels/'
-        env_path = os.path.join(channels_path, '.env')
-        env_vars = dotenv_values(env_path)
-        core_url = None
-        if 'core_host' in env_vars and 'core_port' in env_vars:
-            host = env_vars['core_host']
-            port = env_vars['core_port']
-            core_url = f"http://{host}:{port}"
-        else:
-            core_url = None
-        return core_url
+    # def core_url(self) -> str | None:
+    #     """Get the core url from sub class's .env file"""
+    #     channels_path = Util().root_path() + '/channels/'
+    #     env_path = os.path.join(channels_path, '.env')
+    #     env_vars = dotenv_values(env_path)
+    #     core_url = None
+    #     if 'core_host' in env_vars and 'core_port' in env_vars:
+    #         host = env_vars['core_host']
+    #         port = env_vars['core_port']
+    #         core_url = f"http://{host}:{port}"
+    #     else:
+    #         core_url = None
+    #     return core_url
 
 
     async def run_bot(self):

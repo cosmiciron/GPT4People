@@ -30,19 +30,7 @@ from base.BaseChannel import ChannelMetadata, BaseChannel
 from base.util import Util
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    #await register_with_core()
-    logger.debug("Email Channel lifespan started!")
-    yield
-    logger.debug("Email Channel lifespan end!")
-    try:
-        # Do some deinitialization
-        pass
-    except:
-        pass
-
-channel_app: FastAPI = FastAPI(lifespan=lifespan)    
+channel_app: FastAPI = FastAPI()    
 
 class Channel(BaseChannel):
     def __init__(self, metadata: ChannelMetadata):
@@ -52,7 +40,6 @@ class Channel(BaseChannel):
 
     def initialize(self):
         logger.debug("Email channel initializing...")
-        super().initialize()
         self.start_monitoring()
         
         
@@ -251,24 +238,25 @@ class Channel(BaseChannel):
                 sys.exit(0)
 
 
-    #def register_channel(self, name, host, port, endpoints):
-    #    pass
+    def register_channel(self, name, host, port, endpoints):
+       pass
 
 
-    #def deregister_channel(self, name, host, port, endpoints):
-    #    pass
+    def deregister_channel(self, name, host, port, endpoints):
+       pass
 
 
     def stop(self):
         # do some deinitialization here
         logger.debug("Email channel is stopping!")
-        self.kill = True
-        super().stop()  
+        try:
+            self.kill = True
+            if self.server is not None:
+                #asyncio.run(Util().stop_uvicorn_server(self.server))
+                Util().stop_uvicorn_server(self.server)
+        except Exception as e:
+            logger.debug(e)
 
-
-    def deregister_channel(self, name, host, port, endpoints):  
-        pass    
-        
 
 def main():
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
@@ -281,7 +269,8 @@ def main():
     try:
         asyncio.run(channel.run()) # channel.run()
     except Exception as e:
-        logger.exception(e)
+        pass
+        #logger.exception(e)
     
 if __name__ == "__main__":
     main()

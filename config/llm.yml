@@ -3,13 +3,12 @@ llms:
     type: local
     alias: embedding
     path: embedding/bge-m3-Q5_K_M.gguf
-    #embedding/nomic-embed-text-v1.5.Q5_K_M.gguf
     description: embedding-multilingual
     languages: ['en', 'cn']
     introduction: 我是embedding model 
     capabilities: ['embedding']
     host: 127.0.0.1
-    port: 5066
+    port: 5067
     parameters: {'API_KEY': 'your_api_key'}
     
   # # os.environ["OPENAI_API_KEY"] = "your-api-key"

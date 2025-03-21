@@ -2,6 +2,7 @@ import asyncio
 from enum import Enum
 import json
 import os
+from pathlib import Path
 import signal
 import sys
 import threading
@@ -16,6 +17,8 @@ import httpx
 from pydantic import BaseModel
 import uvicorn
 from loguru import logger
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from base.util import Util
 from base.base import Server, PromptRequest, AsyncResponse
 
@@ -146,10 +149,10 @@ class BaseChannel:
             else:
                 return False
         except httpx.HTTPError as err:
-            logger.error(f"Deregister Request to core failed: {err}")
+            #logger.error(f"Deregister Request to core failed: {err}")
             return False
         except Exception as err:
-            logger.exception(f"Unexpected error: {err}")
+            #logger.exception(f"Unexpected error: {err}")
             return False
         
 

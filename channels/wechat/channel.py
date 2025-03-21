@@ -21,19 +21,7 @@ from base.BaseChannel import ChannelMetadata, BaseChannel
 
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    #await register_with_core()
-    logger.debug("Wechat Channel lifespan started!")
-    yield
-    logger.debug("Wechat Channel lifespan end!")
-    try:
-        # Do some deinitialization
-        pass
-    except:
-        pass
-
-channel_app: FastAPI = FastAPI(lifespan=lifespan)  
+channel_app: FastAPI = FastAPI()  
 
 class Channel(BaseChannel):
     def __init__(self, metadata: ChannelMetadata):

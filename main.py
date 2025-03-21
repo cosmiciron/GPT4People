@@ -254,12 +254,23 @@ class Channel(BaseChannel):
 
 
     def initialize(self):
-        super().initialize()
+        pass
 
 
-    def stop(self, register=True):
-        # do some deinitialization here
-        super().stop()
+    def register_channel(self, name, host, port, endpoints):
+       pass
+
+    def deregister_channel(self, name, host, port, endpoints):
+       pass
+
+    def stop(self):
+        logger.debug("local channel is stopping!")
+        try:
+            if self.server is not None:
+                #asyncio.run(Util().stop_uvicorn_server(self.server))
+                Util().stop_uvicorn_server(self.server)
+        except Exception as e:
+            logger.debug(e)
         
 
 def run_core() ->threading.Thread:
@@ -267,18 +278,25 @@ def run_core() ->threading.Thread:
     thread.start()
     return thread
 
+def reset_memory():
+    Util().clear_data()
+
 def start():
+    has_user = True
     if not account_exists():
-        register_user()
+        has_user = register_user()
+    if not has_user:
+        print("Account registration failed. Please try again or contact support.(账户注册失败，请重试或联系支持)\n")
+        return
     gpt4people_account = Util().get_gpt4people_account()
     email = gpt4people_account.email_user
     password = gpt4people_account.email_pass
     print(f"Your GPT4People account(你的GPT4People账号): {email}\n Password(密码): {password}\n")
 
     # Running start_core in a background thread
-    print("Starting GPT4People Core...\n")
+    print("Starting GPT4People..., please wait... (启动GPT4People..., 请稍等...)\n")
     llm_thread = run_core()
-
+    sleep(30)
     channel_metadata = ChannelMetadata(name="gpt4people", host="localhost", port=0, endpoints=[])
     with Channel(metadata=channel_metadata) as channel:
         try:
@@ -501,6 +519,14 @@ def start():
             for email in user.email:
                 print(email)
                 print('\n')
+            continue
+        elif user_input == 'reset':
+            print("It will reset the conversation history and all the history data will be lost... (将重置对话历史，所有历史数据将丢失...)\n")
+            print("Are you sure you want to reset? (你确定要重置吗?)\n")
+            confirm = input("Enter 'CONFIRM' to confirm or any other string to cancel(输入'CONFIRM'确认或其他任意字符串取消): ")
+            if confirm == 'CONFIRM':
+                Util().reset_memory()
+                flag = False
             continue
         else:
             resp = asyncio.run(channel.on_message(user_input)) #channel.on_message(user_input)

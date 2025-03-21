@@ -4,6 +4,7 @@ from multiprocessing import Process
 import os
 import re
 import runpy
+import shutil
 import subprocess
 import sys
 import threading
@@ -17,11 +18,19 @@ import watchdog.events
 import watchdog.observers
 import torch
 
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from memory.chat.message import ChatMessage
 from memory.prompts import MEMORY_SUMMARIZATION_PROMPT
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from base.base import CoreMetadata, User, LLM, GPT4PeopleAccount
 
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+core_metadata =CoreMetadata.from_yaml(os.path.join(root_dir, 'config', 'core.yml'))
+data_root = os.path.join(root_dir, 'database')
+if  (os.path.exists(data_root) and core_metadata.reset_memory == True):
+    core_metadata.reset_memory = False
+    CoreMetadata.to_yaml(core_metadata, os.path.join(root_dir, 'config', 'core.yml'))
+    shutil.rmtree(data_root)
 
 def run_script_silent(script_path):
     with open(os.devnull, 'w') as devnull:
@@ -50,9 +59,10 @@ class Util:
             self.config_observer = None
             self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
             self.silent = self.core_metadata.silent
+
             if self.has_gpu_cuda():
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
-                    self.core_metadata.main_llm = self.core_metadata.available_llms[:-1]
+                    self.core_metadata.main_llm = self.core_metadata.available_llms[-1]
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is available. Using GPU.")
             else:
@@ -133,7 +143,11 @@ class Util:
     
     def data_path(self):
         root = self.root_path()
-        return os.path.join(root, 'database')
+        return os.path.join(root, 'database')    
+
+    def reset_memory(self): 
+        self.core_metadata.reset_memory = True
+        CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
     
     def plugins_path(self):
         root = self.root_path()
@@ -551,7 +565,7 @@ class Util:
             self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
             if self.has_gpu_cuda():
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
-                    self.core_metadata.main_llm = self.core_metadata.available_llms[:-1]
+                    self.core_metadata.main_llm = self.core_metadata.available_llms[-1]
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
 
             else:

@@ -600,7 +600,7 @@ class Core(CoreInterface):
                         prompt = MEMORY_CHECK_PROMPT
                         prompt = prompt.format(user_input=human_message)
                         llm_input = []
-                        llm_input = [{"role": "system", "content": prompt}] 
+                        llm_input = [{"role"      : "system", "content": prompt}] 
                         logger.debug("Start to check if the user input should be added to memory")
                         result =await self.openai_chat_completion(messages=llm_input)
                         if result is not None and len(result) > 0:
@@ -907,8 +907,12 @@ class Core(CoreInterface):
 
     def shutdown_all_channels(self):
         for channel in self.channels:
-            self.shutdown_channel(channel["name"], channel["host"], channel["port"])
-            logger.debug(f"Channel {channel['name']} is shutdown from {channel['host']}:{channel['port']}")
+            try:
+                self.shutdown_channel(channel["name"], channel["host"], channel["port"])
+                logger.debug(f"Channel {channel['name']} is shutdown from {channel['host']}:{channel['port']}")
+            except Exception as e:
+                continue
+        logger.debug("All channels are shutdown!")
         
 
     def start_chroma_client(self):  
