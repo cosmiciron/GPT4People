@@ -15,9 +15,9 @@ alembic
 schedule
 # For Channels
 # Wechat
-wcferry==39.2.4.0
+#wcferry==39.2.4.0
 # whatsapp
-neonize==0.3.9
+#neonize==0.3.9
 # Matrix it'scol
 simplematrixbotlib==2.12.3
 

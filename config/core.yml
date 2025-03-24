@@ -1,7 +1,8 @@
 available_llms:
 - qwen25_7B_q5_k_m
-- deepseek_r1_qwen_14B_q5_k_m
-- qwen25_14B_q5_k_m
+#- deepseek_r1_qwen_14B_q5_k_m
+#- qwen25_14B_q5_k_m
+- deepseek_r1_qwen_7B_q5_k_m
 embeddingTokensLen: 8192
 embedding_llm: embedding_text_model
 endpoints:
@@ -19,7 +20,7 @@ endpoints:
   output: {}
   path: /process
 host: 0.0.0.0
-main_llm:
+main_llm: qwen25_7B_q5_k_m
 mode: dev
 model_path: ../models/
 name: core

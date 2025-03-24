@@ -43,13 +43,13 @@ class LLMServiceManager:
             self.gather_task: asyncio.Task = None
         
         
-    def start_llama_cpp_process(self, cmd: str, name:str, host:str, port:str):
+    async def start_llama_cpp_process(self, cmd: str, name:str, host:str, port:str):
         """
         Start an LLM process asynchronously and record its details.
         """
         try:
-            process = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            #process = await asyncio.to_thread(Popen, cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            #process = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = await asyncio.to_thread(Popen, cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             # shell=True is not necessary here, as we're passing the command as a list of strings.
             # This is safer, as it prevents shell injection attacks.
             
@@ -103,7 +103,19 @@ class LLMServiceManager:
         """
         return [process_info['name'] for process_info in self.llama_cpp_processes]
 
-
+    def start_async_coroutine(self, coroutine):
+        """Function to run the coroutine in a new event loop."""
+        def run(loop, coroutine):
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(coroutine)
+        
+        # Create a new event loop
+        new_loop = asyncio.new_event_loop()
+        # Create and start a new Thread with the loop and coroutine
+        t = threading.Thread(target=run, args=(new_loop, coroutine))
+        t.start()
+        t.join() 
+    
     def start_llama_cpp_server(self, name:str, host:str, port:int, model_path:str, 
                                      ctx_size:str = '32768', predict:str = '8192', temp:str = '0.8', 
                                      threads:str = '8', n_gpu_layers:str = '99', 
@@ -140,29 +152,48 @@ class LLMServiceManager:
 
         root_path = Util().root_path()
         llama_cpp_path = os.path.join(root_path, 'llama.cpp-master')
-        if platform.system() == "Windows":
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            if device.type == 'cuda':
-                llama_cpp_args += " --n-gpu-layers 99"
-                #cmd = "..\\llama.cpp-master\\win_cuda\\llama-server.exe" + " " + llama_cpp_args
-                cmd = os.path.join(llama_cpp_path, "win_cuda", "llama-server.exe") + " " + llama_cpp_args
-                logger.debug("LLama.cpp is Running on GPU, cmd: " + cmd)
-            else:
-                #cmd = "..\\llama.cpp-master\\win_cpu\\llama-server.exe" + " " + llama_cpp_args
-                cmd = os.path.join(llama_cpp_path, "win_cpu", "llama-server.exe") + " " + llama_cpp_args
-                logger.debug("LLama.cpp is Running on CPU, cmd: " + cmd)
-        else:
-            cmd = os.path.join(llama_cpp_path, "mac_arm_cpu", "llama-server") + " " + llama_cpp_args
-            logger.debug("LLama.cpp is Running on Mac Arm CPU, cmd: " + cmd)
-
         try:
-            process = self.start_llama_cpp_process(cmd, name, host, port)
-            logger.debug("LLama.cpp is Running on " + host + ":" + str(port)
-                         + "\nwith model \n" +  os.path.basename(model_path))
-            #_, stderr = await asyncio.to_thread(process.communicate)
-            #logger.debug("llama-server exited with code " + str(process.returncode))
-            #if process.returncode != 0:
-            #    logger.debug(f"llama-server failed with code {process.returncode}, stderr: {stderr.decode()}")
+            if platform.system() == "Windows":
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                if device.type == 'cuda':
+                    llama_cpp_args += " --n-gpu-layers 99"
+                    #cmd = "..\\llama.cpp-master\\win_cuda\\llama-server.exe" + " " + llama_cpp_args
+                    cmd = os.path.join(llama_cpp_path, "win_cuda", "llama-server.exe") + " " + llama_cpp_args
+                    logger.debug("LLama.cpp is Running on GPU, cmd: " + cmd)
+                else:
+                    #cmd = "..\\llama.cpp-master\\win_cpu\\llama-server.exe" + " " + llama_cpp_args
+                    cmd = os.path.join(llama_cpp_path, "win_cpu", "llama-server.exe") + " " + llama_cpp_args
+                    logger.debug("LLama.cpp is Running on CPU, cmd: " + cmd)
+                    
+                process = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                #process = await asyncio.to_thread(Popen, cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                # shell=True is not necessary here, as we're passing the command as a list of strings.
+                # This is safer, as it prevents shell injection attacks.
+                
+                self.llama_cpp_processes.append({
+                    'name': name,
+                    'process': process,
+                    'host': host,
+                    'port': port,
+                })
+                logger.debug(f"Started LLM process on {host}:{port} with PID {process.pid}")
+                logger.debug("LLama.cpp is Running on " + host + ":" + str(port)
+                            + "\nwith model \n" +  os.path.basename(model_path))
+            else:
+                cmd = os.path.join(llama_cpp_path, "mac_arm_cpu", "llama-server") + " " + llama_cpp_args
+                logger.debug("LLama.cpp is Running on Mac Arm CPU, cmd: " + cmd)
+
+                coroutine = self.start_llama_cpp_process(cmd, name, host, str(port))
+    
+                # Use the utility function to run the coroutine asynchronously
+                self.start_async_coroutine(coroutine)
+                #process = asyncio.run(self.start_llama_cpp_process(cmd, name, host, port))
+                logger.debug("LLama.cpp is Running on " + host + ":" + str(port)
+                            + "\nwith model \n" +  os.path.basename(model_path))
+                #_, stderr = await asyncio.to_thread(process.communicate)
+                #logger.debug("llama-server exited with code " + str(process.returncode))
+                #if process.returncode != 0:
+                #    logger.debug(f"llama-server failed with code {process.returncode}, stderr: {stderr.decode()}")
         except asyncio.CancelledError:
             logger.debug("Shutting down the daemon.")
         except Exception as e:

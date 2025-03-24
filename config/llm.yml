@@ -181,17 +181,17 @@ llms:
   #   port: 5016
   #   parameters: {'API_KEY': 'your_api_key'}
 
-  # deepseek_r1_qwen_7B_q5_k_m:
-  #   type: local
-  #   alias: DeepSeek-R1_qwen_7B
-  #   path: deepseek-r1/deepseek-qwen-7B_q5_k_m/DeepSeek-R1-Distill-Qwen-7B-Q5_K_M.gguf
-  #   description: DeepSeek-R1 distill model using qwen 7B
-  #   languages: ['cn', 'en']
-  #   introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
-  #   capabilities: ['Chat']
-  #   host: 127.0.0.1
-  #   port: 5018
-  #   parameters: {'API_KEY': 'your_api_key'}
+  deepseek_r1_qwen_7B_q5_k_m:
+    type: local
+    alias: DeepSeek-R1_qwen_7B
+    path: deepseek-r1/deepseek-qwen-7B_q5_k_m/DeepSeek-R1-Distill-Qwen-7B-Q5_K_M.gguf
+    description: DeepSeek-R1 distill model using qwen 7B
+    languages: ['cn', 'en']
+    introduction: 我是GPT4People的AI助手, 我是中文助手. 有任何问题请告诉我. 
+    capabilities: ['Chat']
+    host: 127.0.0.1
+    port: 5018
+    parameters: {'API_KEY': 'your_api_key'}
 
   qwen25_7B_q5_k_m:
     type: local
