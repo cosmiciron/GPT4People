@@ -13,13 +13,16 @@ openai
 watchdog
 alembic
 schedule
+pytz
+
 # For Channels
 # Wechat
-#wcferry==39.2.4.0
-# whatsapp
-#neonize==0.3.9
+wcferry==39.2.3.0
 # Matrix it'scol
 simplematrixbotlib==2.12.3
+
+# whatsapp
+#neonize==0.3.9
 
 
 #litellm
