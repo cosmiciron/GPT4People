@@ -44,7 +44,6 @@ Although the project is still in its early stages, you can begin exploring and e
       中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/ <br>
 
 
-   3. Download the required models
    4. **http://www.gpt4people.ai:8001/models.zip** <br>
       The models can be downloaded from Baidu too.<br>
       Link(链接)：https://pan.baidu.com/s/1tUOct-YZXuNaQQSNpMSQzQ <br>
