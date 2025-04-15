@@ -1,9 +1,6 @@
 loguru
 PyYAML
 python-dotenv
-torch
-torchaudio
-torchvision
 tqdm
 transformers
 chromadb
@@ -18,11 +15,12 @@ pytz
 # For Channels
 # Wechat
 wcferry==39.2.3.0
-# Matrix it'scol
-simplematrixbotlib==2.12.3
-
 # whatsapp
-#neonize==0.3.9
+neonize==0.3.10
+# Matrix it'scol
+#simplematrixbotlib==2.12.3
+
+
 
 
 #litellm
@@ -42,4 +40,4 @@ simplematrixbotlib==2.12.3
 #python-dotenv==1.0.1
 #schedule==1.2.2
 #simplematrixbotlib==2.12.3
-#neonize==0.3.9
+#neonize==0.3.10
