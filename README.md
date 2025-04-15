@@ -21,18 +21,29 @@ The Time Awareness Module (TAM) represents a paradigm shift in how AI handles ti
 ### Modular Design
 GPT4People’s modular architecture ensures maximum flexibility and scalability. Key components like the large language model (LLM), communication channels, and specialized functions are separate, standalone modules that can be deployed locally or on remote servers. This design allows for the integration of third-party services like food delivery or travel booking without compromising the AI's autonomy. The modularity also enables users and developers to customize their AI's capabilities, creating a system that adapts to individual needs and leverages the best available tools, all while remaining fully decentralized.
 
-## Getting Started
+## Getting Started for developers
 Although the project is still in its early stages, you can begin exploring and experimenting with GPT4People once the initial codebase is released:
 
 1. **Clone the Repository**: Once available, clone this repository to your local machine.
-2. **Install Requirements**: Follow the instructions in the `requirements.txt` to install dependencies.
-3. **For Developers:**
-   1. Python Environment **Version < 3.12**, recommend **version 3.10**
-   2. Install required python packages based on the requirements.txt. Run command pip install -r requirements.txt
-      Note: If you are in China, you may need to use the **mirrors** from China <br>
+2. **Python Environment**: version from 3.10.* to 3.12.9 or higher (not Tested) -- Conda or other python environment can be used. 
+3. **Install Pytorch**:
+   With GPU: Exmaple Command: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+   With CPU: Example Command: pip install torch torchvision torchaudio
+4. **Install vc++ building tool for chromaDB**: This is for building chromaDB
+   Guide: https://github.com/bycloudai/InstallVSBuildToolsWindows
+   Downloadlink: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+5. **Install Requirements**: Follow the instructions in the `requirements.txt` to install dependencies.
+   pip install -r requirements.txt
+6. **Download Models**:
+
+   
+## For Mainland China
+      Note: If you are in China, you may need to use the python **mirrors** from China <br>
       清华大学：https://pypi.tuna.tsinghua.edu.cn/simple/ <br>
       阿里云：http://mirrors.aliyun.com/pypi/simple/ <br>
       中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/ <br>
+
+
    3. Download the required models
    4. **http://www.gpt4people.ai:8001/models.zip** <br>
       The models can be downloaded from Baidu too.<br>
@@ -56,11 +67,6 @@ Although the project is still in its early stages, you can begin exploring and e
       One email address with **xxx@gpt4people.ai** will be created for you.
       After that, you can jump to portal page by clicking the link or type **"http://127.0.0.1:8000/portal/"**. <br>
       The portal will work well only after the account created. 
-    
-4. **Run a Local LLM**: Use the provided scripts to set up and run a local instance of a language model.
-5. **Interact via Channels**: Test out interactions through different channels, such as email or text messages.
-
-Note: The current version is experimental, and we welcome contributions to make the setup easier and more versatile.
 
 ## Contributing
 We believe in open collaboration. Whether you’re a developer, researcher, or someone interested in the future of AI, your contribution matters. Here’s how you can get involved:
