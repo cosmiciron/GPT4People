@@ -321,36 +321,58 @@ def start():
             continue
 
         elif user_input == 'llm':
-            available_llms = Util().availabe_llms()
-            i = 1
-            for llm in available_llms:
-                print(f"{i}. {llm}\n")
-                i += 1
-                
-            current_llm = Util().main_llm().name
-            print(f"Current LLM: {current_llm}\n")
-            continue
-        elif user_input == 'llm set':
-            available_llms = Util().availabe_llms()
+            available_llms = Util().available_llms()
+            ollama_llms = Util().get_ollama_supported_models()
             i = 1
             for llm in available_llms:
                 print(f"{i}. {llm}\n")
                 i += 1
 
-            current_llm = Util().main_llm().name
-            print(f"Current LLM: {current_llm}\n")
+            for llm in ollama_llms:
+                print(f"{i}. ollama/{llm}\n")
+                i += 1
+                
+            _, name, type, host, port = Util().main_llm()
+            print(f"Current LLM: {name}\n")
+            continue
+        elif user_input == 'llm set':
+            available_llms = Util().available_llms()
+            ollama_llms = Util().get_ollama_supported_models()
+            i = 1
+            for llm in available_llms:
+                print(f"{i}. {llm}\n")
+                i += 1
+
+            for llm in ollama_llms:
+                print(f"{i}. ollama/{llm}\n")
+                i += 1
+
+            _, name, type, host, port = Util().main_llm()
+            print(f"Current LLM: {name}\n")
             llm_index = int(input("Enter the number of the LLM you want to set(输入你要设置的LLM的序号): "))
-            if llm_index < 1 or llm_index > len(available_llms):
+            if llm_index < 1 or llm_index > (len(available_llms) + len(ollama_llms)):
                 print("Invalid input. Cancel.(输入无效，退出)\n")
                 continue
-            if current_llm != available_llms[llm_index - 1]:
-                Util().set_mainllm(available_llms[llm_index - 1])
-                print(f"LLM set to（大模型设置为）: {available_llms[llm_index - 1]}\n")
-                print('Restart the app to use new LLM.(重启应用以使用新的大模型)\n')
-                break
+            if llm_index <= len(available_llms):
+                if name != available_llms[llm_index - 1]:
+                    name = available_llms[llm_index - 1]
+                    Util().set_mainllm(name, type='local')
+                    print(f"LLM set to（大模型设置为）: {name}\n")
+                    print('Restart the app to use new LLM.(重启应用以使用新的大模型)\n')
+                    break
+                else:
+                    print("Current LLM is already set.(当前大模型已设置)\n")
+                    continue
             else:
-                print("Current LLM is already set.(当前大模型已设置)\n")
-                continue       
+                if name != 'ollama/' + ollama_llms[llm_index - len(available_llms) - 1]:
+                    name = 'ollama/' + ollama_llms[llm_index - len(available_llms) - 1]
+                    Util().set_mainllm(name, type='litellm')
+                    print(f"LLM set to（大模型设置为）: {name}\n")
+                    print('Restart the app to use new LLM.(重启应用以使用新的大模型)\n')
+                    break 
+                else:
+                    print("Current LLM is already set.(当前大模型已设置)\n")
+                    continue                                             
         elif  user_input == 'channel':
             print('################################################################################################################################\n')
             print("How to use wechat channel: \n")

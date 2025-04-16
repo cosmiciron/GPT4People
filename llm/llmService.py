@@ -19,7 +19,7 @@ import base
 from base.util import Util
 from base.base import LLM, Server
 #from llm.llamaCppPython import LlamaCppPython
-#from llm.litellmService import LiteLLMService
+from llm.litellmService import LiteLLMService
 
 class LLMServiceManager:
     
@@ -41,6 +41,7 @@ class LLMServiceManager:
             self.llms: List[LLM] = []
             #self.llm_to_app: Dict[str, asyncio.Task] = {}
             self.gather_task: asyncio.Task = None
+            #self.litellm_server_task = None
         
         
     async def start_llama_cpp_process(self, cmd: str, name:str, host:str, port:str):
@@ -114,7 +115,7 @@ class LLMServiceManager:
         # Create and start a new Thread with the loop and coroutine
         t = threading.Thread(target=run, args=(new_loop, coroutine))
         t.start()
-        t.join() 
+        #t.join() 
     
     def start_llama_cpp_server(self, name:str, host:str, port:int, model_path:str, 
                                      ctx_size:str = '32768', predict:str = '8192', temp:str = '0.8', 
@@ -199,61 +200,42 @@ class LLMServiceManager:
         except Exception as e:
             logger.debug(f"An error occurred: {e}")
             
- 
-    def run_llama_cpp_llm(self, name: str, pooling:bool = False):
-        try:
-            llm = Util().get_llm(name)
-            name = llm.name
-            host = llm.host
-            port = llm.port
-            path = llm.path
-            
-            if llm in self.llms:
-                logger.debug(f"LLM {name} is already running")
-                return
-            
-            # Initialize and start the Uvicorn server for the LLM service
-            #server_task = asyncio.create_task(self.start_llama_cpp_server(name, host, port, path, ctx_size=ctx_size, predict=predict, temp=temp,
-            #                        threads=threads, n_gpu_layers=n_gpu_layers, chat_format=chat_format, verbose=verbose, pooling=pooling))
-            #self.apps.append(server_task)
-            #self.llm_to_app[name] = server_task
-            self.start_llama_cpp_server(name, host, port, path, pooling=pooling)
-            self.llms.append(llm)      
-            #self.apps.append(self.start_llama_cpp_server(name, host, port, path))
-            logger.debug(f"Running LLM Server {path} on {host}:{port}")
-        except asyncio.CancelledError:
-            logger.debug("LLM from llama.cpp was cancelled.")
-            # Handle any cleanup if necessary
 
     def run_embedding_llm(self):
         try:
-            llm = Util().get_llm(self.embedding_llm().name)
-            name = llm.name
-            host = llm.host
-            port = llm.port
-            path = llm.path
+            embedding_model_path, llm_name, llm_type, host, port = Util().embedding_llm()
             
-            if llm in self.llms:
-                logger.debug(f"LLM {name} is already running")
+            if llm_name in self.llms:
+                logger.debug(f"LLM {llm_name} is already running")
                 return
 
             embedding_token_len = Util().embedding_tokens_len()
-            self.start_llama_cpp_server(name, host, port, path, ctx_size=str(embedding_token_len), pooling=True)
-            self.llms.append(llm)
+            if llm_type == 'local':
+                self.start_llama_cpp_server(llm_name, host, port, embedding_model_path, ctx_size=str(embedding_token_len), pooling=True)
+            elif llm_type == 'litellm':
+                pass
+            self.llms.append(llm_name)
             logger.debug("Running Embedding services!")
         except asyncio.CancelledError:
             logger.debug("LLM for embeddingwas cancelled.")
         
             
-    def run_main_llm(self):
-        llm = self.main_llm()
-        type = llm.type
-        name = llm.name
-        ret = None
-        if type == 'local':       
-            self.run_llama_cpp_llm(name)
-        #elif type == 'litellm':
-        #    ret = self.run_litellm_service(name)
+    def run_main_llm(self, pooling:bool = False):
+        llm_path,  llm_name, llm_type, host, port = Util().main_llm()
+
+        if llm_name in self.llms:
+            logger.debug(f"LLM {llm_name} is already running")
+            return
+
+        if llm_type == 'local':       
+            self.start_llama_cpp_server(llm_name, host, port, llm_path, pooling=pooling)
+            self.llms.append(llm_name)      
+            #self.apps.append(self.start_llama_cpp_server(name, host, port, path))
+            logger.debug(f"Running Main LLM Server {llm_name} on {host}:{port}")
+        elif llm_type == 'litellm':
+            self.run_litellm_service()
+            self.llms.append(llm_name)
+            logger.debug(f"Running Main LLM Server {llm_name} on {host}:{port}")
             
     '''       
     async def start_llama_cpp_python(self, host, port, model_path, 
@@ -275,8 +257,8 @@ class LLMServiceManager:
             logger.debug("LLM from llama.cpp.python server done.")
         except asyncio.CancelledError:
             logger.debug("LLM from llama.cpp.python was cancelled.")
-    '''    
-    '''  
+
+
     def run_llama_cpp_python_llm(self, name: str, chat_format='chatml-function-calling', 
                                      embedding=False, verbose=False, n_gpu_layers=99, n_ctx=2048):
         try:
@@ -302,51 +284,48 @@ class LLMServiceManager:
         except asyncio.CancelledError:
             logger.debug("LLM from llama.cpp.python was cancelled.")
             # Handle any cleanup if necessary
-    '''    
     '''   
-    async def start_litellm_service(self, host, port, model):
-        # Initialize the LLM service
-        litellm_service = LiteLLMService()
 
-        # Run the FastAPI app
-        if host == '127.0.0.1' or host == 'localhost':
-            host = '0.0.0.0'
-        config = uvicorn.Config(litellm_service.app, host=host, port=port, log_level="info")
-        server = Server(config)
-        logger.debug(f"Running litellm on {host}:{port}, model is {model}")
+       
+    async def start_litellm_service(self):
         try:
-            await server.serve()
-        except asyncio.CancelledError:
-            logger.debug("LLM from liteLLM was cancelled.")
+            # Initialize the LLM service
+            litellm_service = LiteLLMService()
+            _, model, type, host, port = llm = Util().main_llm()
+            # Run the FastAPI app
+            if host == '127.0.0.1' or host == 'localhost':
+                host = '0.0.0.0'
+            config = uvicorn.Config(litellm_service.app, host=host, port=port, log_level="info")
+            server = Server(config)
+            logger.debug(f"Running litellm on {host}:{port}, model is {model}")
+            try:
+                await server.serve()
+            except asyncio.CancelledError:
+                logger.debug("LLM from liteLLM was cancelled.")
+        except Exception as e:
+            logger.error(f"Unexpected error in start_litellm_service: {e}")
 
         
         
-    def run_litellm_service(self, name: str):
+    def run_litellm_service(self):
         try:
-            llm = Util().get_llm(name)
-            type = llm.type
-            if type != 'litellm':
-                logger.debug(f"LLM {name} is not a litellm")
-                return None
-            name = llm.name
-            host = llm.host
-            port = llm.port
-            model = llm.path
-            
-            if llm in self.llms:
-                logger.debug(f"LLM {name} is already running")
+            _, model, type, host, port = Util().main_llm()
+            logger.debug(f"Try to run LLM Server {model} on {host}:{port}")
+            if model in self.llms:
+                logger.debug(f"LLM {model} is already running")
                 return None
             
-            # Initialize and start the Uvicorn server for the LLM service
-            server_task = asyncio.create_task(self.start_litellm_service(host, port, model))
-            #self.apps.append(server_task)
-            self.llm_to_app[name] = server_task
-            self.llms.append(llm)
+            coroutine = self.start_litellm_service()
+            self.start_async_coroutine(coroutine)
+            #self.litellm_server_task = asyncio.create_task(self.start_litellm_service())
+
+            #self.llm_to_app[name] = server_task
             logger.debug(f"Running litellm Service {model} on {host}:{port}")
-            return server_task
         except asyncio.CancelledError:
             logger.debug("LLM from litellm service was cancelled.")
-    '''
+
+
+    
 
     def main_llm(self):
         return Util().main_llm()
@@ -463,11 +442,6 @@ class LLMServiceManager:
         try:
             self.run_main_llm()
             self.run_embedding_llm()
-            
-            #await self.start_all_apps()
-            
-            #await self.restart_all_apps()
-            # Wait for the server to finish
         except Exception as e:
             logger.exception(f"Unexpected error in run: {e}")
 

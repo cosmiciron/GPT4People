@@ -301,10 +301,18 @@ class CoreMetadata:
     port: int
     mode: str
     model_path: str
-    available_llms: List[str]
     embeddingTokensLen: int
-    main_llm: str
     embedding_llm: str
+    embedding_host: str
+    embedding_port: int
+    embedding_llm_type: str
+    main_llm: str
+    main_llm_host: str
+    main_llm_port: int
+    main_llm_type: str
+    main_llm_language: str
+    main_llm_api_key_name: str
+    main_llm_api_key: str
     silent: bool
     use_memory: bool
     reset_memory: bool
@@ -327,10 +335,18 @@ class CoreMetadata:
             port=data['port'],
             mode=data['mode'],
             model_path=data['model_path'],
-            available_llms=data['available_llms'],
             embeddingTokensLen=data['embeddingTokensLen'],
-            main_llm=data['main_llm'],
             embedding_llm=data['embedding_llm'],
+            embedding_host=data['embedding_host'],
+            embedding_port=data['embedding_port'],
+            embedding_llm_type=data['embedding_llm_type'],
+            main_llm_type=data['main_llm_type'],
+            main_llm=data['main_llm'],
+            main_llm_host=data['main_llm_host'],
+            main_llm_port=data['main_llm_port'],
+            main_llm_language=data['main_llm_language'],
+            main_llm_api_key_name=data['main_llm_api_key_name'],
+            main_llm_api_key=data['main_llm_api_key'],
             silent=data['silent'],
             use_memory=data['use_memory'],
             reset_memory=data['reset_memory'],
@@ -354,7 +370,15 @@ class CoreMetadata:
                 'port': core.port,
                 'mode': core.mode,
                 'model_path': core.model_path,
-                'available_llms': core.available_llms,
+                'embedding_host': core.embedding_host,
+                'embedding_port': core.embedding_port,
+                'embedding_llm_type': core.embedding_llm_type,
+                'main_llm_host': core.main_llm_host,
+                'main_llm_port': core.main_llm_port,
+                'main_llm_type': core.main_llm_type,
+                'main_llm_language': core.main_llm_language,
+                'main_llm_api_key_name': core.main_llm_api_key_name,
+                'main_llm_api_key': core.main_llm_api_key,
                 'embeddingTokensLen': core.embeddingTokensLen,
                 'main_llm': core.main_llm,
                 'silent': core.silent,

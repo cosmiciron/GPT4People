@@ -1,4 +1,3 @@
-'''
 import os
 from typing import List
 from fastapi import FastAPI, Request
@@ -35,7 +34,8 @@ class LiteLLMService:
         self.num_retries = 2
         self.max_tokens = 2048
         self._setup_routes()
-        os.environ["OPENAI_API_KEY"] = "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"
+        Util().set_api_key_for_llm()
+        #os.environ["OPENAI_API_KEY"] = "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"
  
     def _setup_routes(self):
         @self.app.exception_handler(RequestValidationError)
@@ -108,4 +108,3 @@ class LiteLLMService:
             except Exception as e:
                 logger.exception(e)
                 return JSONResponse(status_code=500, content={"detail": str(e)})    
-'''

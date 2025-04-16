@@ -298,9 +298,7 @@ class Core(CoreInterface):
     async def get_embedding(self, request: EmbeddingRequest)-> List[List[float]]:
         # Initialize the embedder, now it is using one existing llama_cpp server with local LLM model
         try:
-            llm: LLM = Util().embedding_llm()
-            host = llm.host
-            port = llm.port
+            _, _, _, host, port = Util().embedding_llm()
             embedding_url = "http://" + host + ":" + str(port) + "/v1/embeddings"
             text = text.replace("\n", " ")
             request_json = request.model_dump_json()
@@ -357,10 +355,8 @@ class Core(CoreInterface):
             logger.debug(f"Received channel registration request: {request.name}")
             try:
                 self.register_channel(request.name, request.host, request.port, request.endpoints)
-                main_llm: LLM = Util().main_llm()
-                language = main_llm.languages[0]
-                host = main_llm.host
-                port = main_llm.port
+                _, _, _, host, port = Util().main_llm()
+                language = Util().main_llm_language()
 
                 return {"result": "Succeed", "host": host, "port": port, "language": language}
             except Exception as e:
@@ -547,12 +543,12 @@ class Core(CoreInterface):
         use_memory = Util().has_memory()
         has_gpu = Util().has_gpu_cuda()
         while True:
-            if main_llm_size is None:
-                logger.debug("main_llm_size is None")
-                time.sleep(30)
-                continue
-            else:        
-                time.sleep(2)
+            # if main_llm_size is None:
+            #     logger.debug("main_llm_size is None")
+            #     time.sleep(30)
+            #     continue
+            # else:        
+            time.sleep(2)
 
             request: PromptRequest = await self.memory_queue.get()            
             if use_memory:                
@@ -769,8 +765,7 @@ class Core(CoreInterface):
 
     def prompt_template(self, section: str, prompt_name: str) -> List[Dict] | None:
         try:
-            main_llm = Util().main_llm()
-            main_language = main_llm.languages[0]
+            main_language = Util().main_llm_language()
             current_path = os.path.dirname(os.path.abspath(__file__))
             prompt_file_name = "prompt_" + main_language + ".yml"
             prompt_file_path = os.path.join(current_path, 'prompts',prompt_file_name)
@@ -833,7 +828,9 @@ class Core(CoreInterface):
 
             # Schedule llmManager.run() to run concurrently
             #llm_task = asyncio.create_task(self.llmManager.run())
+            logger.debug("Starting LLM manager...")
             self.llmManager.run()
+            logger.debug("LLM manager started!")
             # Start the server
             #server_task = asyncio.create_task(self.server.serve())
             #await asyncio.gather(llm_task, server_task)

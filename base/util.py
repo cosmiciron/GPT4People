@@ -17,6 +17,7 @@ from loguru import logger
 import watchdog.events
 import watchdog.observers
 import torch
+import requests
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -62,16 +63,16 @@ class Util:
 
             if self.has_gpu_cuda():
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
-                    self.core_metadata.main_llm = self.core_metadata.available_llms[-1]
+                    self.core_metadata.main_llm = self.llm_for_gpu()
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is available. Using GPU.")
             else:
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
-                    self.core_metadata.main_llm = self.core_metadata.available_llms[0]
+                    self.core_metadata.main_llm = self.llm_for_cpu()
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is not available. Using CPU.")
             self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
-            self.llms: list[LLM]= LLM.from_yaml(os.path.join(self.config_path(), 'llm.yml'))
+            self.llms = self.get_llms()
             self.gpt4people_account: GPT4PeopleAccount = GPT4PeopleAccount.from_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
             
             # Start to monitor the specified config files
@@ -194,26 +195,46 @@ class Util:
             logger.add(log_file, format=log_format, filter=filter_debug, level="DEBUG")
    
               
-    def main_llm(self) -> LLM:
+    def main_llm(self):
         main_llm_name = self.core_metadata.main_llm
-        for llm in self.llms:
-            if llm.name == main_llm_name:
-                return llm
+        if self.core_metadata.main_llm_type == "local":
+            for llm_name in self.llms:
+                if llm_name == main_llm_name:
+                    return os.path.join(self.models_path(), llm_name), llm_name, self.core_metadata.main_llm_type, self.core_metadata.main_llm_host, self.core_metadata.main_llm_port
+            return None
+        else:
+            return main_llm_name, main_llm_name, self.core_metadata.main_llm_type, self.core_metadata.main_llm_host, self.core_metadata.main_llm_port
             
-    def set_mainllm(self, main_llm_name):
-        for llm in self.llms:
-            if llm.name == main_llm_name:
+            
+    def set_mainllm(self, main_llm_name, type = "local", language = "en"):
+        for llm_name in self.llms:
+            if llm_name == main_llm_name:
                 self.core_metadata.main_llm = main_llm_name 
+                self.core_metadata.main_llm_type = type
+                self.core_metadata.main_llm_language = language
                 CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 return main_llm_name
-         
+
+    def set_api_key_for_llm(self):
+        if self.core_metadata.main_llm_type == "local":
+            return
+        if self.core_metadata.main_llm_api_key_name == None or len(self.core_metadata.main_llm_api_key_name) == 0:
+            return
+        if self.core_metadata.main_llm_api_key == None or len(self.core_metadata.main_llm_api_key) == 0:
+            return
+        os.environ[self.core_metadata.main_llm_api_key_name] = self.core_metadata.main_llm_api_key
+        
             
-    def embedding_llm(self) -> LLM:
+    def embedding_llm(self):
         embedding_llm_name = self.core_metadata.embedding_llm
-        for llm in self.llms:
-            if llm.name == embedding_llm_name:
-                #llm.port = 5066
-                return llm
+        if self.core_metadata.embedding_llm_type == "local":
+            for llm_name in self.llms:
+                if llm_name == embedding_llm_name:
+                    return os.path.join(self.models_path(), llm_name), llm_name, self.core_metadata.embedding_llm_type, self.core_metadata.embedding_host, self.core_metadata.embedding_port
+            return None
+        else:
+            return embedding_llm_name, embedding_llm_name, self.core_metadata.embedding_llm_type, self.core_metadata.embedding_host, self.core_metadata.embedding_port
+        
             
     def main_llm_size(self):
         name = self.core_metadata.main_llm.lower()  
@@ -228,7 +249,67 @@ class Util:
             # Convert size to integer representing billions
             return int(size)
         else:
+            return 0
+        
+    def llm_size(self, llm_name):
+        name = llm_name.lower()  
+        # Regular expression to find the model size (e.g., "14b")
+        model_size_pattern = re.compile(r'(\d+)b')
+        
+        # Find all matches of the pattern in the name
+        matches = model_size_pattern.findall(name)
+        if matches:
+            # Assuming you want the first match if there are multiple
+            size = matches[0]
+            # Convert size to integer representing billions
+            return int(size)
+        else:
+            return 0
+        
+    def llm_for_cpu(self):
+        llms = self.available_llms()
+        llm_num = len(llms)
+        if llm_num < 1:
             return None
+        if len(llms) == 1:
+            return llms[0]
+        for llm_name in llms:
+            if self.llm_size(llm_name) <= 7:
+                return llm_name
+        return llms[0]
+        
+            
+    def llm_for_gpu(self):
+        llms = self.available_llms()
+        llm_num = len(llms)
+        if llm_num < 1:
+            return None
+        if len(llms) == 1:
+            return llms[0]
+        for llm_name in llms:
+            size = self.llm_size(llm_name)
+            if size >= 7 and size <= 14 :
+                return llm_name
+        return llms[0]
+        
+    def main_llm_language(self):
+        return self.core_metadata.main_llm_language
+    
+    def main_llm_type(self):
+        return self.core_metadata.main_llm_type
+    
+
+    def get_ollama_supported_models(self):
+        url = "http://localhost:11434/api/tags"
+        response = requests.get(url)
+        if response.status_code == 200:
+            models_data = response.json()
+            # Extract the first part of model names before the colon
+            model_prefixes = [model["name"].split(':')[0] for model in models_data["models"]]
+            return model_prefixes
+        else:
+            # Handle errors or unexpected status codes
+            return []
         
             
     def process_text(self, text):
@@ -294,14 +375,9 @@ class Util:
                                      tool_choice: str = "auto", 
                                      functions: Optional[List] = None,
                                      function_call: Optional[str] = None,
-                                     llm_name: str = None) -> str | None:    
+                                     ) -> str | None:    
         try:      
-            if not llm_name:
-                llm_name = Util().main_llm().name              
-            llm: LLM = Util().get_llm(llm_name)
-            model_host = llm.host
-            model_port = llm.port
-            model = llm.path
+            _, model, type, model_host, model_port = Util().main_llm()
             data = {}
             if grammar != None and len(grammar) > 0:
                 data = {
@@ -445,9 +521,8 @@ class Util:
         if len(text) > embeddingTokenslen // 2:
             text = await self.llm_summarize(text, embeddingTokenslen // 2)
         logger.debug(f"LlamaCppEmbedding.embed: summarizedtext: {text}")
-        llm: LLM = self.embedding_llm()
-        host = llm.host
-        port = llm.port
+        host = self.core_metadata.embedding_host
+        port = self.core_metadata.embedding_port
         embedding_url = "http://" + host + ":" + str(port) + "/v1/embeddings"
         try:
             async with aiohttp.ClientSession() as session:
@@ -565,21 +640,18 @@ class Util:
             self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
             if self.has_gpu_cuda():
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
-                    self.core_metadata.main_llm = self.core_metadata.available_llms[-1]
+                    self.core_metadata.main_llm = self.llm_for_gpu
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
 
             else:
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
-                    self.core_metadata.main_llm = self.core_metadata.available_llms[0]
+                    self.core_metadata.main_llm = self.llm_for_cpu()
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 
         return self.core_metadata
     
-    def availabe_llms(self):
-        return self.core_metadata.available_llms
-    
     def switch_llm(self, llm_name: str):
-        if llm_name not in self.core_metadata.available_llms:
+        if llm_name not in self.llms:
             return
         self.core_metadata.main_llm = llm_name
         CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
@@ -593,16 +665,29 @@ class Util:
         except Exception as e:
             logger.exception(e)
         
-        
+
     def get_llms(self):
-        if self.llms == None:
-            self.llms = LLM.from_yaml(os.path.join(self.config_path(), 'llm.yml'))
+        models_directory = self.models_path()
+        if not os.path.exists(models_directory):
+            return []  # Return an empty list if the models directory does not exist
+
+        # Filter for files with a .gguf extension
+        self.llms = [f for f in os.listdir(models_directory) if f.endswith('.gguf') and os.path.isfile(os.path.join(models_directory, f))]
+
+        logger.debug(f"llms: {self.llms}")
         return self.llms
+    
+    def available_llms(self):
+        llms = self.llms
+        if self.core_metadata.embedding_llm in llms:
+            llms.remove(self.core_metadata.embedding_llm)
+        return llms
         
-    def get_llm(self, name: str) -> LLM:        
-        for llm in self.llms:
-            if llm.name == name:
-                return llm
+    def get_llm(self, name: str):        
+        for llm_name in self.llms:
+            if llm_name == name:
+                return os.path.join(self.models_path(), llm_name), llm_name
+        return None
     
            
     def extract_json_str(self, response) -> str:
@@ -647,16 +732,13 @@ class Util:
         if self.config_observer is None:  
             class Handler(watchdog.events.PatternMatchingEventHandler):
                 def __init__(self, util: Util):
-                    super().__init__(patterns=['user.yml', 'llm.yml'])
+                    super().__init__(patterns=['user.yml'])
                     self.util: Util = util
 
                 def on_modified(self, event):
                     if event.src_path.endswith('user.yml'):
                         self.util.users = None
                         self.util.get_users()
-                    elif event.src_path.endswith('llm.yml'):
-                        self.util.llms = None
-                        self.util.get_llms()
         
       
             self.config_observer = watchdog.observers.Observer()
@@ -678,22 +760,22 @@ if __name__ == "__main__":
     util = Util()
     
     # Load and logger.debug core metadata
-    core_metadata = util.get_core_metadata()
+    core_metadata = util().get_core_metadata()
     logger.debug("core Metadata:", core_metadata)
 
     # Load and logger.debug users
-    users = util.get_users()
+    users = util().get_users()
     logger.debug("Users:", users)
 
     # Load and logger.debug llms
-    llms = util.get_llms()
+    llms = util().get_llms()
     logger.debug("LLMs:", llms)
 
     # logger.debug main LLM
-    main_llm = util.main_llm()
-    logger.debug("Main LLM:", main_llm)
+    #main_llm = util().main_llm()
+    #logger.debug("Main LLM:", main_llm)
 
     # logger.debug embedding LLM
-    embedding_llm = util.embedding_llm()
-    logger.debug("Embedding LLM:", embedding_llm)
+    #embedding_llm = util.embedding_llm()
+    #logger.debug("Embedding LLM:", embedding_llm)
 

@@ -1,10 +1,8 @@
-available_llms:
-- qwen25_7B_q5_k_m
-- deepseek_r1_qwen_14B_q5_k_m
-#- qwen25_14B_q5_k_m
-#- deepseek_r1_qwen_7B_q5_k_m
 embeddingTokensLen: 8192
-embedding_llm: embedding_text_model
+embedding_host: 127.0.0.1
+embedding_llm: bge-m3-Q5_K_M.gguf
+embedding_llm_type: local
+embedding_port: 5066
 endpoints:
 - capabilities: []
   description: Register a helper with metadata, which can be used for core to select
@@ -20,7 +18,13 @@ endpoints:
   output: {}
   path: /process
 host: 0.0.0.0
-main_llm: qwen25_7B_q5_k_m
+main_llm: Qwen2.5-7B-Instruct-Q5_K_M.gguf
+main_llm_api_key: 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
+main_llm_api_key_name: OPENAI_API_KEY
+main_llm_host: 127.0.0.1
+main_llm_language: en
+main_llm_port: 5088
+main_llm_type: local
 mode: dev
 model_path: ../models/
 name: core
