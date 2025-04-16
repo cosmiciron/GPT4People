@@ -372,7 +372,29 @@ def start():
                     break 
                 else:
                     print("Current LLM is already set.(当前大模型已设置)\n")
-                    continue                                             
+                    continue 
+        elif user_input == 'llm download':  
+            available_llms = Util().available_llms()
+            ollama_llms = Util().get_ollama_supported_models()
+            i = 1            
+            for llm in available_llms:
+                print(f"{i}. {llm}\n")    
+                i += 1
+
+            for llm in ollama_llms:     
+                print(f"{i}. ollama/{llm}\n")
+                i += 1
+
+            _, name, type, host, port = Util().main_llm()
+            print(f"Current LLM: {name}\n")
+            model = input("Enter the name of the LLM you want to pull from Ollama(输入从Ollama下载的LLM的名称): ")
+            if model in ollama_llms:
+                print("{model} is already downloaded.(模型已下载)\n")
+                continue                 
+            else:
+                resp = Util().pull_model_from_ollama(model)
+                print(resp)
+                continue
         elif  user_input == 'channel':
             print('################################################################################################################################\n')
             print("How to use wechat channel: \n")

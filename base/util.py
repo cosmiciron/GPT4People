@@ -311,6 +311,25 @@ class Util:
             # Handle errors or unexpected status codes
             return []
         
+    def pull_model_from_ollama(self, model_name):
+        url = "http://localhost:11434/api/pull"
+        payload = {"model": model_name}
+        headers = {'Content-Type': 'application/json'}
+
+        response = requests.post(url, data=json.dumps(payload), headers=headers)
+
+        if response.ok:
+            # Assuming the response contains multiple JSON objects (not standard JSON)
+            # Split response by lines and parse each line as JSON
+            statuses = [json.loads(line) for line in response.iter_lines() if line.strip()]
+
+            # Extract the 'status' values from the parsed JSON objects
+            status_contents = [status_dict["status"] for status_dict in statuses]
+            return status_contents
+        else:
+            # Handle errors, e.g., by returning None or raising an exception
+            response.raise_for_status()
+        
             
     def process_text(self, text):
         # Check if both <think> and </think> are in the text
