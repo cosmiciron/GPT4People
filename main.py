@@ -392,6 +392,7 @@ def start():
                 print("{model} is already downloaded.(模型已下载)\n")
                 continue                 
             else:
+                print(f"Pulling {model} from Ollama... (从Ollama下载{model}...)")
                 resp = Util().pull_model_from_ollama(model)
                 print(resp)
                 continue

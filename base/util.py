@@ -207,13 +207,22 @@ class Util:
             
             
     def set_mainllm(self, main_llm_name, type = "local", language = "en"):
-        for llm_name in self.llms:
-            if llm_name == main_llm_name:
+        if type == "local":
+            if main_llm_name in self.llms:
                 self.core_metadata.main_llm = main_llm_name 
                 self.core_metadata.main_llm_type = type
                 self.core_metadata.main_llm_language = language
                 CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 return main_llm_name
+            else:
+                return None
+        else:
+            self.core_metadata.main_llm = main_llm_name 
+            self.core_metadata.main_llm_type = type
+            self.core_metadata.main_llm_language = language
+            CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
+            return main_llm_name
+        
 
     def set_api_key_for_llm(self):
         if self.core_metadata.main_llm_type == "local":
@@ -315,20 +324,19 @@ class Util:
         url = "http://localhost:11434/api/pull"
         payload = {"model": model_name}
         headers = {'Content-Type': 'application/json'}
-
         response = requests.post(url, data=json.dumps(payload), headers=headers)
 
         if response.ok:
             # Assuming the response contains multiple JSON objects (not standard JSON)
             # Split response by lines and parse each line as JSON
-            statuses = [json.loads(line) for line in response.iter_lines() if line.strip()]
+            #statuses = [json.loads(line) for line in response.iter_lines() if line.strip()]
 
             # Extract the 'status' values from the parsed JSON objects
-            status_contents = [status_dict["status"] for status_dict in statuses]
-            return status_contents
+            #status_contents = [status_dict["status"] for status_dict in statuses]
+            return "Model successfully pulled from Ollama."
         else:
             # Handle errors, e.g., by returning None or raising an exception
-            response.raise_for_status()
+            return "Failed to pull model from Ollama."
         
             
     def process_text(self, text):

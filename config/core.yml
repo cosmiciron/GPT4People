@@ -18,13 +18,13 @@ endpoints:
   output: {}
   path: /process
 host: 0.0.0.0
-main_llm: Qwen2.5-7B-Instruct-Q5_K_M.gguf
+main_llm: ollama/deepseek-r1
 main_llm_api_key: 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
 main_llm_api_key_name: OPENAI_API_KEY
 main_llm_host: 127.0.0.1
 main_llm_language: en
 main_llm_port: 5088
-main_llm_type: local
+main_llm_type: litellm
 mode: dev
 model_path: ../models/
 name: core
