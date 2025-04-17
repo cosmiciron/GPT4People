@@ -7,7 +7,6 @@
 *.pyc
 /.idea
 *.log
-/models
 /llama.cpp-master/build
 *.db
 *.sqlite3
