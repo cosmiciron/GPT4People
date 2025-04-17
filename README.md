@@ -49,33 +49,33 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
       ```
 
 6. **Download Models for GPT4People**:
-- **Embedding Model**: GPT4People uses the embedding model available at [Hugging Face](https://huggingface.co/gpustack/bge-m3-GGUF/blob/main/bge-m3-Q5_K_M.gguf). Download the model file and place it in the "models" folder.
-- **Main LLM**:
-  - **Local GGUF Format Models**: GPT4People supports local models in GGUF format. Download GGUF models from Hugging Face or other sources, and place them in the "models" folder. Use the "llm set" command in `main.py` to switch between models.
-  - **Local Ollama Models**: Leverage all the local models from Ollama by running it and downloading models via the "llm download" command in `main.py`. The "llm set" command allows you to select between local and Ollama models.
-  - **Cloud LLM Services**: GPT4People supports various cloud LLM services, which you can switch between using the "llm cloud" command in `main.py`. This command will prompt you for the API key and model name. Available services include OpenAI, Anthropic, xAI, Cohere, Together AI, Google Gemini, Mistral AI, Deepseek, and GroqCloud.
+  - **Embedding Model**: GPT4People uses the embedding model available at [Hugging Face](https://huggingface.co/gpustack/bge-m3-GGUF/blob/main/bge-m3-Q5_K_M.gguf). Download the model file and place it in the "models" folder.
+  - **Main LLM**:
+    - **Local GGUF Format Models**: GPT4People supports local models in GGUF format. Download GGUF models from Hugging Face or other sources, and place them in the "models" folder. Use the "llm set" command in `main.py` to switch between        models.
+    - **Local Ollama Models**: Leverage all the local models from Ollama by running it and downloading models via the "llm download" command in `main.py`. The "llm set" command allows you to select between local and Ollama models.
+    - **Cloud LLM Services**: GPT4People supports various cloud LLM services, which you can switch between using the "llm cloud" command in `main.py`. This command will prompt you for the API key and model name. Available services include OpenAI, Anthropic, xAI, Cohere, Together AI, Google Gemini, Mistral AI, Deepseek, and GroqCloud.
 
 7. **Interacting with GPT4People - Channels**: GPT4People provides multiple interaction channels. Select the one that suits you:
 
-- **Command Line Channel**: Execute `python main.py` to engage with GPT4People via the command line. Use commands like `llm`, `channel`, and `reset` to manage models, channels, and data.
-     - llm: Lists all available models and shows the current model in use.
-     - llm set: Guides you through switching local models.
-     - llm cloud: Set the cloud based LLM service
-     - llm download: Pull models via Ollama
-     - channel: Explains how to use different channels.
-     - wechat user: Configures WeChat user access.
-     - wechat remove: Removes a WeChat user.
-     - wechat list: Lists all WeChat users with access.
-     - whatsapp user: Configures WhatsApp user access.
-     - whatsapp remove: Removes a WhatsApp user.
-     - whatsapp list: Lists all WhatsApp users with access.
-     - matrix user: Configures Matrix user access.
-     - matrix remove: Removes a Matrix user.
-     - matrix list: Lists all Matrix users with access.
-     - email user: Configures email access.
-     - email remove: Removes an email address.
-     - email list: Lists all email addresses with access.
-     - reset: Resets memory and history data.
+  - **Command Line Channel**: Execute `python main.py` to engage with GPT4People via the command line. Use commands like `llm`, `channel`, and `reset` to manage models, channels, and data.
+       - llm: Lists all available models and shows the current model in use.
+       - llm set: Guides you through switching local models.
+       - llm cloud: Set the cloud based LLM service
+       - llm download: Pull models via Ollama
+       - channel: Explains how to use different channels.
+       - wechat user: Configures WeChat user access.
+       - wechat remove: Removes a WeChat user.
+       - wechat list: Lists all WeChat users with access.
+       - whatsapp user: Configures WhatsApp user access.
+       - whatsapp remove: Removes a WhatsApp user.
+       - whatsapp list: Lists all WhatsApp users with access.
+       - matrix user: Configures Matrix user access.
+       - matrix remove: Removes a Matrix user.
+       - matrix list: Lists all Matrix users with access.
+       - email user: Configures email access.
+       - email remove: Removes an email address.
+       - email list: Lists all email addresses with access.
+       - reset: Resets memory and history data.
 
 - **WeChat Channel (Windows only)**: Ensure you have the supported version of WeChat for Windows and follow the instructions to set up multiple accounts for interaction.
   Now GPT4People supports wechat version 3.9.10.27. You can download from
