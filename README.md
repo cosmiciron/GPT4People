@@ -35,6 +35,7 @@ Although the project is still in its early stages, you can begin exploring and e
 5. **Install Requirements**: Follow the instructions in the `requirements.txt` to install dependencies.
    pip install -r requirements.txt
 6. **Download Models for GPT4People**:
+   
    ***a> Local Models - GPT4People supports local models using gguf format:***
      Step 1> Download gguf models from Huggingface or other sites, then put the model file into "models" folder.
      Step 2> You can put different gguf models into the folder and swith among them using "llm set" command when running main.py of  GPT4People.
