@@ -35,7 +35,11 @@ Although the project is still in its early stages, you can begin exploring and e
 5. **Install Requirements**: Follow the instructions in the `requirements.txt` to install dependencies.
    pip install -r requirements.txt
 6. **Download Models for GPT4People**:
+   ***Download the embedding model:***
+     1.Now GPT4People is using https://huggingface.co/gpustack/bge-m3-GGUF/blob/main/bge-m3-Q5_K_M.gguf for embedding
+     2. Download the gguf model file, then put it into "models" folder.
    
+   ***Main LLM:***
    ***a> Local GGUF fomrat Models - GPT4People supports local models using gguf format:***
      1. Download gguf models from Huggingface or other sites, then put the model file into "models" folder.
      2. You can put different gguf models into the folder and swith among them using "llm set" command when running main.py of  GPT4People.
@@ -58,7 +62,7 @@ Although the project is still in its early stages, you can begin exploring and e
      8. Deepseek
      9. GroqCloud
   You can use "llm cloud" command when running main.py to switch among these services. The command will guide you to input API key and the model name.
-7. **Talk with GPT4People - Channels**
+8. **Talk with GPT4People - Channels**
    GPT4People supports multiple channels for interaction. Choose the one that best fits your needs:
 
   1. Command Line Channel
