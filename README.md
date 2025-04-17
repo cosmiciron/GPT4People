@@ -21,7 +21,7 @@ The Time Awareness Module (TAM) represents a paradigm shift in how AI handles ti
 ### Modular Design
 GPT4People’s modular architecture ensures maximum flexibility and scalability. Key components like the large language model (LLM), communication channels, and specialized functions are separate, standalone modules that can be deployed locally or on remote servers. This design allows for the integration of third-party services like food delivery or travel booking without compromising the AI's autonomy. The modularity also enables users and developers to customize their AI's capabilities, creating a system that adapts to individual needs and leverages the best available tools, all while remaining fully decentralized.
 
-## Getting Started for developers
+### Getting Started for developers
 Although the project is still in its early stages, you can begin exploring and experimenting with GPT4People once the initial codebase is released:
 
 1. **Clone the Repository**: Once available, clone this repository to your local machine.
@@ -41,14 +41,14 @@ Although the project is still in its early stages, you can begin exploring and e
    
      ***Main LLM:***
        ***a> Local GGUF fomrat Models - GPT4People supports local models using gguf format:***
-         1. Download gguf models from Huggingface or other sites, then put the model file into "models" folder.
-         2. You can put different gguf models into the folder and swith among them using "llm set" command when running main.py of  GPT4People.
+           1. Download gguf models from Huggingface or other sites, then put the model file into "models" folder.
+           2. You can put different gguf models into the folder and swith among them using "llm set" command when running main.py of  GPT4People.
     
        ***b> Local Ollama Models:***
-       GPT4People supports to levearage all the local models from Ollama.
-         1. Run the Ollama
-         2. Download models you want via Ollama. Or you can download it using "llm download" command when running main.py of GPT4People
-         3. You can use "llm set" command to select local models and Ollama models.
+         GPT4People supports to levearage all the local models from Ollama.
+           1. Run the Ollama
+           2. Download models you want via Ollama. Or you can download it using "llm download" command when running main.py of GPT4People
+           3. You can use "llm set" command to select local models and Ollama models.
     
        ***c> Cloud service of LLM:***
          Availabe cloud LLM services:(可用的云大模型服务):
@@ -61,7 +61,7 @@ Although the project is still in its early stages, you can begin exploring and e
          7. Mistral AI
          8. Deepseek
          9. GroqCloud
-      You can use "llm cloud" command when running main.py to switch among these services. The command will guide you to input API key and the model name.
+         You can use "llm cloud" command when running main.py to switch among these services. The command will guide you to input API key and the model name.
 8. **Talk with GPT4People - Channels**:
    GPT4People supports multiple channels for interaction. Choose the one that best fits your needs:
 
