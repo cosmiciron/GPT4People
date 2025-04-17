@@ -34,7 +34,29 @@ Although the project is still in its early stages, you can begin exploring and e
    Downloadlink: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 5. **Install Requirements**: Follow the instructions in the `requirements.txt` to install dependencies.
    pip install -r requirements.txt
-6. **Download Models**:
+6. **Download Models for GPT4People**:
+   ***a> Local Models - GPT4People supports local models using gguf format:***
+   Step 1> Download gguf models from Huggingface or other sites, then put the model file into "models" folder.
+   Step 2> You can put different gguf models into the folder and swith among them using "llm set" command when running main.py of  GPT4People.
+
+   ***b> Local Ollama Models:***
+   GPT4People supports to levearage all the local models from Ollama.
+   Step 1> Run the Ollama
+   Step 2> Download models you want via Ollama. Or you can download it using "llm download" command when running main.py of GPT4People
+   Step 3> You can use "llm set" command to select local models and Ollama models.
+
+   ***c> Cloud service of LLM:***
+     Availabe cloud LLM services:(可用的云大模型服务):
+     1. OpenAI
+     2. Anthropic
+     3. xAI
+     4. Cohere
+     5. Together AI
+     6. Google Gemini
+     7. Mistral AI
+     8. Deepseek
+     9. GroqCloud
+  You can use "llm cloud" command when running main.py to switch among these services. The command will guide you to input API key and the model name. 
 
    
 ## For Mainland China
