@@ -333,8 +333,93 @@ def start():
                 i += 1
                 
             _, name, type, host, port = Util().main_llm()
-            print(f"Current LLM: {name}\n")
+            if type == 'local':
+                print(f"Current LLM: {name}\n")
+            else:
+                print(f"You are using cloud LLM: {name}\n")
             continue
+        elif user_input == 'llm cloud':
+            print("################################################################################################################################\n")
+            print("Availabe cloud LLM services:(可用的云大模型服务):\n")
+            print("1. OpenAI\n")
+            print("2. Anthropic\n")
+            print("3. xAI\n")
+            print("4. Cohere\n")
+            print("5. Together AI\n")
+            print("6. Google Gemini\n")
+            print("7. Mistral AI\n")
+            print("8. Deepseek\n")
+            print("9. GroqCloud\n")
+            print("################################################################################################################################\n")
+            cloud_llm_index = int(input("Enter the index of the LLM you want to set(输入你要设置的LLM的序号): "))
+            if cloud_llm_index < 1 or cloud_llm_index > 9:
+                print("Invalid input. Cancel.(输入无效，退出)\n")
+                continue
+            model_name = ""
+            api_key_name = ""
+            api_key_value = ""
+            if cloud_llm_index == 1:
+                # Logic for OpenAI
+                model_name = input("Enter the model name (like gpt-4o) of OpenAI(输入你要设置的OpenAI模型名字) : ")
+                model_name = "openai/" + model_name.strip()
+                api_key_name = "OPENAI_API_KEY"
+                api_key_value = input("Enter the OpenAI API key(输入OpenAI的API密钥): ")
+            elif cloud_llm_index == 2:
+                # Logic for Anthropic
+                model_name = input("Enter the model name (like claude-3-sonnet-20240229) of Anthropic(输入你要设置的Anthropic模型名字) : ")
+                model_name = "anthropic/" + model_name.strip()
+                api_key_name = "ANTHROPIC_API_KEY"
+                api_key_value = input("Enter the Anthropic API key(输入Anthropic的API密钥): ")
+            elif cloud_llm_index == 3:
+                # Logic for xAI
+                model_name = input("Enter the model name (like grok-3-mini-beta) of xAI(输入你要设置的xAI模型名字) : ")
+                model_name = "xai/" + model_name.strip()
+                api_key_name = "XAI_API_KEY"
+                api_key_value = input("Enter the xAI API key(输入Anthropic的API密钥): ")
+            elif cloud_llm_index == 4:
+                # Logic for VertexAI
+                model_name = input("Enter the model name (like command-r) of Cohere(输入你要设置的Cohere模型名字) : ")
+                model_name =  model_name.strip()
+                api_key_name = "COHERE_API_KEY"
+                api_key_value = input("Enter the Cohere API key(输入Cohere的API密钥): ")
+            elif cloud_llm_index == 5:
+                # Logic for Together AI
+                model_name = input("Enter the model name (like 'togethercomputer/Llama-2-7B-32K-Instruct') of Together AI(输入你要设置的Together AI模型名字) : ")
+                model_name = "together_ai/" + model_name.strip()
+                api_key_name = "TOGETHERAI_API_KEY"
+                api_key_value = input("Enter the Together AI API key(输入Together AI的API密钥): ")
+            elif cloud_llm_index == 6:
+                # Logic for Google
+                model_name = input("Enter the model name (like 'gemini-1.5-pro') of Google Gemini(输入你要设置的Google Gemini模型名字) : ")
+                model_name = "gemini/" + model_name.strip()
+                api_key_name = "GEMINI_API_KEY"
+                api_key_value = input("Enter the Google Gemini API key(输入Google Gemini的API密钥): ")
+            elif cloud_llm_index == 7:
+                # Logic for Mistral AI
+                model_name = input("Enter the model name (like 'mistral-small-latest') of Mistral AI(输入你要设置的Mistral AI模型名字) : ")
+                model_name = "mistral/" + model_name.strip()
+                api_key_name = "MISTRAL_API_KEY"
+                api_key_value = input("Enter the Mistral AI API key(输入Mistral AI的API密钥): ")
+            elif cloud_llm_index == 8:
+                # Logic for Openrouter
+                model_name = input("Enter the model name (like 'deepseek-chat') of Deepseek(输入你要设置的Deepseek模型名字) : ")
+                model_name = "deepseek/" + model_name.strip()
+                api_key_name = "DEEPSEEK_API_KEY"
+                #sk-3c8a08bc438244988cacffd1c41513d7
+                api_key_value = input("Enter the Deepseek API key(输入Deepseek的API密钥): ")
+            elif cloud_llm_index == 9:
+                model_name = input("Enter the model name (like 'llama3-8b-8192') of GroqCloud(输入你要设置的GroqCloud模型名字) : ")
+                model_name = "groq/" + model_name.strip()
+                api_key_name = "GROQ_API_KEY"
+                api_key_value = input("Enter the GroqCloud API key(输入GroqCloud的API密钥): ")
+            else:
+                # Default case if needed
+                continue           
+
+            Util().set_mainllm(model_name, type='litellm', api_key_name=api_key_name, api_key=api_key_value)
+            print(f"Cloud LLM set to（云端大模型设置为）: {model_name}\n")
+            print('Restart the app to use new cloud LLM.(重启应用以使用新的云端大模型)\n')
+            break
         elif user_input == 'llm set':
             available_llms = Util().available_llms()
             ollama_llms = Util().get_ollama_supported_models()
@@ -348,8 +433,11 @@ def start():
                 i += 1
 
             _, name, type, host, port = Util().main_llm()
-            print(f"Current LLM: {name}\n")
-            llm_index = int(input("Enter the number of the LLM you want to set(输入你要设置的LLM的序号): "))
+            if type == 'local':
+                print(f"Current LLM: {name}\n")
+            else:
+                print(f"You are using cloud LLM: {name}\n")
+            llm_index = int(input("Enter the index of the LLM you want to set(输入你要设置的LLM的序号): "))
             if llm_index < 1 or llm_index > (len(available_llms) + len(ollama_llms)):
                 print("Invalid input. Cancel.(输入无效，退出)\n")
                 continue
@@ -370,7 +458,7 @@ def start():
                     print(f"LLM set to（大模型设置为）: {name}\n")
                     print('Restart the app to use new LLM.(重启应用以使用新的大模型)\n')
                     break 
-                else:
+                else: 
                     print("Current LLM is already set.(当前大模型已设置)\n")
                     continue 
         elif user_input == 'llm download':  

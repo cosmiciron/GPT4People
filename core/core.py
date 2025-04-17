@@ -596,7 +596,7 @@ class Core(CoreInterface):
                         prompt = MEMORY_CHECK_PROMPT
                         prompt = prompt.format(user_input=human_message)
                         llm_input = []
-                        llm_input = [{"role"      : "system", "content": prompt}] 
+                        llm_input = [{"role": "system", "content": "You are a helpful assistant, please follow the instructions from user."}, {"role": "user", "content": prompt}] 
                         logger.debug("Start to check if the user input should be added to memory")
                         result =await self.openai_chat_completion(messages=llm_input)
                         if result is not None and len(result) > 0:

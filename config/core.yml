@@ -18,9 +18,9 @@ endpoints:
   output: {}
   path: /process
 host: 0.0.0.0
-main_llm: ollama/deepseek-r1
-main_llm_api_key: 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
-main_llm_api_key_name: OPENAI_API_KEY
+main_llm: deepseek/deepseek-reasoner
+main_llm_api_key: sk-3c8a08bc438244988cacffd1c41513d7
+main_llm_api_key_name: DEEPSEEK_API_KEY
 main_llm_host: 127.0.0.1
 main_llm_language: en
 main_llm_port: 5088

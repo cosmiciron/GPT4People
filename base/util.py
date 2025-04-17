@@ -206,12 +206,14 @@ class Util:
             return main_llm_name, main_llm_name, self.core_metadata.main_llm_type, self.core_metadata.main_llm_host, self.core_metadata.main_llm_port
             
             
-    def set_mainllm(self, main_llm_name, type = "local", language = "en"):
+    def set_mainllm(self, main_llm_name, type = "local", language = "en", api_key_name = "", api_key = ""):
         if type == "local":
             if main_llm_name in self.llms:
                 self.core_metadata.main_llm = main_llm_name 
                 self.core_metadata.main_llm_type = type
                 self.core_metadata.main_llm_language = language
+                self.core_metadata.main_llm_api_key_name = api_key_name
+                self.core_metadata.main_llm_api_key = api_key
                 CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 return main_llm_name
             else:
@@ -220,6 +222,8 @@ class Util:
             self.core_metadata.main_llm = main_llm_name 
             self.core_metadata.main_llm_type = type
             self.core_metadata.main_llm_language = language
+            self.core_metadata.main_llm_api_key_name = api_key_name
+            self.core_metadata.main_llm_api_key = api_key
             CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
             return main_llm_name
         
@@ -309,15 +313,19 @@ class Util:
     
 
     def get_ollama_supported_models(self):
-        url = "http://localhost:11434/api/tags"
-        response = requests.get(url)
-        if response.status_code == 200:
-            models_data = response.json()
-            # Extract the first part of model names before the colon
-            model_prefixes = [model["name"].split(':')[0] for model in models_data["models"]]
-            return model_prefixes
-        else:
-            # Handle errors or unexpected status codes
+        try:
+            url = "http://localhost:11434/api/tags"
+            response = requests.get(url)
+            if response.status_code == 200:
+                models_data = response.json()
+                # Extract the first part of model names before the colon
+                model_prefixes = [model["name"].split(':')[0] for model in models_data["models"]]
+                return model_prefixes
+            else:
+                # Handle errors or unexpected status codes
+                return []
+        except Exception as e:
+            # Handle exceptions
             return []
         
     def pull_model_from_ollama(self, model_name):
