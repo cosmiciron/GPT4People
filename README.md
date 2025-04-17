@@ -57,7 +57,59 @@ Although the project is still in its early stages, you can begin exploring and e
      7. Mistral AI
      8. Deepseek
      9. GroqCloud
-  You can use "llm cloud" command when running main.py to switch among these services. The command will guide you to input API key and the model name. 
+  You can use "llm cloud" command when running main.py to switch among these services. The command will guide you to input API key and the model name.
+7. **Talk with GPT4People - Channels**
+   GPT4People supports multiple channels for interaction. Choose the one that best fits your needs:
+
+  1. Command Line Channel
+     - "Python main.py" will start the command line channel directly
+     - Initial Setup: After registration, communicate directly with GPT4People using the command line.
+     - Commands:
+       - llm: Lists all available models and shows the current model in use.
+       - llm set: Guides you through switching models.
+       - channel: Explains how to use different channels.
+       - wechat user: Configures WeChat user access.
+       - wechat remove: Removes a WeChat user.
+       - wechat list: Lists all WeChat users with access.
+       - whatsapp user: Configures WhatsApp user access.
+       - whatsapp remove: Removes a WhatsApp user.
+       - whatsapp list: Lists all WhatsApp users with access.
+       - matrix user: Configures Matrix user access.
+       - matrix remove: Removes a Matrix user.
+       - matrix list: Lists all Matrix users with access.
+       - email user: Configures email access.
+       - email remove: Removes an email address.
+       - email list: Lists all email addresses with access.
+       - reset: Resets memory and history data.
+  
+  2. WeChat Channel (Windows only)
+     - Prerequisites:
+       - Install and login the supported version of WeChat for Windows. Wechat version 3.9.10.27
+       - The wechat package is included and do not upgrade it for using GPT4People.
+       - You need at least two WeChat accounts; one for your PC and the others as friends.
+     - Usage: Run wechat_channel.exe after starting GPT4People.exe.
+
+  3. WhatsApp Channel (Windows and Mac)
+     - Prerequisites:
+       - Python main.py for starting GPT4People
+       - Python Channels/whatsapp/channel.py Start the whatsapp channel.
+       - You need two or more WhatsApp accounts.
+     - Usage: Execute whatsapp_channel.exe, then use a WhatsApp account on your mobile to scan and log in on your PC or Mac.
+  
+  4. Matrix Channel (Windows and Mac)
+     - Prerequisites:
+       - Pip install simplematrixbotlib==2.12.3
+       - Python main.py for starting the GPT4People
+       - Python Channels/matrix/channel.py Start the matrix channel.
+       - Download and log into the Element app on your mobile phone or PC.
+       - You need two or more Matrix accounts on the same home server.
+     - Usage: Run matrix_channel.exe, then provide your home server address and credentials.
+  
+  5. Email Channel
+     - Usage: After running GPT4People, you can interact with your GPT4People account directly via email.
+     - Command： Python main.py
+     - Send email to your GPT4People account
+ 
 
    
 ## For Mainland China
