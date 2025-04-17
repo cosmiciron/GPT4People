@@ -21,52 +21,51 @@ The Time Awareness Module (TAM) represents a paradigm shift in how AI handles ti
 ### Modular Design
 GPT4People’s modular architecture ensures maximum flexibility and scalability. Key components like the large language model (LLM), communication channels, and specialized functions are separate, standalone modules that can be deployed locally or on remote servers. This design allows for the integration of third-party services like food delivery or travel booking without compromising the AI's autonomy. The modularity also enables users and developers to customize their AI's capabilities, creating a system that adapts to individual needs and leverages the best available tools, all while remaining fully decentralized.
 
-## Getting Started for developers
-Although the project is still in its early stages, you can begin exploring and experimenting with GPT4People once the initial codebase is released:
+### For Developers
 
-1. **Clone the Repository**: Once available, clone this repository to your local machine.
-2. **Python Environment**: version from 3.10.* to 3.12.9 or higher (not Tested) -- Conda or other python environment can be used. 
-3. **Install Pytorch**:
-   With GPU: Exmaple Command: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
-   With CPU: Example Command: pip install torch torchvision torchaudio
-4. **Install vc++ building tool for chromaDB**: This is for building chromaDB
-   Guide: https://github.com/bycloudai/InstallVSBuildToolsWindows
-   Downloadlink: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-5. **Install Requirements**: Follow the instructions in the `requirements.txt` to install dependencies.
+Welcome to the GPT4People project. As we are still in the early stages, we encourage developers to get involved and start experimenting with our codebase as soon as it becomes available. Below is a step-by-step guide to help you get started:
+
+1. **Clone the Repository**: As soon as the repository is available, clone it to your local machine for access to the latest code.
+
+2. **Python Environment**: Ensure you have Python version 3.10.* to 3.12.9 or higher installed on your system. Although untested versions may work, we recommend using stable releases. Tools like Conda or virtualenv can help manage your environments.
+
+3. **Install PyTorch**:
+   - **With GPU**: Run the following command to install PyTorch with GPU support:
+     ```
+     pip install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cu126](https://download.pytorch.org/whl/cu126)
+     ```
+   - **With CPU**: For CPU-only support, use:
+     ```
+     pip install torch torchvision torchaudio
+     ```
+
+4. **Install Visual C++ Build Tools for chromaDB**: These tools are necessary for building chromaDB.
+   - **Guide**: [Install Visual Studio Build Tools for Windows](https://github.com/bycloudai/InstallVSBuildToolsWindows)
+   - **Download**: [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+
+5. **Install Requirements**: Install the necessary dependencies by running:
+   ```
    pip install -r requirements.txt
+   ```
+
 6. **Download Models for GPT4People**:
-   
-   ***a> Local GGUF fomrat Models - GPT4People supports local models using gguf format:***
-     1. Download gguf models from Huggingface or other sites, then put the model file into "models" folder.
-     2. You can put different gguf models into the folder and swith among them using "llm set" command when running main.py of  GPT4People.
+  - **Embedding Model**: GPT4People uses the embedding model available at [Hugging Face](https://huggingface.co/gpustack/bge-m3-GGUF/blob/main/bge-m3-Q5_K_M.gguf). Download the model file and place it in the "models" folder.
+  ```
+  https://huggingface.co/gpustack/bge-m3-GGUF/blob/main/bge-m3-Q5_K_M.gguf
+  ```
+    
+  - **Main LLM**:
+    - **Local GGUF Format Models**: GPT4People supports local models in GGUF format. Download GGUF models from Hugging Face or other sources, and place them in the "models" folder. Use the "llm set" command in `main.py` to switch between        models.
+    - **Local Ollama Models**: Leverage all the local models from Ollama by running it and downloading models via the "llm download" command in `main.py`. The "llm set" command allows you to select between local and Ollama models.
+    - **Cloud LLM Services**: GPT4People supports various cloud LLM services, which you can switch between using the "llm cloud" command in `main.py`. This command will prompt you for the API key and model name. Available services include OpenAI, Anthropic, xAI, Cohere, Together AI, Google Gemini, Mistral AI, Deepseek, and GroqCloud.
 
-   ***b> Local Ollama Models:***
-   GPT4People supports to levearage all the local models from Ollama.
-     1. Run the Ollama
-     2. Download models you want via Ollama. Or you can download it using "llm download" command when running main.py of GPT4People
-     3. You can use "llm set" command to select local models and Ollama models.
+7. **Interacting with GPT4People - Channels**: GPT4People provides multiple interaction channels. Select the one that suits you:
 
-   ***c> Cloud service of LLM:***
-     Availabe cloud LLM services:(可用的云大模型服务):
-     1. OpenAI
-     2. Anthropic
-     3. xAI
-     4. Cohere
-     5. Together AI
-     6. Google Gemini
-     7. Mistral AI
-     8. Deepseek
-     9. GroqCloud
-  You can use "llm cloud" command when running main.py to switch among these services. The command will guide you to input API key and the model name.
-7. **Talk with GPT4People - Channels**
-   GPT4People supports multiple channels for interaction. Choose the one that best fits your needs:
-
-  1. Command Line Channel
-     - "Python main.py" will start the command line channel directly
-     - Initial Setup: After registration, communicate directly with GPT4People using the command line.
-     - Commands:
+  - **Command Line Channel**: Execute `python main.py` to engage with GPT4People via the command line. Use commands like `llm`, `channel`, and `reset` to manage models, channels, and data.
        - llm: Lists all available models and shows the current model in use.
-       - llm set: Guides you through switching models.
+       - llm set: Guides you through switching local models.
+       - llm cloud: Set the cloud based LLM service
+       - llm download: Pull models via Ollama
        - channel: Explains how to use different channels.
        - wechat user: Configures WeChat user access.
        - wechat remove: Removes a WeChat user.
@@ -81,66 +80,38 @@ Although the project is still in its early stages, you can begin exploring and e
        - email remove: Removes an email address.
        - email list: Lists all email addresses with access.
        - reset: Resets memory and history data.
-  
-  2. WeChat Channel (Windows only)
-     - Prerequisites:
-       - Install and login the supported version of WeChat for Windows. Wechat version 3.9.10.27
-       - The wechat package is included and do not upgrade it for using GPT4People.
-       - You need at least two WeChat accounts; one for your PC and the others as friends.
-     - Usage: Run wechat_channel.exe after starting GPT4People.exe.
 
-  3. WhatsApp Channel (Windows and Mac)
-     - Prerequisites:
-       - Python main.py for starting GPT4People
-       - Python Channels/whatsapp/channel.py Start the whatsapp channel.
-       - You need two or more WhatsApp accounts.
-     - Usage: Execute whatsapp_channel.exe, then use a WhatsApp account on your mobile to scan and log in on your PC or Mac.
-  
-  4. Matrix Channel (Windows and Mac)
-     - Prerequisites:
-       - Pip install simplematrixbotlib==2.12.3
-       - Python main.py for starting the GPT4People
-       - Python Channels/matrix/channel.py Start the matrix channel.
-       - Download and log into the Element app on your mobile phone or PC.
-       - You need two or more Matrix accounts on the same home server.
-     - Usage: Run matrix_channel.exe, then provide your home server address and credentials.
-  
-  5. Email Channel
-     - Usage: After running GPT4People, you can interact with your GPT4People account directly via email.
-     - Command： Python main.py
-     - Send email to your GPT4People account
+- **WeChat Channel (Windows only)**: Ensure you have the supported version of WeChat for Windows and follow the instructions to set up multiple accounts for interaction.
+  Now GPT4People supports wechat version 3.9.10.27. You can download from
+  ```
+  http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe
+  ```
  
+  ```
+  python Channels/wechat/channel.py
+  ```
 
-   
-## For Mainland China
+- **WhatsApp Channel (Windows and Mac)**: Start the WhatsApp channel by running `python Channels/whatsapp/channel.py`. Use WhatsApp accounts to interact with GPT4People on your PC or Mac.
+  ```
+  python Channels/whatsapp/channel.py
+  ```
+
+- **Matrix Channel (Windows and Mac)**: Install `simplematrixbotlib` and run the Matrix channel script-  `python Channels/matrix/channel.py`. Use the Element app to interact with GPT4People through Matrix.
+  ```
+  python Channels/matrix/channel.py
+  ```
+
+- **Email Channel**: Directly interact with your GPT4People account via email after starting the application with `python main.py`.
+
+Follow these steps to set up your development environment and begin contributing to the GPT4People project. We look forward to your innovative contributions and feedback.
+
+8. **Remove History Data / Memory**: Simply remove the "database" folder
+ 
+## For Mainland China Developer
       Note: If you are in China, you may need to use the python **mirrors** from China <br>
       清华大学：https://pypi.tuna.tsinghua.edu.cn/simple/ <br>
       阿里云：http://mirrors.aliyun.com/pypi/simple/ <br>
       中国科技大学：https://pypi.mirrors.ustc.edu.cn/simple/ <br>
-
-
-   4. **http://www.gpt4people.ai:8001/models.zip** <br>
-      The models can be downloaded from Baidu too.<br>
-      Link(链接)：https://pan.baidu.com/s/1tUOct-YZXuNaQQSNpMSQzQ <br>
-      Code(提取码)：8888 <br>
-      Unzip the models.zip to GPT4People root folder. The path is like **"GPT4People/models/llama-3-8B-Instruct"** <br>
-      The models can be replaced to whatever you want and we also support ollama and litellm. The detail instruction is coming.
-   5. GPT4People is using different channels to communicate with the user and the default channel is **Email**. <br>
-      You can send email to your own GPT4People and get response.<br>
-      Matrix and WeChat(微信）are supported too.<br>
-      For the users in China, you can download the specified WeChat from<br>
-      **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**<br>
-      The wechat package can be downloaded from Baidu too.<br>
-      链接：https://pan.baidu.com/s/1ct_sYAeHYslJ1uihxFlRVw <br>
-      提取码：8888 <br>
-      You can use one wechat account to login on windows and add it as friend on your mobile phone.<br>
-      For the users who can use Matrix, you can download Element mobile app，PC App or Mac App. Connect to the same matrix home server. Now GPT4People is using matrix.org.<br>
-   7. Run the following command **"python GPT4People/ui/gpt4people.py"**. Note: You can change the path based on your root path.<br>
-      Open one brower and access **"http://127.0.0.1:8000"**<br>
-      If it's the first time you are trying GPT4People. You can use one email address to retrieve verfication code. After inputting the verification code, you can create one GPT4People account.
-      One email address with **xxx@gpt4people.ai** will be created for you.
-      After that, you can jump to portal page by clicking the link or type **"http://127.0.0.1:8000/portal/"**. <br>
-      The portal will work well only after the account created. 
 
 ## Contributing
 We believe in open collaboration. Whether you’re a developer, researcher, or someone interested in the future of AI, your contribution matters. Here’s how you can get involved:
