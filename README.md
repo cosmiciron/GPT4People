@@ -90,7 +90,7 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 
 Follow these steps to set up your development environment and begin contributing to the GPT4People project. We look forward to your innovative contributions and feedback.
 
-8. **Remove History Data / Memory**:Simply remove the "database" folder
+8. **Remove History Data / Memory**: Simply remove the "database" folder
  
 ## For Mainland China Developer
       Note: If you are in China, you may need to use the python **mirrors** from China <br>
