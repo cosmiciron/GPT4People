@@ -58,7 +58,6 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 7. **Interacting with GPT4People - Channels**: GPT4People provides multiple interaction channels. Select the one that suits you:
 
 - **Command Line Channel**: Execute `python main.py` to engage with GPT4People via the command line. Use commands like `llm`, `channel`, and `reset` to manage models, channels, and data.
-     - Commands:
      - llm: Lists all available models and shows the current model in use.
      - llm set: Guides you through switching local models.
      - llm cloud: Set the cloud based LLM service
@@ -90,7 +89,8 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 - **Email Channel**: Directly interact with your GPT4People account via email after starting the application with `python main.py`.
 
 Follow these steps to set up your development environment and begin contributing to the GPT4People project. We look forward to your innovative contributions and feedback.
-8. **Remove History Data / Memory** Simply remove the "database" folder
+
+8. **Remove History Data / Memory**:Simply remove the "database" folder
  
 ## For Mainland China Developer
       Note: If you are in China, you may need to use the python **mirrors** from China <br>
