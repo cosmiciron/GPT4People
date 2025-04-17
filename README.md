@@ -58,6 +58,25 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 7. **Interacting with GPT4People - Channels**: GPT4People provides multiple interaction channels. Select the one that suits you:
 
 - **Command Line Channel**: Execute `python main.py` to engage with GPT4People via the command line. Use commands like `llm`, `channel`, and `reset` to manage models, channels, and data.
+     - Commands:
+     - llm: Lists all available models and shows the current model in use.
+     - llm set: Guides you through switching local models.
+     - llm cloud: Set the cloud based LLM service
+     - llm download: Pull models via Ollama
+     - channel: Explains how to use different channels.
+     - wechat user: Configures WeChat user access.
+     - wechat remove: Removes a WeChat user.
+     - wechat list: Lists all WeChat users with access.
+     - whatsapp user: Configures WhatsApp user access.
+     - whatsapp remove: Removes a WhatsApp user.
+     - whatsapp list: Lists all WhatsApp users with access.
+     - matrix user: Configures Matrix user access.
+     - matrix remove: Removes a Matrix user.
+     - matrix list: Lists all Matrix users with access.
+     - email user: Configures email access.
+     - email remove: Removes an email address.
+     - email list: Lists all email addresses with access.
+     - reset: Resets memory and history data.
 
 - **WeChat Channel (Windows only)**: Ensure you have the supported version of WeChat for Windows and follow the instructions to set up multiple accounts for interaction.
   Now GPT4People supports wechat version 3.9.10.27. You can download from
@@ -71,7 +90,7 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 - **Email Channel**: Directly interact with your GPT4People account via email after starting the application with `python main.py`.
 
 Follow these steps to set up your development environment and begin contributing to the GPT4People project. We look forward to your innovative contributions and feedback.
- 
+8. **Remove History Data / Memory** Simply remove the "database" folder
  
 ## For Mainland China Developer
       Note: If you are in China, you may need to use the python **mirrors** from China <br>
