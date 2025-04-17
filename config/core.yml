@@ -18,13 +18,13 @@ endpoints:
   output: {}
   path: /process
 host: 0.0.0.0
-main_llm: deepseek/deepseek-reasoner
-main_llm_api_key: sk-3c8a08bc438244988cacffd1c41513d7
-main_llm_api_key_name: DEEPSEEK_API_KEY
+main_llm: 
+main_llm_api_key: 
+main_llm_api_key_name: 
 main_llm_host: 127.0.0.1
 main_llm_language: en
 main_llm_port: 5088
-main_llm_type: litellm
+main_llm_type: 
 mode: dev
 model_path: ../models/
 name: core
