@@ -60,6 +60,8 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 - **Command Line Channel**: Execute `python main.py` to engage with GPT4People via the command line. Use commands like `llm`, `channel`, and `reset` to manage models, channels, and data.
 
 - **WeChat Channel (Windows only)**: Ensure you have the supported version of WeChat for Windows and follow the instructions to set up multiple accounts for interaction.
+  Now GPT4People supports wechat version 3.9.10.27. You can download from
+  **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**<br> or other place.
 
 - **WhatsApp Channel (Windows and Mac)**: Start the WhatsApp channel by running `python Channels/whatsapp/channel.py`. Use WhatsApp accounts to interact with GPT4People on your PC or Mac.
 
