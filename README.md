@@ -46,10 +46,14 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 5. **Install Requirements**: Install the necessary dependencies by running:
    ```
    pip install -r requirements.txt
-      ```
+   ```
 
 6. **Download Models for GPT4People**:
   - **Embedding Model**: GPT4People uses the embedding model available at [Hugging Face](https://huggingface.co/gpustack/bge-m3-GGUF/blob/main/bge-m3-Q5_K_M.gguf). Download the model file and place it in the "models" folder.
+    ```
+   https://huggingface.co/gpustack/bge-m3-GGUF/blob/main/bge-m3-Q5_K_M.gguf
+    ```
+    
   - **Main LLM**:
     - **Local GGUF Format Models**: GPT4People supports local models in GGUF format. Download GGUF models from Hugging Face or other sources, and place them in the "models" folder. Use the "llm set" command in `main.py` to switch between        models.
     - **Local Ollama Models**: Leverage all the local models from Ollama by running it and downloading models via the "llm download" command in `main.py`. The "llm set" command allows you to select between local and Ollama models.
@@ -80,11 +84,19 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 - **WeChat Channel (Windows only)**: Ensure you have the supported version of WeChat for Windows and follow the instructions to set up multiple accounts for interaction.
   Now GPT4People supports wechat version 3.9.10.27. You can download from
   **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**<br> or other place.
-  `python Channels/wechat/channel.py`
+  ```
+  python Channels/wechat/channel.py
+  ```
 
 - **WhatsApp Channel (Windows and Mac)**: Start the WhatsApp channel by running `python Channels/whatsapp/channel.py`. Use WhatsApp accounts to interact with GPT4People on your PC or Mac.
+  ```
+  python Channels/whatsapp/channel.py
+  ```
 
 - **Matrix Channel (Windows and Mac)**: Install `simplematrixbotlib` and run the Matrix channel script-  `python Channels/matrix/channel.py`. Use the Element app to interact with GPT4People through Matrix.
+  ```
+  python Channels/matrix/channel.py
+  ```
 
 - **Email Channel**: Directly interact with your GPT4People account via email after starting the application with `python main.py`.
 
