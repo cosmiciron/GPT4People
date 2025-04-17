@@ -83,7 +83,10 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 
 - **WeChat Channel (Windows only)**: Ensure you have the supported version of WeChat for Windows and follow the instructions to set up multiple accounts for interaction.
   Now GPT4People supports wechat version 3.9.10.27. You can download from
-  **http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe**<br> or other place.
+  ```
+  http://www.gpt4people.ai:8001/WeChatSetup-3.9.10.27.exe
+  ```
+ 
   ```
   python Channels/wechat/channel.py
   ```
