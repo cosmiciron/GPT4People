@@ -39,7 +39,7 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
      pip install torch torchvision torchaudio
      ```
 
-4. **Install Visual C++ Build Tools for chromaDB**: These tools are necessary for building chromaDB.
+4. **Install Visual C++ Build Tools for chromaDB**: These tools are necessary for building chromaDB on Windows. It's only needed on Windows.
    - **Guide**: [Install Visual Studio Build Tools for Windows](https://github.com/bycloudai/InstallVSBuildToolsWindows)
    - **Download**: [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 
