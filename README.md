@@ -56,10 +56,65 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
     
   - **Main LLM**:
     - **Local GGUF Format Models**: GPT4People supports local models in GGUF format. Download GGUF models from Hugging Face or other sources, and place them in the "models" folder. Use the "llm set" command in `main.py` to switch between        models.
+      - [Qwen 2.5 1.5B Instruct]
+      ```
+      https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q5_k_m.gguf?download=true
+      ```
       - [Qwen 2.5 7B Instruct]
       ```
       https://huggingface.co/MaziyarPanahi/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct.Q5_K_M.gguf?download=true
-      ```  
+      ```
+      - [Qwen 2.5 14B Instruct]
+      ```
+      https://huggingface.co/lmstudio-community/Qwen2.5-14B-Instruct-GGUF/resolve/main/Qwen2.5-14B-Instruct-Q4_K_M.gguf?download=true
+      ```
+      - [QwQ 32B]
+      ```
+      https://huggingface.co/Mungert/QwQ-32B-GGUF/resolve/main/QwQ-32B-q4_k_m.gguf?download=true
+      ```
+      - [Llama3.2 3B Instruct]
+      ```
+      https://huggingface.co/mradermacher/Llama-3.2-8B-Instruct-GGUF/resolve/main/Llama-3.2-8B-Instruct.Q5_K_M.gguf?download=true
+      ```
+      - [Llama3.2 8B Instruct]
+      ```
+      https://huggingface.co/unsloth/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q8_0.gguf?download=true
+      ```
+      - [GLM-4 9B Instruct]
+      ```
+      https://huggingface.co/bartowski/THUDM_GLM-4-9B-0414-GGUF/resolve/main/THUDM_GLM-4-9B-0414-Q5_K_M.gguf?download=true
+      ```
+      - [GLM-4 32B Instruct]
+      ```
+      https://huggingface.co/bartowski/THUDM_GLM-4-32B-0414-GGUF/resolve/main/THUDM_GLM-4-32B-0414-Q4_K_M.gguf?download=true
+      ```
+      - [Gemma-3 4B]
+      ```
+      https://huggingface.co/google/gemma-3-4b-it-qat-q4_0-gguf/resolve/main/gemma-3-4b-it-q4_0.gguf?download=true
+      ```
+      - [Gemma-3 12B]
+      ```
+      https://huggingface.co/google/gemma-3-12b-it-qat-q4_0-gguf/resolve/main/gemma-3-12b-it-q4_0.gguf?download=true
+      ```
+      - [Gemma-3 27B]
+      ```
+      https://huggingface.co/google/gemma-3-27b-it-qat-q4_0-gguf/resolve/main/gemma-3-27b-it-q4_0.gguf?download=true
+      ```
+      - [Deepseek-R1-Distill-Qwen 1.5B]
+      ```
+      https://huggingface.co/unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-1.5B-Q5_K_M.gguf?download=true
+      ```
+      - [Deepseek-R1-Distill-Qwen 7B]
+      ```
+      https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-7B-Q5_K_M.gguf?download=true
+      ```
+      - [Deepseek-R1-Distill-Qwen 14B]
+      ```
+      https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf?download=true
+      ```
+
+      
+       
     - **Local Ollama Models**: Leverage all the local models from Ollama by running it and downloading models via the "llm download" command in `main.py`. The "llm set" command allows you to select between local and Ollama models.
     - **Cloud LLM Services**: GPT4People supports various cloud LLM services, which you can switch between using the "llm cloud" command in `main.py`. This command will prompt you for the API key and model name. Available services include OpenAI, Anthropic, xAI, Cohere, Together AI, Google Gemini, Mistral AI, Deepseek, and GroqCloud.
 
