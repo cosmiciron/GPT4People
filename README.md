@@ -188,21 +188,18 @@ https://pan.baidu.com/s/1jJaKBLRkHqUql3ieRTD2yQ?pwd=1234
 Extraction code: 1234
 
 **Suitable for high-configuration machines**, performs better with a GPU, comes with a 7B model, 8.32GB: GPT4People_GPU_CPU_Model_7B.zip
-```
+
 https://pan.baidu.com/s/1jJaKBLRkHqUql3ieRTD2yQ?pwd=1234](https://pan.baidu.com/s/1uiYazKRZy6C2_fQHBHC9qA?pwd=1234 
-```
 Extraction code: 1234
 
 **Suitable for machines with a GPU**, such as the 4090, comes with two models, one 7B and one 14B, 18GB: GPT4People_GPU_2Models_14B.zip
-```
+
 https://pan.baidu.com/s/1jHgz-soZVne0mhm1B1VyYQ?pwd=1234 
-```
 Extraction code: 1234
 
 **Suitable for machines with a GPU**, such as the 4090, comes with one 7B and two 14B models, 27.8GB: GPT4People_GPU_3Models_14B.zip
-```
+
 https://pan.baidu.com/s/1xSS6GgyPQvLxpS2qfEEpzw?pwd=1234 
-```
 Extraction code: 1234
 
 (Note: "Extraction code" is likely a password required to access the shared files on the Baidu Pan platform.)
