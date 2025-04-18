@@ -60,6 +60,7 @@ class Util:
             self.config_observer = None
             self.core_metadata = CoreMetadata.from_yaml(os.path.join(self.config_path(), 'core.yml'))
             self.silent = self.core_metadata.silent
+            self.llms = self.get_llms()
 
             if self.has_gpu_cuda():
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
@@ -72,7 +73,6 @@ class Util:
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is not available. Using CPU.")
             self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
-            self.llms = self.get_llms()
             self.gpt4people_account: GPT4PeopleAccount = GPT4PeopleAccount.from_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
             
             # Start to monitor the specified config files
