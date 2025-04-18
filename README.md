@@ -29,10 +29,14 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 
 2. **Python Environment**: Ensure you have Python version 3.10.* to 3.12.9 or higher installed on your system. Although untested versions may work, we recommend using stable releases. Tools like Conda or virtualenv can help manage your environments.
 
-3. **Install PyTorch**:
+3. **Install PyTorch and CUDA**:
    - **With GPU**: Run the following command to install PyTorch with GPU support:
      ```
      pip install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cu126](https://download.pytorch.org/whl/cu126)
+     ```
+     **Install CUDA**: Download the same version as above. Eg. CUDA  12.6
+     ```
+     https://developer.download.nvidia.com/compute/cuda/12.6.0/local_installers/cuda_12.6.0_560.76_windows.exe
      ```
    - **With CPU**: For CPU-only support, use:
      ```
