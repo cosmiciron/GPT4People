@@ -178,15 +178,13 @@ Follow these steps to set up your development environment and begin contributing
 ## Installation package
 Download the packages you want. Unzip and try the steps in the readme.txt.
 **Suitable for use on Apple computers**, comes with two 7B (billion parameter) models, 10.84GB: GPT4People_Mac_Arm_Model_7B.zip
-```
+
 https://pan.baidu.com/s/1Rs1GsUNCY7PR-05JTtd-5A?pwd=1234 
-```
 Extraction code: 1234
 
 **Suitable for low-configuration computers**, average performance, comes with a 1.5B model, 4.28GB: GPT4People_CPU_Model_1_5B.zip 
-```
+
 https://pan.baidu.com/s/1jJaKBLRkHqUql3ieRTD2yQ?pwd=1234 
-```
 Extraction code: 1234
 
 **Suitable for high-configuration machines**, performs better with a GPU, comes with a 7B model, 8.32GB: GPT4People_GPU_CPU_Model_7B.zip
