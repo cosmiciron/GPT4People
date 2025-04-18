@@ -34,7 +34,12 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
      ```
      pip install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cu126](https://download.pytorch.org/whl/cu126)
      ```
-     **Install CUDA**: Download the same version as above. Eg. CUDA  12.6
+     Check whether CUDA is available on the machine.
+     ```
+     python -c "import torch;print(torch.cuda.is_available())"
+     ```
+     If the result is False, try to install CUDA SDK.
+     **(Optional) Install CUDA**: If CUDA doesn't work, you can download and install CUDA -  the same version as above. Eg. CUDA  12.6
      ```
      https://developer.download.nvidia.com/compute/cuda/12.6.0/local_installers/cuda_12.6.0_560.76_windows.exe
      ```
