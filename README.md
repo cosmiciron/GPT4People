@@ -65,6 +65,20 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
     
   - **Main LLM**:
     - **Local GGUF Format Models**: GPT4People supports local models in GGUF format. Download GGUF models from Hugging Face or other sources, and place them in the "models" folder. Use the "llm set" command in `main.py` to switch between        models. Some models can be downloaded and placed into "models" folder.
+      - [Qwen3 8B]
+      ```
+      https://huggingface.co/bartowski/Qwen_Qwen3-8B-GGUF/resolve/main/Qwen_Qwen3-8B-Q5_K_M.gguf?download=true
+      ```
+      
+      - [Qwen3 14B]
+      ```
+      https://huggingface.co/unsloth/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q5_K_M.gguf?download=true
+      ```
+      - [Qwen3 32B]
+      ```
+      https://huggingface.co/unsloth/Qwen3-32B-GGUF/resolve/main/Qwen3-32B-Q4_K_M.gguf?download=true
+      ```
+      
       - [Qwen 2.5 1.5B Instruct]
       ```
       https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q5_k_m.gguf?download=true
