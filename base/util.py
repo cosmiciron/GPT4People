@@ -571,7 +571,7 @@ class Util:
                     data=json.dumps({"input": text}),
                 ) as response:
                     response_json = await response.json()
-                    logger.debug(f"Response from embedding LLM: {response_json}")
+                    #logger.debug(f"Response from embedding LLM: {response_json}")
                     ret = response_json["data"][0]["embedding"]
                     return ret
         except Exception as e:

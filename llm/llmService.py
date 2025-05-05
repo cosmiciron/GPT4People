@@ -440,8 +440,8 @@ class LLMServiceManager:
     # This funciton is for testing    
     def run(self):
         try:
-            self.run_main_llm()
             self.run_embedding_llm()
+            self.run_main_llm()
         except Exception as e:
             logger.exception(f"Unexpected error in run: {e}")
 
