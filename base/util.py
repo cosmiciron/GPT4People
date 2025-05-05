@@ -65,11 +65,13 @@ class Util:
             if self.has_gpu_cuda():
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
                     self.core_metadata.main_llm = self.llm_for_gpu()
+                    self.core_metadata.main_llm_type = "local"
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is available. Using GPU.")
             else:
                 if self.core_metadata.main_llm is None or len(self.core_metadata.main_llm) == 0:
                     self.core_metadata.main_llm = self.llm_for_cpu()
+                    self.core_metadata.main_llm_type = "local"
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is not available. Using CPU.")
             self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
@@ -558,7 +560,9 @@ class Util:
         logger.debug(f"LlamaCppEmbedding.embed: summarizedtext: {text}")
         host = self.core_metadata.embedding_host
         port = self.core_metadata.embedding_port
+        embedding_txt = text.encode("utf-8")
         embedding_url = "http://" + host + ":" + str(port) + "/v1/embeddings"
+        logger.debug(f"Embedding URL: {embedding_url}")
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -567,6 +571,7 @@ class Util:
                     data=json.dumps({"input": text}),
                 ) as response:
                     response_json = await response.json()
+                    logger.debug(f"Response from embedding LLM: {response_json}")
                     ret = response_json["data"][0]["embedding"]
                     return ret
         except Exception as e:
