@@ -34,7 +34,12 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
      ```
      pip install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cu126](https://download.pytorch.org/whl/cu126)
      ```
-     **Install CUDA**: Download the same version as above. Eg. CUDA  12.6
+     Check whether CUDA is available on the machine.
+     ```
+     python -c "import torch;print(torch.cuda.is_available())"
+     ```
+     If the result is False, try to install CUDA SDK.
+     **(Optional) Install CUDA**: If CUDA doesn't work, you can download and install CUDA -  the same version as above. Eg. CUDA  12.6
      ```
      https://developer.download.nvidia.com/compute/cuda/12.6.0/local_installers/cuda_12.6.0_560.76_windows.exe
      ```
@@ -43,7 +48,7 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
      pip install torch torchvision torchaudio
      ```
 
-4. **Install Visual C++ Build Tools for chromaDB**: These tools are necessary for building chromaDB on Windows. It's only needed on Windows.
+4. **Install Visual C++ Build Tools **: ONLY needed on Windows.
    - **Guide**: [Install Visual Studio Build Tools for Windows](https://github.com/bycloudai/InstallVSBuildToolsWindows)
    - **Download**: [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 
@@ -60,6 +65,20 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
     
   - **Main LLM**:
     - **Local GGUF Format Models**: GPT4People supports local models in GGUF format. Download GGUF models from Hugging Face or other sources, and place them in the "models" folder. Use the "llm set" command in `main.py` to switch between        models. Some models can be downloaded and placed into "models" folder.
+      - [Qwen3 8B]
+      ```
+      https://huggingface.co/bartowski/Qwen_Qwen3-8B-GGUF/resolve/main/Qwen_Qwen3-8B-Q5_K_M.gguf?download=true
+      ```
+      
+      - [Qwen3 14B]
+      ```
+      https://huggingface.co/unsloth/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q5_K_M.gguf?download=true
+      ```
+      - [Qwen3 32B]
+      ```
+      https://huggingface.co/unsloth/Qwen3-32B-GGUF/resolve/main/Qwen3-32B-Q4_K_M.gguf?download=true
+      ```
+      
       - [Qwen 2.5 1.5B Instruct]
       ```
       https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q5_k_m.gguf?download=true
@@ -169,7 +188,7 @@ Welcome to the GPT4People project. As we are still in the early stages, we encou
 Follow these steps to set up your development environment and begin contributing to the GPT4People project. We look forward to your innovative contributions and feedback.
 
 8. **Remove History Data / Memory**: Simply remove the "database" folder
- 
+
 ## For Mainland China Developer
       Note: If you are in China, you may need to use the python **mirrors** from China <br>
       清华大学：https://pypi.tuna.tsinghua.edu.cn/simple/ <br>
