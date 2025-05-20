@@ -282,21 +282,26 @@ def reset_memory():
     Util().clear_data()
 
 def start():
+    '''
     has_user = True
     if not account_exists():
         has_user = register_user()
     if not has_user:
         print("Account registration failed. Please try again or contact support.(账户注册失败，请重试或联系支持)\n")
         return
-    gpt4people_account = Util().get_gpt4people_account()
+    gpt4people_account = Util().get_email_account()
     email = gpt4people_account.email_user
     password = gpt4people_account.email_pass
     print(f"Your GPT4People account(你的GPT4People账号): {email}\n Password(密码): {password}\n")
-
+    '''
+    llm_thread = run_core()
     # Running start_core in a background thread
     print("Starting GPT4People..., please wait... (启动GPT4People..., 请稍等...)\n")
-    llm_thread = run_core()
-    sleep(30)
+    embedding_llm_health = Util().check_embedding_model_server_health()
+    main_llm_health = Util().check_main_model_server_health()
+    if not embedding_llm_health or not main_llm_health:
+        print("Main LLM or embedding LLM is not available. Please check the server status.(主大模型或嵌入大模型不可用，请检查服务器状态)\n")
+        return
     channel_metadata = ChannelMetadata(name="gpt4people", host="localhost", port=0, endpoints=[])
     with Channel(metadata=channel_metadata) as channel:
         try:
