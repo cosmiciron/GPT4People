@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 from typing import Dict, List, Optional, Tuple
 import aiohttp
 import uvicorn
@@ -23,7 +24,7 @@ import requests
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from memory.chat.message import ChatMessage
 from memory.prompts import MEMORY_SUMMARIZATION_PROMPT
-from base.base import CoreMetadata, User, LLM, GPT4PeopleAccount
+from base.base import CoreMetadata, User, LLM, EmailAccount
 
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 core_metadata =CoreMetadata.from_yaml(os.path.join(root_dir, 'config', 'core.yml'))
@@ -75,7 +76,7 @@ class Util:
                     CoreMetadata.to_yaml(self.core_metadata, os.path.join(self.config_path(), 'core.yml'))
                 logger.debug("CUDA is not available. Using CPU.")
             self.users : list = User.from_yaml(os.path.join(self.config_path(), 'user.yml'))
-            self.gpt4people_account: GPT4PeopleAccount = GPT4PeopleAccount.from_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
+            self.email_account: EmailAccount = EmailAccount.from_yaml(os.path.join(self.config_path(), 'email_account.yml'))
             
             # Start to monitor the specified config files
             self.watch_config_file()
@@ -404,6 +405,62 @@ class Util:
         except UnicodeEncodeError:
             return False
         return True
+    
+    def check_main_model_server_health(self, timeout: int = 300) -> bool:
+        """Check if the LLM server is ready by making a request to its health endpoint."""
+        _, model, type, model_host, model_port = Util().main_llm()
+        health_url = f"http://{model_host}:{model_port}/health"
+        logger.debug(f"Main model Health URL: {health_url}")
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                response = requests.get(health_url, timeout=10)
+                if response.status_code == 200:
+                    logger.debug("Main model server is healthy and ready to accept requests.")
+                    return True
+                elif response.status_code == 503:
+                    # The server is not ready yet
+                    logger.debug("Main model server is not ready yet, retrying...")
+                    time.sleep(1)  # Wait for 1 second before trying again
+                    continue
+                else:
+                    # The server is up but returned an unexpected status code
+                    logger.error(f"Main model server returned unexpected status code: {response.status_code}")
+                    return False
+            except requests.exceptions.ConnectionError:
+                # The request failed because the server is not up yet
+                logger.debug("Main model server is not connected yet, retrying...")
+            time.sleep(1)  # Wait for 1 second before trying again
+        logger.error(f"Main model server did not become ready within {timeout} seconds.")
+        return False
+    
+    def check_embedding_model_server_health(self, timeout: int = 120) -> bool:
+        """Check if the LLM server is ready by making a request to its health endpoint."""
+        _, model, type, model_host, model_port = Util().embedding_llm()
+        health_url = f"http://{model_host}:{model_port}/health"
+        logger.debug(f"Embedding model Health URL: {health_url}")
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                response = requests.get(health_url, timeout=10)
+                if response.status_code == 200:
+                    logger.debug("Embedding server is healthy and ready to accept requests.")
+                    return True
+                elif response.status_code == 503:
+                    # The server is not ready yet
+                    logger.debug("Embedding server is not ready yet, retrying...")
+                    time.sleep(1)  # Wait for 1 second before trying again
+                    continue
+                else:
+                    # The server is up but returned an unexpected status code
+                    logger.error(f"Embedding server returned unexpected status code: {response.status_code}")
+                    return False
+            except requests.exceptions.ConnectionError:
+                # The request failed because the server is not up yet
+                logger.debug("Embedding server is not connected yet, retrying...")
+            time.sleep(1)  # Wait for 1 second before trying again
+        logger.error(f"LLM server did not become ready within {timeout} seconds.")
+        return False
             
 
     async def openai_chat_completion(self, messages: list[dict], 
@@ -667,13 +724,13 @@ class Util:
     def save_users(self, users: List[User] = None):
         User.to_yaml(users, os.path.join(self.config_path(), 'user.yml'))
     
-    def get_gpt4people_account(self):
-        if self.gpt4people_account == None:
-            self.gpt4people_account = GPT4PeopleAccount.from_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
-        return self.gpt4people_account
+    def get_email_account(self):
+        if self.email_account == None:
+            self.email_account = EmailAccount.from_yaml(os.path.join(self.config_path(), 'email_account.yml'))
+        return self.email_account
     
-    def save_gpt4people_account(self):
-        self.gpt4people_account.to_yaml(os.path.join(self.config_path(), 'gpt4people_account.yml'))
+    def save_email_account(self):
+        self.email_account.to_yaml(os.path.join(self.config_path(), 'email_account.yml'))
 
     def get_core_metadata(self):
         if self.core_metadata == None:

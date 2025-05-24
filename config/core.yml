@@ -18,9 +18,9 @@ endpoints:
   output: {}
   path: /process
 host: 0.0.0.0
-main_llm: Qwen3-8B-Q5_K_M.gguf
-main_llm_api_key: null
-main_llm_api_key_name: null
+main_llm: Qwen3-32B-Q4_K_M.gguf
+main_llm_api_key:
+main_llm_api_key_name:
 main_llm_host: 127.0.0.1
 main_llm_language: en
 main_llm_port: 5088

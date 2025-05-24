@@ -68,6 +68,7 @@ class Core(CoreInterface):
     
     def __init__(self):
         if not hasattr(self, 'initialized'):
+            self.hasEmailChannel = False
             self.initialized = True
             self.orchestratorAndTAM_enabled = False
             self.latestPromptRequest: PromptRequest = None
@@ -803,13 +804,15 @@ class Core(CoreInterface):
 
 
     def start_email_channel(self):
-        try:
-            thread = threading.Thread(target=channel.main)
-            thread.start()
+        if self.hasEmailChannel:
+            try:
+                thread = threading.Thread(target=channel.main)
+                thread.start()
 
-        except Exception as e:
-           logger.exception(e)
-   
+            except Exception as e:
+                logger.exception(e)
+
+
     async def run(self):
         """Run the core using uvicorn"""
         try:
@@ -850,12 +853,12 @@ class Core(CoreInterface):
         self.shutdown_all_channels()
         self.llmManager.stop_all_llama_cpp_processes()
         # do some deinitialization here
-        logger.debug("core is stopping!")
+        #logger.debug("core is stopping!")
         self.llmManager.stop_all_apps()
-        logger.debug("LLM apps are stopped!")
+        #logger.debug("LLM apps are stopped!")
 
         self.plugin_manager.deinitialize_plugins()
-        logger.debug("Plugins are deinitialized!")
+        #logger.debug("Plugins are deinitialized!")
         self.stop_chroma_client()
 
         def shutdown():
@@ -863,12 +866,13 @@ class Core(CoreInterface):
                 #asyncio.run(Util().stop_uvicorn_server(self.server))
                 Util().stop_uvicorn_server(self.server)
             except Exception as e:
-                logger.exception(e)
+                #logger.exception(e)
+                pass
        
         thread = threading.Thread(target=shutdown)
         thread.start()
-        thread.join()
-        logger.debug("Uvicorn server is stopped!")
+        #thread.join()
+        #logger.debug("Uvicorn server is stopped!")
 
     def register_channel(self, name: str, host: str, port: str, endpoints: list):
         channel = {
@@ -906,10 +910,10 @@ class Core(CoreInterface):
         for channel in self.channels:
             try:
                 self.shutdown_channel(channel["name"], channel["host"], channel["port"])
-                logger.debug(f"Channel {channel['name']} is shutdown from {channel['host']}:{channel['port']}")
+                #logger.debug(f"Channel {channel['name']} is shutdown from {channel['host']}:{channel['port']}")
             except Exception as e:
                 continue
-        logger.debug("All channels are shutdown!")
+        #logger.debug("All channels are shutdown!")
         
 
     def start_chroma_client(self):  
@@ -1216,26 +1220,26 @@ class Core(CoreInterface):
                        
     def exit_gracefully(self, signum, frame):
         try:
-            logger.debug("CTRL+C received, shutting down...")
+            #logger.debug("CTRL+C received, shutting down...")
             # shut down the chromadb server
             # self.shutdown_chroma_server()  # Shut down ChromaDB server
             # End the main thread
             self.stop()
-            #sys.exit(0)
-            logger.debug("CTRL+C Done...")
+            sys.exit(0)
+            #logger.debug("CTRL+C Done...")
         except Exception as e:
             logger.exception(e)
     
     def __enter__(self):
-        if threading.current_thread() == threading.main_thread():
-            try:
-                #logger.debug("channel initializing..., register the ctrl+c signal handler")
-                signal.signal(signal.SIGINT, self.exit_gracefully)
-                signal.signal(signal.SIGTERM, self.exit_gracefully)
-            except Exception as e:
-                # It's a good practice to at least log the exception
-                # logger.error(f"Error setting signal handlers: {e}")
-                pass
+        #if threading.current_thread() == threading.main_thread():
+        try:
+            #logger.debug("channel initializing..., register the ctrl+c signal handler")
+            signal.signal(signal.SIGINT, self.exit_gracefully)
+            signal.signal(signal.SIGTERM, self.exit_gracefully)
+        except Exception as e:
+            # It's a good practice to at least log the exception
+            # logger.error(f"Error setting signal handlers: {e}")
+            pass
 
         return self
 

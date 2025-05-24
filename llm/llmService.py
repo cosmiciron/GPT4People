@@ -120,7 +120,7 @@ class LLMServiceManager:
     def start_llama_cpp_server(self, name:str, host:str, port:int, model_path:str, 
                                      ctx_size:str = '32768', predict:str = '8192', temp:str = '0.8', 
                                      threads:str = '8', n_gpu_layers:str = '99', 
-                                     chat_format:str = None, verbose:str = 'false', pooling:bool = False):
+                                     chat_format:str = None, verbose:str = 'false', function_calling:bool = True, pooling:bool = False):
         logger.debug(f"model path {model_path}")
         thread_num = multiprocessing.cpu_count()
         model_sub_path = os.path.normpath(model_path)
@@ -144,6 +144,9 @@ class LLMServiceManager:
             llama_cpp_args += " --threads " + str(thread_num)
         llama_cpp_args += " --host " + host
         llama_cpp_args += " --port " + str(port)
+        if function_calling:
+            llama_cpp_args += " --jinja "
+            logger.debug("Function calling is enabled.")
         if pooling:
             llama_cpp_args += " --embedding"
             llama_cpp_args += " --pooling cls -ub 8192"
@@ -211,7 +214,7 @@ class LLMServiceManager:
 
             embedding_token_len = Util().embedding_tokens_len()
             if llm_type == 'local':
-                self.start_llama_cpp_server(llm_name, host, port, embedding_model_path, ctx_size=str(embedding_token_len), pooling=True)
+                self.start_llama_cpp_server(llm_name, host, port, embedding_model_path, ctx_size=str(embedding_token_len), function_calling=False, pooling=True)
             elif llm_type == 'litellm':
                 pass
             self.llms.append(llm_name)

@@ -115,7 +115,7 @@ class User:
             yaml.safe_dump({'users': [user.__dict__ for user in users]}, file)
 
 
-class GPT4PeopleAccount:
+class EmailAccount:
     def __init__(self, imap_host: str, imap_port: int, smtp_host: str, smtp_port: int, email_user: str, email_pass: str):
         self.imap_host = imap_host
         self.imap_port = imap_port
@@ -128,13 +128,13 @@ class GPT4PeopleAccount:
     def from_yaml(cls, filepath: str):
         with open(filepath, 'r', encoding='utf-8') as file:
             data = yaml.safe_load(file)
-            account_data = data['gpt4people_account']
+            account_data = data['EmailAccount']
             return cls(**account_data)
 
     def to_yaml(self, filepath: str):
         """Serializes the account data to a YAML file."""
         account_data = {
-            'gpt4people_account': {
+            'EmailAccount': {
                 'imap_host': self.imap_host,
                 'imap_port': self.imap_port,
                 'smtp_host': self.smtp_host,
