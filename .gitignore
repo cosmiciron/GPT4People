@@ -18,3 +18,4 @@ ui/logs
 core/latestPromptRequest.json
 ui/latestPromptRequest.json
 
+/models

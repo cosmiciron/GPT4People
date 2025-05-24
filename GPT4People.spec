@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['/Users/shileipeng/Documents/cosmiciron/GPT4People/main.py'],
+    ['/Users/shileipeng/Documents/cosmiciron/GPT4People/channels/matrix/channel.py'],
     pathex=[],
     binaries=[],
-    datas=[('/Users/shileipeng/Documents/cosmiciron/GPT4People/base', 'base/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/config', 'config/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/core', 'core/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/llama.cpp-master', 'llama.cpp-master/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/llm', 'llm/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/memory', 'memory/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/models', 'models/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/plugins', 'plugins/')],
-    hiddenimports=['chromadb.utils.embedding_functions.onnx_mini_lm_l6_v2', '“pytz', 'onnxruntime', 'transformers'],
+    datas=[('/Users/shileipeng/Documents/cosmiciron/GPT4People/base', 'base/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/config', 'config/'), ('/Users/shileipeng/Documents/cosmiciron/GPT4People/core', 'core/')],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
