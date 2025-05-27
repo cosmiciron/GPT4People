@@ -18,7 +18,7 @@ endpoints:
   output: {}
   path: /process
 host: 0.0.0.0
-main_llm: Qwen3-32B-Q4_K_M.gguf
+main_llm: Qwen3-8B-Q5_K_M.gguf
 main_llm_api_key:
 main_llm_api_key_name:
 main_llm_host: 127.0.0.1
@@ -30,7 +30,7 @@ model_path: ../models/
 name: core
 port: 9000
 reset_memory: false
-silent: true
+silent: false
 use_memory: true
 vectorDB:
   Chroma:

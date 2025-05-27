@@ -70,7 +70,7 @@ class Core(CoreInterface):
         if not hasattr(self, 'initialized'):
             self.hasEmailChannel = False
             self.initialized = True
-            self.orchestratorAndTAM_enabled = False
+            self.orchestratorAndTAM_enabled = True
             self.latestPromptRequest: PromptRequest = None
             Util().setup_logging("core", Util().get_core_metadata().mode)
             root = Util().root_path()
