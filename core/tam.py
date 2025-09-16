@@ -122,6 +122,7 @@ class TAM:
         
         return response_json
 
+    '''
     def create_prompt(self, text: str, chat_history: str) -> str:
 
        # Get the current datetime
@@ -355,7 +356,59 @@ class TAM:
         Determine the user's intent and create a JSON object:
         """
         return prompt
-    
+    '''
+    def create_prompt(self, text: str, chat_history: str) -> str:
+        # Get the current datetime
+        current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Define the common prompt template
+        prompt_template = """\
+        You are an expert at understanding user intentions based on chat history and user input. Use the provided chat history, user input, and the current datetime to determine the user's intent and create a structured JSON object for scheduling a job.
+
+        Current datetime: {current_datetime}
+
+        Guidelines:
+        - Use the chat history and user input to determine the user's intent.
+        - Ensure the intent is accurate, concise, and addresses the user's query.
+        - If the intent is related to scheduling, create a JSON object with time-based information.
+        - Use the current datetime to determine appropriate scheduling times.
+        - Prioritize recent information in the chat history and user input.
+        - If no start time is provided, use the current datetime as the start time.
+        - The JSON object should include the job type, interval, and necessary parameters.
+
+        Provide the JSON object in the following format:
+        {{
+            "type": "reminder",
+            "sub_type": "repeated | fixed | random",
+            "interval_unit": "seconds | minutes | hours | days | weeks | months | years",
+            "interval": number,
+            "start_time": "YYYY-MM-DD HH:MM:SS" (ISO 8601 format),
+            "params": {{
+                "message": "Reminder content",
+                "repeat": "true" (for repeated events)
+            }}
+        }}
+
+        Examples:
+        * Several examples can be listed here with a single instance of the current datetime *
+
+        Current datetime: {current_datetime}
+
+        Chat History:
+        {chat_history}
+
+        User Input:
+        {text}
+
+        Determine the user's intent and create a JSON object:"""
+
+        # Format the prompt with the current datetime, chat history, and user input
+        prompt = prompt_template.format(
+            current_datetime=current_datetime,
+            chat_history=chat_history,
+            text=text
+        )
+        return prompt    
 
     def schedule_job_from_intent(self, data_object: Dict, request: PromptRequest):
         logger.debug(f"Scheduling job with data: {data_object}")

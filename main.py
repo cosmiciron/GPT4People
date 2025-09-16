@@ -294,7 +294,7 @@ def start():
     password = gpt4people_account.email_pass
     print(f"Your GPT4People account(你的GPT4People账号): {email}\n Password(密码): {password}\n")
     '''
-    llm_thread = run_core()
+    llm_thread = run_core() 
     # Running start_core in a background thread
     print("Starting GPT4People..., please wait... (启动GPT4People..., 请稍等...)\n")
     embedding_llm_health = Util().check_embedding_model_server_health()

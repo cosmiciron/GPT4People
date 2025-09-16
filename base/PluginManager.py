@@ -13,7 +13,7 @@ from base.BasePlugin import BasePlugin
 from base.util import Util
 from core.coreInterface import CoreInterface
 
-disable_plugins = True
+disable_plugins = False
 
 class PluginManager:
     def __init__(self, coreInst: CoreInterface):

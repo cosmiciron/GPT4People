@@ -420,7 +420,7 @@ class Util:
                     return True
                 elif response.status_code == 503:
                     # The server is not ready yet
-                    logger.debug("Main model server is not ready yet, retrying...")
+                    #logger.debug("Main model server is not ready yet, retrying...")
                     time.sleep(1)  # Wait for 1 second before trying again
                     continue
                 else:
@@ -448,7 +448,7 @@ class Util:
                     return True
                 elif response.status_code == 503:
                     # The server is not ready yet
-                    logger.debug("Embedding server is not ready yet, retrying...")
+                    # logger.debug("Embedding server is not ready yet, retrying...")
                     time.sleep(1)  # Wait for 1 second before trying again
                     continue
                 else:
@@ -503,7 +503,7 @@ class Util:
             else:
                 data_json = json.dumps(data, ensure_ascii=False).encode('utf-8')
 
-            logger.debug(f"Message Request to LLM: {data_json}")
+            #logger.debug(f"Message Request to LLM: {data_json}")
             chat_completion_api_url = 'http://' + model_host + ':' + str(model_port) + '/v1/chat/completions'
             async with aiohttp.ClientSession() as session:
                 async with session.post(chat_completion_api_url, headers=headers, data=data_json) as resp:
@@ -511,7 +511,7 @@ class Util:
                     # Ensure resp_json is a dictionary
                     while isinstance(resp_json, dict) == False:
                         resp_json = json.loads(resp_json)
-                    logger.debug(f"Original Response from LLM: {resp_json}")
+                    #logger.debug(f"Original Response from LLM: {resp_json}")
                     if isinstance(resp_json, dict) and 'choices' in resp_json:
                         if isinstance(resp_json['choices'], list) and len(resp_json['choices']) > 0:
                             if 'message' in resp_json['choices'][0] and 'content' in resp_json['choices'][0]['message']:
@@ -522,7 +522,7 @@ class Util:
                                     logger.debug(f"Message Response from LLM: {message_content}")
                                     return filtered_message_content
                                 else:
-                                    logger.error("filtered message content is None")
+                                    #logger.error("filtered message content is None")
                                     return None
                     logger.error("Invalid response structure")
                     return None

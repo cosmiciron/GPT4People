@@ -70,7 +70,7 @@ class Core(CoreInterface):
         if not hasattr(self, 'initialized'):
             self.hasEmailChannel = False
             self.initialized = True
-            self.orchestratorAndTAM_enabled = True
+            self.orchestratorAndTAM_enabled = False
             self.latestPromptRequest: PromptRequest = None
             Util().setup_logging("core", Util().get_core_metadata().mode)
             root = Util().root_path()
@@ -101,7 +101,7 @@ class Core(CoreInterface):
             self.request_queue_task = None
             self.response_queue_task = None
             self.memory_queue_task = None
-            self.active_plugin = None
+            #self.active_plugin = None
             logger.debug("Before initialize orchestrator")
             self.orchestratorInst = Orchestrator(self)
             logger.debug("After initialize orchestrator")
@@ -247,11 +247,11 @@ class Core(CoreInterface):
             logger.debug("No plugins loaded.")
             return None
         # Prioritize the active plugin if it is set
-        if self.active_plugin:
-            result, text = await self.is_proper_plugin(self.active_plugin, text)
-            if result:
-                logger.debug(f"Found plugin: {self.active_plugin.get_description()}")
-                return self.active_plugin
+        #if self.active_plugin:
+        #    result, text = await self.is_proper_plugin(self.active_plugin, text)
+        #    if result:
+        #        logger.debug(f"Found plugin: {self.active_plugin.get_description()}")
+        #        return self.active_plugin
 
         prompt = self.find_plugin_prompt(text)
         logger.debug(f"Find plugin Prompt: {prompt}")
@@ -277,9 +277,9 @@ class Core(CoreInterface):
 
         if 0 <= best_index < len(original_descriptions):
             best_match_description = original_descriptions[best_index]
-            active_plugin = self.plugin_manager.plugin_descriptions.get(best_match_description, None)
-            logger.debug(f"Update active plugin: {active_plugin.get_description()}")
-            return active_plugin
+            found_plugin = self.plugin_manager.plugin_descriptions.get(best_match_description, None)
+            logger.debug(f"Found plugin: {found_plugin.get_description()}")
+            return found_plugin
         else:
             logger.error(f"Best index {best_index} is out of range for description keys")
             return None
@@ -341,7 +341,8 @@ class Core(CoreInterface):
         self.response_queue_task = asyncio.create_task(self.process_response_queue())
         self.memory_queue_task = asyncio.create_task(self.process_memory_queue())
         
-        self.plugin_manager: PluginManager = PluginManager(self)
+        if self.orchestratorAndTAM_enabled:
+            self.plugin_manager: PluginManager = PluginManager(self)
 
         @self.app.exception_handler(RequestValidationError)
         async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -428,6 +429,15 @@ class Core(CoreInterface):
                 
                 if len(user.name) > 0:
                     request.user_name = user.name
+                    
+                self.latestPromptRequest = copy.deepcopy(request)
+                logger.debug(f'latestPromptRequest set to: {self.latestPromptRequest}')
+                self.save_latest_prompt_request_to_file('latestPromptRequest.json') 
+                    
+                flag = await self.orchestrator_handler(request)
+                if flag:
+                    logger.debug(f"Orchestrator and plugin handled the request")
+                    return Response(content="Orchestrator and plugin handled the request", status_code=200)
                 
                 resp_text = await self.process_text_message(request)
                 if resp_text is None:
@@ -468,13 +478,62 @@ class Core(CoreInterface):
             logger.error(f"Error reading latestPromptRequest: {e}")
             return None
         
-    
+    async def orchestrator_handler(self, request: PromptRequest):
+        # Early return if orchestratorAndTAM is not enabled
+        if not self.orchestratorAndTAM_enabled:
+            return False
+
+        try:
+            intent: Intent = await self.orchestratorInst.translate_to_intent(request)
+            # Early return if no intent is found or intent type is not OTHER
+            if intent is None or intent.type != IntentType.OTHER:
+                return False
+
+            logger.debug(f"Got intent: {intent.type} {intent.intent_text}")
+            plugin: BasePlugin = await self.find_plugin_for_text(intent.text)
+            # Early return if no plugin is found
+            if plugin is None:
+                return False
+
+            plugin.user_input = intent.text
+
+            # Update plugin's promptRequest with request data, either by creating a new instance or updating existing one
+            if plugin.promptRequest is None:
+                plugin.promptRequest = PromptRequest(**request.__dict__)
+            else:
+                for attr in vars(request):
+                    setattr(plugin.promptRequest, attr, getattr(request, attr))
+
+            logger.debug(f"Found plugin's description: {plugin.get_description()}")
+            await plugin.run()
+
+            return True
+
+        except Exception as e:
+            logger.error(f"An error occurred in orchestrator_handler: {e}")
+            return False 
+                   
+                        
     async def process_request_queue(self):
         while True:
             request: PromptRequest = await self.request_queue.get()
             try:
                 if request is None:
                     return
+                logger.debug(f"Received request from channel: {request.user_name}, {request.user_id}, {request.channelType}, {request.contentType}")
+                flag = await self.orchestrator_handler(request)
+                if flag:
+                    logger.debug(f"Orchestrator and plugin handled the request")
+                    continue
+                    
+                user: User = None
+                has_permission, user = self.check_permission(request.user_name, request.user_id, request.channelType, request.contentType)
+                if not has_permission or user is None:
+                    return Response(content="Permission denied", status_code=401)
+                
+                if len(user.name) > 0:
+                    request.user_name = user.name
+                '''
                 if self.orchestratorAndTAM_enabled:
                     intent: Intent = await self.orchestratorInst.translate_to_intent(request)
                     if intent is not None:
@@ -496,11 +555,12 @@ class Core(CoreInterface):
                                 else:
                                     plugin.promptRequest = PromptRequest(**request.__dict__)
                                 logger.debug(f"Found plugin's description: {plugin.get_description()}")
-                                if plugin == self.active_plugin:
-                                    continue
+                                #if plugin == self.active_plugin:
+                                #    continue
                                 await plugin.run()
-                                self.active_plugin = plugin
+                                #self.active_plugin = plugin
                                 continue
+                '''
 
                 #if intent is not None and (intent.type == IntentType.RESPOND or intent.type == IntentType.QUERY):
                 if request.contentType == ContentType.TEXT:
@@ -528,8 +588,12 @@ class Core(CoreInterface):
             request = self.read_latest_prompt_request_from_file('latestPromptRequest.json')
             if request is None:
                 return
-        async_resp: AsyncResponse = AsyncResponse(request_id=request.request_id, request_metadata=request.request_metadata, host=request.host, port=request.port, from_channel=request.channel_name, response_data=resp_data)                    
-        await self.response_queue.put(async_resp) 
+        if request.app_id == 'gpt4people':
+            # print onto local console
+            print(response)
+        else:
+            async_resp: AsyncResponse = AsyncResponse(request_id=request.request_id, request_metadata=request.request_metadata, host=request.host, port=request.port, from_channel=request.channel_name, response_data=resp_data)                    
+            await self.response_queue.put(async_resp) 
 
 
     async def send_response_to_request_channel(self, response: str, request: PromptRequest):
@@ -825,9 +889,10 @@ class Core(CoreInterface):
             self.start_email_channel()
 
             # Load plugins
-            self.load_plugins()
-            self.plugin_manager.run()            
-            self.start_hot_reload()
+            if self.orchestratorAndTAM_enabled:
+                self.load_plugins()
+                self.plugin_manager.run()            
+                self.start_hot_reload()
 
             # Schedule llmManager.run() to run concurrently
             #llm_task = asyncio.create_task(self.llmManager.run())
@@ -857,7 +922,8 @@ class Core(CoreInterface):
         self.llmManager.stop_all_apps()
         #logger.debug("LLM apps are stopped!")
 
-        self.plugin_manager.deinitialize_plugins()
+        if self.orchestratorAndTAM_enabled:
+            self.plugin_manager.deinitialize_plugins()
         #logger.debug("Plugins are deinitialized!")
         self.stop_chroma_client()
 
